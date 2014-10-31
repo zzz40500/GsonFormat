@@ -1,1 +1,13 @@
-这是一个Android studio插件,又或者是intellij 插件
+GsonFormat
+    这是一个Android studio插件,又或者是intellij  插件,主要是为了不写麻烦的实体类.
+   是一个根据JSONObject格式的字符串,自动生成实体类参数.
+  Usage:
+     1.下载GsonFormat.jar ;
+     2.Android studio  File->Settings..->Plugins --> install  plugin from disk..导入下载的GsonFormat.jar -->ok;
+     3重启android studio 在一个实体类下使用快捷键alt+ins;
+Code Samples
+      结合Gson库的使用;
+      
+
+
+End

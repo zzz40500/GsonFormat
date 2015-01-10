@@ -12,11 +12,11 @@
 ~~~
 快捷键:图中选中的部分
 
-![72350A47-A21A-4505-817E-2CA8092F7B7D.png](http://upload-images.jianshu.io/upload_images/166866-45621bdaadaa177c.png)
+![](http://upload-images.jianshu.io/upload_images/166866-45621bdaadaa177c.png)
 我这边的快捷键是 command+n;
 使用方式:
 简单的实体类:
-![简单的.gif](http://upload-images.jianshu.io/upload_images/166866-07f3084bb6758efa.gif)
+![](http://upload-images.jianshu.io/upload_images/166866-07f3084bb6758efa.gif)
 图中简单的 json 格式
 ~~~
 {
@@ -80,7 +80,7 @@ public class Bean  extends JSONModel {
 ~~~
 复杂的实体类:
 实体类不仅包含另外一个**实体**,还包含另外实体的**数组**.
-![复杂.gif](http://upload-images.jianshu.io/upload_images/166866-38c1f99c6d097367.gif)
+![](http://upload-images.jianshu.io/upload_images/166866-38c1f99c6d097367.gif)
 图中复杂的json 格式
 ~~~
 {

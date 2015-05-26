@@ -2,11 +2,12 @@ import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.*;
 import com.intellij.psi.codeStyle.JavaCodeStyleManager;
+import org.jetbrains.annotations.NotNull;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import javax.swing.*;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -29,7 +30,6 @@ public class WriterUtil extends WriteCommandAction.Simple {
     private JLabel jLabel;
 
 
-
     public WriterUtil(JDialog jDialog, JLabel jLabel,
                       String jsonStr, PsiFile mFile, Project project, PsiClass mClass, PsiFile... files) {
         super(project, files);
@@ -44,16 +44,21 @@ public class WriterUtil extends WriteCommandAction.Simple {
     }
 
     @Override
-    protected void run()  {
+    protected void run() {
 
 
+
+        String s1=jsonStr.replaceAll("/\\*\\*" +
+                "[\\S\\s]*?" +
+                "\\*/","");
+        String jsonStr=s1.replaceAll("//\\S+","");
         try {
             JSONObject json = new JSONObject(jsonStr);
             Set<String> set = json.keySet();
-            List<String>  list = new ArrayList<String>(set);
-            createField(json,list, mClass);
-            createSetMethod(json,list,mClass);
-            createGetMethod(json,list,mClass);
+            List<String> list = new ArrayList<String>(set);
+            createField(json, list, mClass);
+            createSetMethod(json, list, mClass);
+            createGetMethod(json, list, mClass);
             JavaCodeStyleManager styleManager = JavaCodeStyleManager.getInstance(project);
             styleManager.optimizeImports(mFile);
             styleManager.shortenClassReferences(mClass);
@@ -65,43 +70,23 @@ public class WriterUtil extends WriteCommandAction.Simple {
         }
     }
 
-    private void createField( JSONObject json, List<String> list ,PsiClass mClass){
+    private void createField(JSONObject json, List<String> list, PsiClass mClass) {
         StringBuilder sb = new StringBuilder();
         sb.append("/** \n");
-        for(int i=0;i<list.size();i++){
-            String key = list.get(i) ;
+        for (int i = 0; i < list.size(); i++) {
+            String key = list.get(i);
             sb.append("* " + key + " : " + json.get(key) + "\n");
         }
         sb.append("*/ \n");
 
-        for(int i=0;i<list.size();i++){
-            String key = list.get(i) ;
+        for (int i = 0; i < list.size(); i++) {
+            String key = list.get(i);
 
-            String type=json.get(key).getClass().getSimpleName();
-
-
-            String typeStr  ;
-            if(type.equals("Boolean")){
-                typeStr=" boolean ";
-            }else if(type.equals("Integer"))   {
-                typeStr=" int ";
-            }else if(type.equals("Double"))   {
-                typeStr=" double ";
-            }     else if(type.equals("JSONObject")){
-                typeStr=" "+createClassSubName(key,mClass)+" ";
-                createClassSub(typeStr,json.getJSONObject(key),mClass);
-            }    else if(type.equals("JSONArray")){
-
-                typeStr=" java.util.List<"+createClassSubName(key,mClass)+"> " ;
-                createClassSub(createClassSubName(key,mClass),json.getJSONArray(key).get(0),mClass);
-            }    else{
-                typeStr=" String "      ;
-            }
-            String filedStr=  "private  " +typeStr+ key + " ; "     ;
-
-
-            if(i==0){
-                filedStr=sb.toString()+filedStr;
+            Object type = json.get(key);
+            String typeStr = typeByValue(mClass, key, type,true);
+            String filedStr = "private  " + typeStr + key + " ; ";
+            if (i == 0) {
+                filedStr = sb.toString() + filedStr;
             }
             mClass.add(mFactory.createFieldFromText(filedStr, mClass));
         }
@@ -109,126 +94,132 @@ public class WriterUtil extends WriteCommandAction.Simple {
     }
 
 
-    private void createClassSub(String className,Object o,PsiClass mClass){
+    @NotNull
+    private String typeByValue(PsiClass mClass, String key, Object type ) {
+
+        return  typeByValue(mClass,key,type,false);
+
+    }
+    @NotNull
+    private String typeByValue(PsiClass mClass, String key, Object type,boolean createClassSub ) {
+        String typeStr;
+        if (type instanceof Boolean) {
+            typeStr = " boolean ";
+        } else if (type instanceof Integer) {
+            typeStr = " int ";
+        } else if (type instanceof Double) {
+            typeStr = " double ";
+        } else if (type instanceof Long) {
+            typeStr = " long ";
+        } else if (type instanceof String) {
+            typeStr = " String ";
+        } else if (type instanceof Character) {
+            typeStr = " char ";
+        } else if (type instanceof JSONObject) {
+            typeStr = " " + createClassSubName(mClass, key, type, mClass,createClassSub) + " ";
+            if(createClassSub) {
+                createClassSub(typeStr, type, mClass);
+            }
+        } else if (type instanceof JSONArray) {
+            typeStr = " java.util.List<" + createClassSubName(mClass,key, type, mClass,createClassSub) + "> ";
+        } else {
+            typeStr = " String ";
+        }
+        return typeStr;
+    }
 
 
-        System.out.println(o.getClass().toString());
-        if(o instanceof JSONObject ){
+    private void createClassSub(String className, Object o, PsiClass mClass) {
 
-            JSONObject jsonObject=(JSONObject)o;
 
-            createClassSub(className,jsonObject,mClass);
+        if (o instanceof JSONObject) {
+
+
+            JSONObject jsonObject = (JSONObject) o;
+            createClassSub(className, jsonObject, mClass);
         }
 
     }
 
-    private void createClassSub(String className,JSONObject json,PsiClass mClass){
+    private void createClassSub(String className, JSONObject json, PsiClass mClass) {
 
-        String classContent="/** */\n " +
-                "public  "+className+"(){" +
+        String classContent = "/** */\n " +
+                "public  " + className + "(){" +
                 "}";
-        PsiClass subClass=    mFactory.createClass(className.trim())   ;
+        PsiClass subClass = mFactory.createClass(className.trim());
         subClass.setName(className.trim());
 
         Set<String> set = json.keySet();
-        List<String>  list = new ArrayList<String>(set);
-        createField(json,list, subClass);
-        createSetMethod(json,list,subClass);
-        createGetMethod(json,list,subClass);
+        List<String> list = new ArrayList<String>(set);
+        createField(json, list, subClass);
+        createSetMethod(json, list, subClass);
+        createGetMethod(json, list, subClass);
         mClass.add(subClass);
 
     }
-    private String createClassSubName(String key,PsiClass mClass){
+
+    private String createClassSubName(PsiClass aClass, String key, Object o, PsiClass mClass,boolean createClassSUb) {
 
 
+        String name="";
+        if (o instanceof JSONObject) {
+            name= key.substring(0, 1).toUpperCase() + key.substring(1) + "Entity";
+        } else if (o instanceof JSONArray) {
+            JSONArray jsonArray=(JSONArray)o;
+            if(jsonArray.length()>0){
+                Object item=jsonArray.get(0);
+                name=typeByValue(mClass,key,item,createClassSUb);
+            }else{
+                name="?";
+            }
+        }
+        return name;
 
-
-        return key.substring(0,1).toUpperCase()+key.substring(1)+"Entity";
     }
 
-    private void createSetMethod(JSONObject json, List<String> list,PsiClass mClass){
+    private void createSetMethod(JSONObject json, List<String> list, PsiClass mClass) {
 
 
-        for(int i=0;i<list.size();i++){
-            String key = list.get(i) ;
-            String type=json.get(key).getClass().getSimpleName();
-            String typeStr  ;
-            if(type.equals("Boolean")){
-                typeStr=" boolean ";
-            }else if(type.equals("Integer"))   {
-                typeStr=" int ";
-            }else if(type.equals("Double"))   {
-                typeStr=" double ";
-            }    else if(type.equals("JSONObject")){
-                typeStr=" "+createClassSubName(key,mClass)+" ";     ;
-            }    else if(type.equals("JSONArray")){
-                typeStr=" List<"+createClassSubName(key,mClass)+"> " ;
-            }    else{
-                typeStr=" String "      ;
-            }
+        for (int i = 0; i < list.size(); i++) {
+            String key = list.get(i);
+            Object type = json.get(key);
+            String typeStr;
+            typeStr = typeByValue(mClass, key, type);
 
-
-
-
-                String method=  "public void  set"+captureName(key) + "( "+typeStr+" " +key+") {   this."+key+" = "+key+";} "     ;
-
-                mClass.add(mFactory.createMethodFromText( method, mClass));
-
-
-
-
-
+            String method = "public void  set" + captureName(key) + "( " + typeStr + " " + key + ") {   this." + key + " = " + key + ";} ";
+            mClass.add(mFactory.createMethodFromText(method, mClass));
 
 
         }
 
     }
 
-    public  String captureName(String name) {
-             name = name.substring(0, 1).toUpperCase() + name.substring(1);
+    public String captureName(String name) {
+        name = name.substring(0, 1).toUpperCase() + name.substring(1);
 
-             return  name;
-//        char[] cs=name.toCharArray();
-//        cs[0]-=32;
-//        return String.valueOf(cs);
-
+        return name;
     }
-    private void createGetMethod(JSONObject json, List<String> list,PsiClass mClass){
+
+    private void createGetMethod(JSONObject json, List<String> list, PsiClass mClass) {
 
 
+        for (int i = 0; i < list.size(); i++) {
+            String key = list.get(i);
+            Object type = json.get(key);
+            String typeStr;
+            typeStr = typeByValue(mClass, key, type);
 
-        for(int i=0;i<list.size();i++){
-            String key = list.get(i) ;
-            String type=json.get(key).getClass().getSimpleName();
-            String typeStr  ;
-            if(type.equals("Boolean")){
-                typeStr=" boolean ";
-            }else if(type.equals("Integer"))   {
-                typeStr=" int ";
-            }else if(type.equals("Double"))   {
-                typeStr=" double ";
-            }     else if(type.equals("JSONObject")){
-                typeStr=" "+createClassSubName(key,mClass)+" ";    ;
-            }    else if(type.equals("JSONArray")){
-                typeStr=" List<"+createClassSubName(key,mClass)+"> " ;
-            } else{
-                typeStr=" String "      ;
+
+            if (type instanceof Boolean) {
+
+                String method = "public " + typeStr + "   is" + captureName(key) + "() {   return " + key + " ;} ";
+                mClass.add(mFactory.createMethodFromText(method, mClass));
+            } else {
+
+
+                String method = "public " + typeStr + "   get" + captureName(key) + "() {   return " + key + " ;} ";
+                mClass.add(mFactory.createMethodFromText(method, mClass));
             }
-
-
-            if(type.equals("Boolean")){
-
-
-
-                String method=  "public " +typeStr+ "   is"+captureName(key) +"() {   return "+key+" ;} "   ;
-                mClass.add(mFactory.createMethodFromText( method, mClass));
-
-            } else{
-                String method=  "public " +typeStr+ "   get"+captureName(key) +"() {   return "+key+" ;} "   ;
-                mClass.add(mFactory.createMethodFromText( method, mClass));
-
-            }
-
 
 
         }

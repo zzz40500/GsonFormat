@@ -12,7 +12,7 @@
   #Usage#
 安装方法1:
 ~~~
-1.Android studio  File->Settings..->Plugins-->Browse repositores..搜索Gson
+1.Android studio  File->Settings..->Plugins-->Browse repositores..搜索GsonFormat
 
 2.安装插件,重启android studio
 ~~~

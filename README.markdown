@@ -5,7 +5,7 @@
   [jetbrains](https://plugins.jetbrains.com/plugin/7654?pr=androidstudio)
 版本更新1.1.0.
 >1.1.0 版本更新内容:
-  1. 直接数组中嵌套数组的解析;
+  1. 支持数组中嵌套数组的解析;
   * 支持过滤Json格式中的注释代码.
 
 

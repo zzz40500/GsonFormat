@@ -118,7 +118,7 @@ public class WriterUtil extends WriteCommandAction.Simple {
     private List<String> createField(JSONObject json, List<String> list, PsiClass mClass) {
 
 
-        List<String> fileds = new ArrayList<String>();
+        List<String> fields = new ArrayList<String>();
         StringBuilder sb = new StringBuilder();
         sb.append("/** \n");
         for (int i = 0; i < list.size(); i++) {
@@ -138,7 +138,7 @@ public class WriterUtil extends WriteCommandAction.Simple {
 
 
             }
-            fileds.add(key);
+            fields.add(key);
             String typeStr = typeByValue(mClass, key, type, true);
 
             filedSb.append("private  ").append(typeStr).append(key).append(" ; ");
@@ -151,7 +151,7 @@ public class WriterUtil extends WriteCommandAction.Simple {
             }
             mClass.add(mFactory.createFieldFromText(filedStr, mClass));
         }
-        return  fileds;
+        return  fields;
 
     }
 

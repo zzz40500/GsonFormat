@@ -1,25 +1,33 @@
 <idea-plugin version="2">
-  <name>GsonFormat</name>
-  <description>根据Gson使用的要求,将JSONObject 格式的String  解析成实体.</description>
-  <version>1.0</version>
-  <vendor>wyh40500</vendor>
+    <name>GsonFormat</name>
+    <description><![CDATA[
+<html>quickly to convert a JSON string to an entity class ..<br>
+<a href="https://github.com/zzz40500/GsonFormat"> openSource</a>
 
-  <!-- please see http://confluence.jetbrains.net/display/IDEADEV/Build+Number+Ranges for description -->
-  <idea-version since-build="107.105"/>
+      </html>
+      ]]>
+    </description>
+    <version>1.1.1</version>
+    <vendor email="wyh405003836@126.com">zzz40500</vendor>
 
-  <application-components>
-    <!-- Add your application components here -->
-  </application-components>
+    <!-- please see http://confluence.jetbrains.net/display/IDEADEV/Build+Number+Ranges for description -->
+    <idea-version since-build="107.111"/>
 
-  <project-components>
-    <!-- Add your project components here -->
-  </project-components>
+    <application-components>
+        <!-- Add your application components here -->
+    </application-components>
 
-  <actions>
+    <project-components>
+        <!-- Add your project components here -->
+    </project-components>
+
+
+    <actions>
     <!-- Add your actions here -->
       <action
               id="MainAction" class="MainAction" text="GsonFormat"
               >
+
           <add-to-group group-id="GenerateGroup" anchor="first"/>
       </action>
   </actions>

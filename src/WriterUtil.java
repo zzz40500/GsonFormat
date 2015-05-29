@@ -7,9 +7,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import javax.swing.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -29,6 +27,8 @@ public class WriterUtil extends WriteCommandAction.Simple {
     private JDialog jDialog;
     private JLabel jLabel;
 
+    private List<String> keyWordList = new ArrayList<String>();
+
 
     public WriterUtil(JDialog jDialog, JLabel jLabel,
                       String jsonStr, PsiFile mFile, Project project, PsiClass mClass, PsiFile... files) {
@@ -47,30 +47,78 @@ public class WriterUtil extends WriteCommandAction.Simple {
     protected void run() {
 
 
+        JSONObject json=null;
 
-        String s1=jsonStr.replaceAll("/\\*\\*" +
-                "[\\S\\s]*?" +
-                "\\*/","");
-        String jsonStr=s1.replaceAll("//\\S+","");
         try {
-            JSONObject json = new JSONObject(jsonStr);
-            Set<String> set = json.keySet();
-            List<String> list = new ArrayList<String>(set);
-            createField(json, list, mClass);
-            createSetMethod(json, list, mClass);
-            createGetMethod(json, list, mClass);
-            JavaCodeStyleManager styleManager = JavaCodeStyleManager.getInstance(project);
-            styleManager.optimizeImports(mFile);
-            styleManager.shortenClassReferences(mClass);
-            jDialog.dispose();
-        } catch (Exception e) {
-            e.printStackTrace();
-            jLabel.setText("json 格式有误");
+            //直接解析
+             json = new JSONObject(jsonStr);
 
+        } catch (Exception e) {
+            //删除注释代码再解析
+          String  temp = jsonStr.replaceAll("/\\*\\*" +
+                    "[\\S\\s]*?" +
+                    "\\*/", "");
+           String  jsonTS = temp.replaceAll("//[^\"']+\\s+", "");
+            try {
+                 json = new JSONObject(jsonTS);
+
+            } catch (Exception e2) {
+                e2.printStackTrace();
+                jLabel.setText(" data err");
+            }
         }
+
+        if(json!=null){
+            try {
+                parseJson(json);
+            } catch (Exception e2) {
+                e2.printStackTrace();
+                jLabel.setText("parse err");
+            }
+        }
+
     }
 
-    private void createField(JSONObject json, List<String> list, PsiClass mClass) {
+
+    public void parseJson(JSONObject json) {
+
+        /**
+         * 关键词
+         *
+         * */
+        keyWordList.add("default");
+        keyWordList.add("public");
+        keyWordList.add("abstract");
+        keyWordList.add("null");
+        keyWordList.add("final");
+        keyWordList.add("void");
+        keyWordList.add("implements");
+        keyWordList.add("this");
+        keyWordList.add("instanceof");
+        keyWordList.add("native");
+        keyWordList.add("new");
+        keyWordList.add("goto");
+        keyWordList.add("const");
+        keyWordList.add("volatile");
+        keyWordList.add("return");
+        keyWordList.add("finally");
+
+        Set<String> set = json.keySet();
+        List<String> list = new ArrayList<String>(set);
+        List<String> fields = createField(json, list, mClass);
+        createSetMethod(json, fields, list, mClass);
+        createGetMethod(json, fields, list, mClass);
+        JavaCodeStyleManager styleManager = JavaCodeStyleManager.getInstance(project);
+        styleManager.optimizeImports(mFile);
+        styleManager.shortenClassReferences(mClass);
+        jDialog.dispose();
+    }
+
+
+    private List<String> createField(JSONObject json, List<String> list, PsiClass mClass) {
+
+
+        List<String> fileds = new ArrayList<String>();
         StringBuilder sb = new StringBuilder();
         sb.append("/** \n");
         for (int i = 0; i < list.size(); i++) {
@@ -83,25 +131,45 @@ public class WriterUtil extends WriteCommandAction.Simple {
             String key = list.get(i);
 
             Object type = json.get(key);
-            String typeStr = typeByValue(mClass, key, type,true);
-            String filedStr = "private  " + typeStr + key + " ; ";
+            StringBuilder filedSb = new StringBuilder();
+            if (checkKeyWord(key)) {
+                filedSb.append("@com.google.gson.annotations.SerializedName(\"" + key + "\")\n");
+                key = key + "X";
+
+
+            }
+            fileds.add(key);
+            String typeStr = typeByValue(mClass, key, type, true);
+
+            filedSb.append("private  ").append(typeStr).append(key).append(" ; ");
+
+            String filedStr = null;
             if (i == 0) {
-                filedStr = sb.toString() + filedStr;
+                filedStr = sb.append(filedSb.toString()).toString();
+            } else {
+                filedStr = filedSb.toString();
             }
             mClass.add(mFactory.createFieldFromText(filedStr, mClass));
         }
+        return  fileds;
 
+    }
+
+    public boolean checkKeyWord(String key) {
+
+        return keyWordList.contains(key);
     }
 
 
     @NotNull
-    private String typeByValue(PsiClass mClass, String key, Object type ) {
+    private String typeByValue(PsiClass mClass, String key, Object type) {
 
-        return  typeByValue(mClass,key,type,false);
+        return typeByValue(mClass, key, type, false);
 
     }
+
     @NotNull
-    private String typeByValue(PsiClass mClass, String key, Object type,boolean createClassSub ) {
+    private String typeByValue(PsiClass mClass, String key, Object type, boolean createClassSub) {
         String typeStr;
         if (type instanceof Boolean) {
             typeStr = " boolean ";
@@ -116,12 +184,12 @@ public class WriterUtil extends WriteCommandAction.Simple {
         } else if (type instanceof Character) {
             typeStr = " char ";
         } else if (type instanceof JSONObject) {
-            typeStr = " " + createClassSubName(mClass, key, type, mClass,createClassSub) + " ";
-            if(createClassSub) {
+            typeStr = " " + createClassSubName(mClass, key, type, mClass, createClassSub) + " ";
+            if (createClassSub) {
                 createClassSub(typeStr, type, mClass);
             }
         } else if (type instanceof JSONArray) {
-            typeStr = " java.util.List<" + createClassSubName(mClass,key, type, mClass,createClassSub) + "> ";
+            typeStr = " java.util.List<" + createClassSubName(mClass, key, type, mClass, createClassSub) + "> ";
         } else {
             typeStr = " String ";
         }
@@ -151,42 +219,44 @@ public class WriterUtil extends WriteCommandAction.Simple {
 
         Set<String> set = json.keySet();
         List<String> list = new ArrayList<String>(set);
-        createField(json, list, subClass);
-        createSetMethod(json, list, subClass);
-        createGetMethod(json, list, subClass);
+        List<String> fields = createField(json, list, subClass);
+        createSetMethod(json, fields, list, subClass);
+        createGetMethod(json, fields, list, subClass);
         mClass.add(subClass);
 
     }
 
-    private String createClassSubName(PsiClass aClass, String key, Object o, PsiClass mClass,boolean createClassSUb) {
+    private String createClassSubName(PsiClass aClass, String key, Object o, PsiClass mClass, boolean createClassSUb) {
 
 
-        String name="";
+        String name = "";
         if (o instanceof JSONObject) {
-            name= key.substring(0, 1).toUpperCase() + key.substring(1) + "Entity";
+            name = key.substring(0, 1).toUpperCase() + key.substring(1) + "Entity";
         } else if (o instanceof JSONArray) {
-            JSONArray jsonArray=(JSONArray)o;
-            if(jsonArray.length()>0){
-                Object item=jsonArray.get(0);
-                name=typeByValue(mClass,key,item,createClassSUb);
-            }else{
-                name="?";
+            JSONArray jsonArray = (JSONArray) o;
+            if (jsonArray.length() > 0) {
+                Object item = jsonArray.get(0);
+                name = typeByValue(mClass, key, item, createClassSUb);
+            } else {
+                name = "?";
             }
         }
         return name;
 
     }
 
-    private void createSetMethod(JSONObject json, List<String> list, PsiClass mClass) {
+    private void createSetMethod(JSONObject json, List<String> fields, List<String> keys, PsiClass mClass) {
 
 
-        for (int i = 0; i < list.size(); i++) {
-            String key = list.get(i);
+        for (int i = 0; i < keys.size(); i++) {
+            String key = keys.get(i);
+
+            String field = fields.get(i);
             Object type = json.get(key);
             String typeStr;
             typeStr = typeByValue(mClass, key, type);
 
-            String method = "public void  set" + captureName(key) + "( " + typeStr + " " + key + ") {   this." + key + " = " + key + ";} ";
+            String method = "public void  set" + captureName(field) + "( " + typeStr + " " + field + ") {   this." + field + " = " + field + ";} ";
             mClass.add(mFactory.createMethodFromText(method, mClass));
 
 
@@ -200,24 +270,25 @@ public class WriterUtil extends WriteCommandAction.Simple {
         return name;
     }
 
-    private void createGetMethod(JSONObject json, List<String> list, PsiClass mClass) {
+    private void createGetMethod(JSONObject json, List<String> fields, List<String> keys, PsiClass mClass) {
 
 
-        for (int i = 0; i < list.size(); i++) {
-            String key = list.get(i);
+        for (int i = 0; i < keys.size(); i++) {
+            String key = keys.get(i);
+            String field = fields.get(i);
             Object type = json.get(key);
             String typeStr;
-            typeStr = typeByValue(mClass, key, type);
+            typeStr = typeByValue(mClass, field, type);
 
 
             if (type instanceof Boolean) {
 
-                String method = "public " + typeStr + "   is" + captureName(key) + "() {   return " + key + " ;} ";
+                String method = "public " + typeStr + "   is" + captureName(field) + "() {   return " + field + " ;} ";
                 mClass.add(mFactory.createMethodFromText(method, mClass));
             } else {
 
 
-                String method = "public " + typeStr + "   get" + captureName(key) + "() {   return " + key + " ;} ";
+                String method = "public " + typeStr + "   get" + captureName(field) + "() {   return " + field + " ;} ";
                 mClass.add(mFactory.createMethodFromText(method, mClass));
             }
 

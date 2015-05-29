@@ -1,7 +1,9 @@
 **写在前头:本插件只适用 android studio和 Intellij IDEA 工具,eclipse 的少年无视我吧!!!**
 
 这是一个根据JSONObject格式的字符串,自动生成实体类参数.
+
   [github](https://github.com/zzz40500/GsonFormat)
+  
   [jetbrains](https://plugins.jetbrains.com/plugin/7654?pr=androidstudio)
   
   [![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-GsonFormat-brightgreen.svg?style=flat)](http://android-arsenal.com/details/1/1896)

@@ -7,12 +7,18 @@
   [jetbrains](https://plugins.jetbrains.com/plugin/7654?pr=androidstudio)
   
   [![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-GsonFormat-brightgreen.svg?style=flat)](http://android-arsenal.com/details/1/1896)
+>1.1.1版本更新内容
+ 1.  修复了因为过滤//注释代码导致的出现的 Json 格式验证异常;
+ * 支持解析 java 的关键字作为 key (支持字段:
+default,abstract,null,final,void,implements,
+this,instanceof,native,new,goto,const,volatile,return,finally)其余暂不支持;
 
-
-版本更新1.1.0.
+版本1.1.0
 >1.1.0 版本更新内容:
-  1. 支持数组中嵌套数组的解析;
+  1. 直接数组中嵌套数组的解析;
   * 支持过滤Json格式中的注释代码.
+
+
 
 
   #Usage#
@@ -269,7 +275,28 @@ public class Bean  extends JSONModel {
 ~~~
 
 
+1.1.1的过滤注释功能讲解:
+支持 java 两种注释过滤:
+~~~
 
+/**段注释:
+ */
+
+//行注释:
+~~~
+例子:
+~~~
+{
+    /**
+    * 名字
+    */
+    "name": "王五",
+    "gender": "man",//性别
+    "age": 15,
+    "height": "140cm",
+}
+~~~
+这样它也是可以解析的.
 
 
 

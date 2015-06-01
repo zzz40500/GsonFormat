@@ -7,6 +7,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.psi.*;
 import com.intellij.psi.util.PsiUtilBase;
 
+import javax.swing.*;
 import java.util.List;
 
 /**
@@ -52,6 +53,10 @@ public class MainAction extends BaseGenerateAction {
         PsiFile mFile = PsiUtilBase.getPsiFileInEditor(editor, project);
         mClass=getTargetClass(editor,mFile);
 
+
+
+
+
         JsonUtilsDialog jsonD=new JsonUtilsDialog();
         jsonD.setmClass(mClass);
         jsonD.setmFactory(mFactory);
@@ -62,6 +67,10 @@ public class MainAction extends BaseGenerateAction {
         jsonD.setSize(400 ,200);
         jsonD.setLocationRelativeTo(null);
         jsonD.setVisible(true);
+
+
+
+
     }
 
 

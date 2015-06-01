@@ -2,6 +2,7 @@ import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.*;
 import com.intellij.psi.codeStyle.JavaCodeStyleManager;
+import config.Config;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -24,13 +25,13 @@ public class WriterUtil extends WriteCommandAction.Simple {
 
     private PsiFile mFile;
     private String jsonStr;
-    private JDialog jDialog;
+    private JFrame jDialog;
     private JLabel jLabel;
 
     private List<String> keyWordList = new ArrayList<String>();
 
 
-    public WriterUtil(JDialog jDialog, JLabel jLabel,
+    public WriterUtil(JFrame jDialog, JLabel jLabel,
                       String jsonStr, PsiFile mFile, Project project, PsiClass mClass, PsiFile... files) {
         super(project, files);
 
@@ -47,33 +48,33 @@ public class WriterUtil extends WriteCommandAction.Simple {
     protected void run() {
 
 
-        JSONObject json=null;
+        JSONObject json = null;
 
         try {
             //直接解析
-             json = new JSONObject(jsonStr);
+            json = new JSONObject(jsonStr);
 
         } catch (Exception e) {
             //删除注释代码再解析
-          String  temp = jsonStr.replaceAll("/\\*\\*" +
+            String temp = jsonStr.replaceAll("/\\*\\*" +
                     "[\\S\\s]*?" +
                     "\\*/", "");
-           String  jsonTS = temp.replaceAll("//[^\"']+\\s+", "");
+            String jsonTS = temp.replaceAll("//[^\"\\]\\}']*\\s+","");
             try {
-                 json = new JSONObject(jsonTS);
+                json = new JSONObject(jsonTS);
 
             } catch (Exception e2) {
                 e2.printStackTrace();
-                jLabel.setText(" data err");
+                jLabel.setText("data err !!");
             }
         }
 
-        if(json!=null){
+        if (json != null) {
             try {
                 parseJson(json);
             } catch (Exception e2) {
                 e2.printStackTrace();
-                jLabel.setText("parse err");
+                jLabel.setText("parse err !!");
             }
         }
 
@@ -106,8 +107,11 @@ public class WriterUtil extends WriteCommandAction.Simple {
         Set<String> set = json.keySet();
         List<String> list = new ArrayList<String>(set);
         List<String> fields = createField(json, list, mClass);
-        createSetMethod(json, fields, list, mClass);
-        createGetMethod(json, fields, list, mClass);
+
+        if (Config.getInstant().isFieldPrivateMode()) {
+            createSetMethod(json, fields, list, mClass);
+            createGetMethod(json, fields, list, mClass);
+        }
         JavaCodeStyleManager styleManager = JavaCodeStyleManager.getInstance(project);
         styleManager.optimizeImports(mFile);
         styleManager.shortenClassReferences(mClass);
@@ -135,14 +139,19 @@ public class WriterUtil extends WriteCommandAction.Simple {
             if (checkKeyWord(key)) {
                 filedSb.append("@com.google.gson.annotations.SerializedName(\"" + key + "\")\n");
                 key = key + "X";
-
-
+            }else{
+                if (Config.getInstant().isUseSerializedName()) {
+                    filedSb.append("@com.google.gson.annotations.SerializedName(\"" + key + "\")\n");
+                }
             }
             fields.add(key);
             String typeStr = typeByValue(mClass, key, type, true);
 
-            filedSb.append("private  ").append(typeStr).append(key).append(" ; ");
-
+            if (Config.getInstant().isFieldPrivateMode()) {
+                filedSb.append("private  ").append(typeStr).append(key).append(" ; ");
+            }else{
+                filedSb.append("public  ").append(typeStr).append(key).append(" ; ");
+            }
             String filedStr = null;
             if (i == 0) {
                 filedStr = sb.append(filedSb.toString()).toString();
@@ -151,7 +160,7 @@ public class WriterUtil extends WriteCommandAction.Simple {
             }
             mClass.add(mFactory.createFieldFromText(filedStr, mClass));
         }
-        return  fields;
+        return fields;
 
     }
 
@@ -214,14 +223,18 @@ public class WriterUtil extends WriteCommandAction.Simple {
         String classContent = "/** */\n " +
                 "public  " + className + "(){" +
                 "}";
+
+
         PsiClass subClass = mFactory.createClass(className.trim());
         subClass.setName(className.trim());
 
         Set<String> set = json.keySet();
         List<String> list = new ArrayList<String>(set);
         List<String> fields = createField(json, list, subClass);
-        createSetMethod(json, fields, list, subClass);
-        createGetMethod(json, fields, list, subClass);
+        if (Config.getInstant().isFieldPrivateMode()) {
+            createSetMethod(json, fields, list, subClass);
+            createGetMethod(json, fields, list, subClass);
+        }
         mClass.add(subClass);
 
     }
@@ -254,7 +267,7 @@ public class WriterUtil extends WriteCommandAction.Simple {
             String field = fields.get(i);
             Object type = json.get(key);
             String typeStr;
-            typeStr = typeByValue(mClass, key, type);
+            typeStr = typeByValue(mClass, field, type);
 
             String method = "public void  set" + captureName(field) + "( " + typeStr + " " + field + ") {   this." + field + " = " + field + ";} ";
             mClass.add(mFactory.createMethodFromText(method, mClass));

@@ -3,15 +3,13 @@
     <description><![CDATA[
 <html>quickly to convert a JSON string to an entity class ..<br>
 <a href="https://github.com/zzz40500/GsonFormat"> openSource</a>
-
       </html>
       ]]>
     </description>
-    <version>1.1.1</version>
+    <version>1.1.2</version>
     <vendor email="wyh405003836@126.com">zzz40500</vendor>
-
     <!-- please see http://confluence.jetbrains.net/display/IDEADEV/Build+Number+Ranges for description -->
-    <idea-version since-build="107.111"/>
+    <idea-version since-build="107.112"/>
 
     <application-components>
         <!-- Add your application components here -->

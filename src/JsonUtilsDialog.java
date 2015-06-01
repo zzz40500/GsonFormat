@@ -6,12 +6,13 @@ import com.intellij.psi.PsiFile;
 import javax.swing.*;
 import java.awt.event.*;
 
-public class JsonUtilsDialog extends JDialog {
-    private JPanel contentPane;
+public class JsonUtilsDialog extends JFrame {
+    private JPanel contentPane2;
     private JButton buttonOK;
     private JButton buttonCancel;
     private JLabel label22;
     private JTextPane textPane1;
+    private JButton setting;
 
 
     protected PsiClass mClass;
@@ -22,10 +23,11 @@ public class JsonUtilsDialog extends JDialog {
 
 
     public JsonUtilsDialog() {
-        setContentPane(contentPane);
-        setModal(true);
+        setContentPane(contentPane2);
+//        setModal(true);
         setTitle("GsonFormat");
         getRootPane().setDefaultButton(buttonOK);
+
 
         buttonOK.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -37,13 +39,16 @@ public class JsonUtilsDialog extends JDialog {
             public void keyTyped(KeyEvent e) {
             }
 
+
             @Override
             public void keyPressed(KeyEvent e) {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     onOK();
 
+
                 }
             }
+
 
             @Override
             public void keyReleased(KeyEvent e) {
@@ -51,13 +56,20 @@ public class JsonUtilsDialog extends JDialog {
         });
 
 
+
+
         buttonCancel.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 onCancel();
             }
         });
+        setting.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                openSettingDialog();
+            }
+        });
 
-// call onCancel() when cross is clicked
+
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent e) {
@@ -65,13 +77,12 @@ public class JsonUtilsDialog extends JDialog {
             }
         });
 
-// call onCancel() on ESCAPE
-        contentPane.registerKeyboardAction(new ActionListener() {
+        contentPane2.registerKeyboardAction(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 onCancel();
             }
         }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
-    }
+         }
 
     private void onOK() {
 
@@ -117,5 +128,16 @@ public class JsonUtilsDialog extends JDialog {
     }
 
     private void createUIComponents() {
+    }
+
+
+   public void openSettingDialog(){
+
+        SettingDialog settingDialog=new SettingDialog();
+        settingDialog.setSize(360,360);
+        settingDialog.setLocationRelativeTo(null);
+        settingDialog.setResizable(false);
+        settingDialog.setVisible(true);
+
     }
 }

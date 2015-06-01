@@ -9,7 +9,8 @@
   [![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-GsonFormat-brightgreen.svg?style=flat)](http://android-arsenal.com/details/1/1896)
   
 版本1.1.2
->1.1.2 版本更新内容:
+>1.1.2 版本更新内容
+
 1. 修复了开启对话框会闪一下的 bug;
 * 增加了设置界面;
 * 增加了使用Public 修饰成员变量,替代 private 和 set/get 方法.默认为 private ,可以手动切换过来;

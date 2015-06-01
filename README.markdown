@@ -7,6 +7,7 @@
   [jetbrains](https://plugins.jetbrains.com/plugin/7654?pr=androidstudio)
   
   [![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-GsonFormat-brightgreen.svg?style=flat)](http://android-arsenal.com/details/1/1896)
+  
   版本1.1.2
 >1.1.2 版本更新内容:
 1. 修复了开启对话框会闪一下的 bug;
@@ -14,11 +15,13 @@
 * 增加了使用Public 修饰成员变量,替代 private 和 set/get 方法.默认为 private ,可以手动切换过来;
 * 直接全部变量用注解(SerializedName)的形式.然后你就可以混淆实体类.
   
+
 >1.1.1版本更新内容
  1.  修复了因为过滤//注释代码导致的出现的 Json 格式验证异常;
  * 支持解析 java 的关键字作为 key (支持字段:
 default,abstract,null,final,void,implements,
 this,instanceof,native,new,goto,const,volatile,return,finally)其余暂不支持;
+
 
 版本1.1.0
 >1.1.0 版本更新内容:

@@ -8,33 +8,33 @@ import java.awt.event.*;
 
 public class JsonUtilsDialog extends JFrame {
     private JPanel contentPane2;
-    private JButton buttonOK;
-    private JButton buttonCancel;
-    private JLabel label22;
-    private JTextPane textPane1;
-    private JButton setting;
+    private JButton okButton;
+    private JButton cancelButton;
+    private JLabel errorLB;
+    private JTextPane editTP;
+    private JButton settingButton;
 
 
     protected PsiClass mClass;
     protected  PsiElementFactory mFactory    ;
     protected  PsiFile mFile    ;
-    protected  Project project    ;
+    protected  Project mProject;
 
-
+    public String mErrorInfo=null;
 
     public JsonUtilsDialog() {
         setContentPane(contentPane2);
 //        setModal(true);
         setTitle("GsonFormat");
-        getRootPane().setDefaultButton(buttonOK);
+        getRootPane().setDefaultButton(okButton);
+        this.setAlwaysOnTop(true);
 
-
-        buttonOK.addActionListener(new ActionListener() {
+        okButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 onOK();
             }
         });
-        textPane1.addKeyListener(new KeyListener() {
+        editTP.addKeyListener(new KeyListener() {
             @Override
             public void keyTyped(KeyEvent e) {
             }
@@ -44,8 +44,6 @@ public class JsonUtilsDialog extends JFrame {
             public void keyPressed(KeyEvent e) {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     onOK();
-
-
                 }
             }
 
@@ -55,15 +53,29 @@ public class JsonUtilsDialog extends JFrame {
             }
         });
 
+        errorLB.addMouseListener(new MouseAdapter(){
 
 
+            @Override
+            public void mouseClicked(MouseEvent mouseEvent) {
+                super.mouseClicked(mouseEvent);
+                if(mErrorInfo != null){
+                    ErrorDialog errorDialog=new ErrorDialog(mErrorInfo);
+                    errorDialog.setSize(800,600);
+                    errorDialog.setLocationRelativeTo(null);
+                    errorDialog.setVisible(true);
+                }
 
-        buttonCancel.addActionListener(new ActionListener() {
+            }
+        });
+
+
+        cancelButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 onCancel();
             }
         });
-        setting.addActionListener(new ActionListener() {
+        settingButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 openSettingDialog();
             }
@@ -86,9 +98,8 @@ public class JsonUtilsDialog extends JFrame {
 
     private void onOK() {
 
-        String  jsonSTR=   textPane1.getText().toString();
-        new WriterUtil(this, label22,jsonSTR ,  mFile,  project    , mClass).execute() ;
-//        dispose();
+        String  jsonSTR=   editTP.getText().toString();
+        new WriterUtil(this, errorLB,jsonSTR ,  mFile, mProject, mClass).execute() ;
     }
 
     private void onCancel() {
@@ -119,8 +130,8 @@ public class JsonUtilsDialog extends JFrame {
     }
 
 
-    public void setProject(Project project) {
-        this.project = project;
+    public void setmProject(Project mProject) {
+        this.mProject = mProject;
     }
 
     public void setmFile(PsiFile mFile) {
@@ -134,7 +145,7 @@ public class JsonUtilsDialog extends JFrame {
    public void openSettingDialog(){
 
         SettingDialog settingDialog=new SettingDialog();
-        settingDialog.setSize(360,360);
+        settingDialog.setSize(600,600);
         settingDialog.setLocationRelativeTo(null);
         settingDialog.setResizable(false);
         settingDialog.setVisible(true);

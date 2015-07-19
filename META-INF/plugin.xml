@@ -6,31 +6,30 @@
       </html>
       ]]>
     </description>
-    <version>1.1.2</version>
+    <version>1.1.3</version>
     <vendor email="wyh405003836@126.com">zzz40500</vendor>
     <!-- please see http://confluence.jetbrains.net/display/IDEADEV/Build+Number+Ranges for description -->
-    <idea-version since-build="107.112"/>
+    <idea-version since-build="107.113"/>
 
     <application-components>
         <!-- Add your application components here -->
     </application-components>
 
-    <project-components>
-        <!-- Add your project components here -->
-    </project-components>
+    <mProject-components>
+        <!-- Add your mProject components here -->
+    </mProject-components>
 
 
     <actions>
-    <!-- Add your actions here -->
-      <action
-              id="MainAction" class="MainAction" text="GsonFormat"
-              >
+        <!-- Add your actions here -->
+        <action
+                id="MainAction" class="MainAction" text="GsonFormat">
 
-          <add-to-group group-id="GenerateGroup" anchor="first"/>
-      </action>
-  </actions>
+            <add-to-group group-id="GenerateGroup" anchor="first"/>
+        </action>
+    </actions>
 
-  <extensions defaultExtensionNs="com.intellij">
-    <!-- Add your extensions here -->
-  </extensions>
+    <extensions defaultExtensionNs="com.intellij">
+        <!-- Add your extensions here -->
+    </extensions>
 </idea-plugin>

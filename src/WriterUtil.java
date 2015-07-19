@@ -157,7 +157,7 @@ public class WriterUtil extends WriteCommandAction.Simple {
         String temp = str.replaceAll("/\\*" +
                 "[\\S\\s]*?" +
                 "\\*/", "");
-        return temp.replaceAll("//[^\"\\]\\}']*\\s+", "");
+        return temp.replaceAll("//[\\S\\s]*?\n", "");
 
     }
 
@@ -170,21 +170,18 @@ public class WriterUtil extends WriteCommandAction.Simple {
             if (psiFieldText.contains("SerializedName")) {
                 boolean isSerializedName = false;
 
-                System.out.println("SerializedName");
                 psiFieldText = psiFieldText.trim();
 
                 Pattern pattern = Pattern.compile("@com\\s*\\.\\s*google\\s*\\.\\s*gson\\s*\\.\\s*annotations\\s*\\.\\s*SerializedName\\s*\\(\\s*\"(\\w+)\"\\s*\\)");
                 Matcher matcher = pattern.matcher(psiFieldText);
                 if (matcher.find()) {
                     filterFields.add(matcher.group(1));
-                    System.out.println("com");
                     isSerializedName = true;
                 }
                 Pattern pattern2 = Pattern.compile("@\\s*SerializedName\\s*\\(\\s*\"(\\w+)\"\\s*\\)");
                 Matcher matcher2 = pattern2.matcher(psiFieldText);
                 if (matcher2.find()) {
-                    System.out.println("@\\s*SerializedName\\s*\\(\\s*\"(\\w+)\"\\s*\\)");
-                    filterFields.add(matcher.group(1));
+                    filterFields.add(matcher2.group(1));
                     isSerializedName = true;
                 }
                 if (!isSerializedName) {

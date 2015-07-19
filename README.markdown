@@ -8,6 +8,18 @@
   
   [![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-GsonFormat-brightgreen.svg?style=flat)](http://android-arsenal.com/details/1/1896)
   
+  
+  版本1.1.3
+>1.1.3 版本更新内容:
+1. 内部类使用 static 修饰;
+* 生成属性的时候会过滤父类的属性;
+* 支持修改实体类的后缀名,保持跟项目命名规则的统一;
+* 支持自动生成转换方法;
+* 支持转换方法的修改;
+* 支持是否复用内部实体类,默认不启用;
+* 支持转换异常的异常信息查看; 
+
+  
 版本1.1.2
 >1.1.2 版本更新内容
  1. 修复了开启对话框会闪一下的 bug;

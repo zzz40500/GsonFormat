@@ -8,6 +8,8 @@
   
   [![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-GsonFormat-brightgreen.svg?style=flat)](http://android-arsenal.com/details/1/1896)
   
+  [swft 版](https://github.com/EnjoySR/ESJsonFormat-Xcode);
+  
   
   版本1.1.3
 >1.1.3 版本更新内容:

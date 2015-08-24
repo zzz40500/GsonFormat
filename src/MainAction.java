@@ -37,26 +37,27 @@ public class MainAction extends BaseGenerateAction {
     @Override
     public boolean isValidForFile(Project project, Editor editor, PsiFile file) {
 
-        return super.isValidForFile(project,editor,file);
+        return super.isValidForFile(project, editor, file);
     }
 
 
     public void actionPerformed(AnActionEvent event) {
+
         project = event.getData(PlatformDataKeys.PROJECT);
         Editor editor = event.getData(PlatformDataKeys.EDITOR);
         PsiFile mFile = PsiUtilBase.getPsiFileInEditor(editor, project);
         mClass=getTargetClass(editor,mFile);
-        JsonUtilsDialog jsonD=new JsonUtilsDialog();
+        JsonUtilsDialog jsonD=new JsonUtilsDialog(mClass,mFactory,mFile,project);
         jsonD.setmClass(mClass);
         jsonD.setmFactory(mFactory);
-
         jsonD.setmFile(mFile);
         jsonD.setmProject(project);
-
-        jsonD.setSize(400 ,200);
+        jsonD.setSize(600, 400);
         jsonD.setLocationRelativeTo(null);
         jsonD.setVisible(true);
+
     }
+
 
 
 

@@ -3,7 +3,7 @@
   <grid id="cbd77" binding="contentPane" layout-manager="GridLayoutManager" row-count="2" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
     <margin top="10" left="10" bottom="10" right="10"/>
     <constraints>
-      <xy x="48" y="54" width="645" height="671"/>
+      <xy x="48" y="54" width="667" height="728"/>
     </constraints>
     <properties/>
     <border type="none"/>
@@ -56,41 +56,30 @@
         <properties/>
         <border type="none"/>
         <children>
-          <grid id="e9883" layout-manager="GridLayoutManager" row-count="14" column-count="10" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+          <grid id="a53e9" layout-manager="GridLayoutManager" row-count="21" column-count="10" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
             <margin top="0" left="0" bottom="0" right="0"/>
-            <constraints border-constraint="North"/>
+            <constraints border-constraint="Center"/>
             <properties/>
             <border type="none"/>
             <children>
-              <component id="320fd" class="javax.swing.JRadioButton" binding="fieldPublicRadioButton" default-binding="true">
+              <component id="b775c" class="javax.swing.JRadioButton" binding="fieldPublicRadioButton" default-binding="true">
                 <constraints>
-                  <grid row="12" column="0" row-span="1" col-span="10" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                  <grid row="15" column="0" row-span="1" col-span="10" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
-                  <text value="field( public) "/>
+                  <text value="filed( public) "/>
                 </properties>
               </component>
-              <component id="c4843" class="javax.swing.JCheckBox" binding="useSerializedNameCheckBox" default-binding="true">
+              <component id="afbc9" class="javax.swing.JRadioButton" binding="fieldPrivateRadioButton">
                 <constraints>
-                  <grid row="13" column="0" row-span="1" col-span="10" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false">
-                    <minimum-size width="-1" height="30"/>
-                    <preferred-size width="-1" height="30"/>
-                  </grid>
-                </constraints>
-                <properties>
-                  <text value="use serializedName "/>
-                </properties>
-              </component>
-              <component id="8264b" class="javax.swing.JRadioButton" binding="fieldPrivateRadioButton">
-                <constraints>
-                  <grid row="11" column="0" row-span="1" col-span="10" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                  <grid row="14" column="0" row-span="1" col-span="10" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
                   <selected value="false"/>
-                  <text value="field( private )"/>
+                  <text value="filed( private )"/>
                 </properties>
               </component>
-              <component id="2daa2" class="javax.swing.JCheckBox" binding="arrayFromDataCB">
+              <component id="adef0" class="javax.swing.JCheckBox" binding="arrayFromDataCB">
                 <constraints>
                   <grid row="3" column="0" row-span="1" col-span="8" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false">
                     <minimum-size width="-1" height="30"/>
@@ -101,7 +90,7 @@
                   <text value="arrayFromData(Object data)"/>
                 </properties>
               </component>
-              <component id="4c684" class="javax.swing.JCheckBox" binding="objectFromData1CB">
+              <component id="635ca" class="javax.swing.JCheckBox" binding="objectFromData1CB">
                 <constraints>
                   <grid row="2" column="0" row-span="1" col-span="7" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false">
                     <minimum-size width="-1" height="30"/>
@@ -112,7 +101,7 @@
                   <text value="objectFromData(Object data ,String key)"/>
                 </properties>
               </component>
-              <component id="792fb" class="javax.swing.JCheckBox" binding="objectFromDataCB">
+              <component id="b99fb" class="javax.swing.JCheckBox" binding="objectFromDataCB">
                 <constraints>
                   <grid row="1" column="0" row-span="1" col-span="4" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false">
                     <minimum-size width="-1" height="30"/>
@@ -123,7 +112,7 @@
                   <text value="objectFromData(Object data)"/>
                 </properties>
               </component>
-              <component id="edf2a" class="javax.swing.JButton" binding="object1Button">
+              <component id="44a2b" class="javax.swing.JButton" binding="object1Button">
                 <constraints>
                   <grid row="2" column="8" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                 </constraints>
@@ -131,7 +120,7 @@
                   <text value="edit"/>
                 </properties>
               </component>
-              <component id="e5b17" class="javax.swing.JButton" binding="objectButton">
+              <component id="41497" class="javax.swing.JButton" binding="objectButton">
                 <constraints>
                   <grid row="1" column="8" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                 </constraints>
@@ -139,7 +128,7 @@
                   <text value="edit"/>
                 </properties>
               </component>
-              <component id="a5254" class="javax.swing.JButton" binding="arrayButton">
+              <component id="fdc77" class="javax.swing.JButton" binding="arrayButton">
                 <constraints>
                   <grid row="3" column="8" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                 </constraints>
@@ -147,7 +136,7 @@
                   <text value="edit"/>
                 </properties>
               </component>
-              <component id="bd24b" class="javax.swing.JButton" binding="array1Button">
+              <component id="f0d04" class="javax.swing.JButton" binding="array1Button">
                 <constraints>
                   <grid row="4" column="8" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                 </constraints>
@@ -155,7 +144,7 @@
                   <text value="edit"/>
                 </properties>
               </component>
-              <component id="f5ac8" class="javax.swing.JCheckBox" binding="arrayFromData1CB">
+              <component id="d13a2" class="javax.swing.JCheckBox" binding="arrayFromData1CB">
                 <constraints>
                   <grid row="4" column="0" row-span="1" col-span="8" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false">
                     <minimum-size width="-1" height="30"/>
@@ -166,46 +155,38 @@
                   <text value="arrayFromData(Object data ,String key) )"/>
                 </properties>
               </component>
-              <component id="d1719" class="javax.swing.JLabel">
+              <component id="b1cb3" class="javax.swing.JTextField" binding="suffixEdit">
                 <constraints>
-                  <grid row="8" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                </constraints>
-                <properties>
-                  <text value="    Entity  suffix : "/>
-                </properties>
-              </component>
-              <component id="a98dd" class="javax.swing.JTextField" binding="suffixEdit">
-                <constraints>
-                  <grid row="8" column="2" row-span="1" col-span="8" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+                  <grid row="10" column="2" row-span="1" col-span="7" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
                     <preferred-size width="150" height="-1"/>
                   </grid>
                 </constraints>
                 <properties/>
               </component>
-              <hspacer id="860aa">
+              <hspacer id="4b26f">
                 <constraints>
                   <grid row="1" column="6" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false">
                     <preferred-size width="138" height="11"/>
                   </grid>
                 </constraints>
               </hspacer>
-              <component id="b3c2c" class="javax.swing.JLabel">
+              <component id="1210c" class="javax.swing.JLabel">
                 <constraints>
-                  <grid row="6" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                  <grid row="8" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
                   <text value="Entity"/>
                 </properties>
               </component>
-              <component id="c651e" class="javax.swing.JLabel">
+              <component id="e7c1f" class="javax.swing.JLabel">
                 <constraints>
-                  <grid row="10" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                  <grid row="12" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
-                  <text value="field"/>
+                  <text value="filed"/>
                 </properties>
               </component>
-              <component id="b6a44" class="javax.swing.JLabel">
+              <component id="e1138" class="javax.swing.JLabel">
                 <constraints>
                   <grid row="0" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
@@ -213,9 +194,9 @@
                   <text value="Convert method"/>
                 </properties>
               </component>
-              <component id="c5271" class="javax.swing.JCheckBox" binding="reuseEntityCB">
+              <component id="e1145" class="javax.swing.JCheckBox" binding="reuseEntityCB">
                 <constraints>
-                  <grid row="7" column="0" row-span="1" col-span="10" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false">
+                  <grid row="9" column="0" row-span="1" col-span="10" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false">
                     <minimum-size width="-1" height="30"/>
                     <preferred-size width="-1" height="30"/>
                   </grid>
@@ -224,35 +205,150 @@
                   <text value="reuse Entity"/>
                 </properties>
               </component>
-              <component id="ec71d" class="javax.swing.JSeparator">
+              <component id="70489" class="javax.swing.JCheckBox" binding="useSerializedNameCheckBox">
                 <constraints>
-                  <grid row="9" column="0" row-span="1" col-span="10" vsize-policy="6" hsize-policy="6" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
-                </constraints>
-                <properties/>
-              </component>
-              <component id="b1283" class="javax.swing.JSeparator">
-                <constraints>
-                  <grid row="5" column="0" row-span="1" col-span="10" vsize-policy="6" hsize-policy="6" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
-                </constraints>
-                <properties/>
-              </component>
-            </children>
-          </grid>
-          <grid id="56aec" layout-manager="GridLayoutManager" row-count="1" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
-            <margin top="0" left="0" bottom="0" right="0"/>
-            <constraints border-constraint="Center"/>
-            <properties/>
-            <border type="none"/>
-            <children>
-              <component id="79ffb" class="javax.swing.JTextPane" binding="exampleLB">
-                <constraints>
-                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="6" anchor="0" fill="3" indent="0" use-parent-layout="false">
-                    <preferred-size width="150" height="50"/>
+                  <grid row="16" column="0" row-span="1" col-span="10" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false">
+                    <minimum-size width="-1" height="30"/>
+                    <preferred-size width="-1" height="30"/>
                   </grid>
                 </constraints>
                 <properties>
-                  <text value=""/>
+                  <text value="use serializedName "/>
                 </properties>
+              </component>
+              <grid id="6d2ba" layout-manager="GridLayoutManager" row-count="1" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                <margin top="0" left="0" bottom="0" right="0"/>
+                <constraints>
+                  <grid row="19" column="0" row-span="1" col-span="10" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="true">
+                    <maximum-size width="-1" height="50"/>
+                  </grid>
+                </constraints>
+                <properties/>
+                <border type="none"/>
+                <children>
+                  <component id="383cb" class="javax.swing.JRadioButton" binding="gsonJRB">
+                    <constraints>
+                      <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <selected value="false"/>
+                      <text value="Gson"/>
+                    </properties>
+                  </component>
+                  <component id="8df86" class="javax.swing.JRadioButton" binding="jackRB">
+                    <constraints>
+                      <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <selected value="false"/>
+                      <text value="Jack"/>
+                    </properties>
+                  </component>
+                  <component id="80473" class="javax.swing.JRadioButton" binding="fastJsonRB">
+                    <constraints>
+                      <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <selected value="false"/>
+                      <text value="Fastjson"/>
+                    </properties>
+                  </component>
+                  <component id="9cd04" class="javax.swing.JRadioButton" binding="otherRB">
+                    <constraints>
+                      <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <selected value="false"/>
+                      <text value="other"/>
+                    </properties>
+                  </component>
+                </children>
+              </grid>
+              <component id="8c193" class="javax.swing.JTextField" binding="annotationFT">
+                <constraints>
+                  <grid row="20" column="2" row-span="1" col-span="7" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+                    <preferred-size width="150" height="-1"/>
+                  </grid>
+                </constraints>
+                <properties/>
+              </component>
+              <component id="ba954" class="javax.swing.JLabel">
+                <constraints>
+                  <grid row="20" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <text value="       annotation: "/>
+                </properties>
+              </component>
+              <component id="59564" class="javax.swing.JLabel">
+                <constraints>
+                  <grid row="18" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <text value="Convert Library"/>
+                </properties>
+              </component>
+              <component id="9eff9" class="javax.swing.JCheckBox" binding="virgoModelCB">
+                <constraints>
+                  <grid row="6" column="0" row-span="1" col-span="10" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false">
+                    <minimum-size width="-1" height="30"/>
+                    <preferred-size width="-1" height="30"/>
+                  </grid>
+                </constraints>
+                <properties>
+                  <text value="virgo mode"/>
+                </properties>
+              </component>
+              <component id="b1cc0" class="javax.swing.JTextField" binding="filedPrefixTF">
+                <constraints>
+                  <grid row="13" column="2" row-span="1" col-span="7" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+                    <preferred-size width="150" height="-1"/>
+                  </grid>
+                </constraints>
+                <properties/>
+              </component>
+              <component id="7870" class="javax.swing.JCheckBox" binding="filedPrefixCB">
+                <constraints>
+                  <grid row="13" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false">
+                    <minimum-size width="-1" height="30"/>
+                    <preferred-size width="-1" height="30"/>
+                  </grid>
+                </constraints>
+                <properties>
+                  <text value="name prefix"/>
+                </properties>
+              </component>
+              <component id="fa434" class="javax.swing.JLabel">
+                <constraints>
+                  <grid row="10" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <text value="      name  suffix : "/>
+                </properties>
+              </component>
+              <component id="1a6f7" class="javax.swing.JSeparator">
+                <constraints>
+                  <grid row="5" column="0" row-span="1" col-span="9" vsize-policy="6" hsize-policy="6" anchor="1" fill="1" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties/>
+              </component>
+              <component id="8171a" class="javax.swing.JSeparator">
+                <constraints>
+                  <grid row="7" column="0" row-span="1" col-span="9" vsize-policy="6" hsize-policy="6" anchor="1" fill="1" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties/>
+              </component>
+              <component id="65191" class="javax.swing.JSeparator">
+                <constraints>
+                  <grid row="11" column="0" row-span="1" col-span="9" vsize-policy="6" hsize-policy="6" anchor="1" fill="1" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties/>
+              </component>
+              <component id="942e" class="javax.swing.JSeparator">
+                <constraints>
+                  <grid row="17" column="0" row-span="1" col-span="9" vsize-policy="6" hsize-policy="6" anchor="1" fill="1" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties/>
               </component>
             </children>
           </grid>
@@ -265,6 +361,14 @@
       <member id="320fd"/>
       <member id="10502"/>
       <member id="8264b"/>
+      <member id="afbc9"/>
+      <member id="b775c"/>
+    </group>
+    <group name="CovertJar">
+      <member id="383cb"/>
+      <member id="8df86"/>
+      <member id="80473"/>
+      <member id="9cd04"/>
     </group>
   </buttonGroups>
 </form>

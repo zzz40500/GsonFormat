@@ -1,5 +1,9 @@
+import com.intellij.openapi.project.Project;
+import com.intellij.psi.codeStyle.JavaCodeStyleManager;
+import com.intellij.psi.codeStyle.VariableKind;
 import config.Config;
 import config.Strings;
+import org.apache.http.util.TextUtils;
 
 import javax.swing.*;
 import java.awt.event.*;
@@ -9,7 +13,6 @@ public class SettingDialog extends JFrame {
     private JRadioButton fieldPublicRadioButton;
     private JRadioButton fieldPrivateRadioButton;
     private JCheckBox useSerializedNameCheckBox;
-    private JTextPane exampleLB;
     private JButton objectButton;
     private JButton object1Button;
     private JButton arrayButton;
@@ -22,9 +25,18 @@ public class SettingDialog extends JFrame {
     private JCheckBox reuseEntityCB;
     private JButton cancelButton;
     private JButton okButton;
+    private JTextField filedPrefixTF;
+    private JCheckBox filedPrefixCB;
+    private JRadioButton gsonJRB;
+    private JRadioButton jackRB;
+    private JRadioButton fastJsonRB;
+    private JRadioButton otherRB;
+    private JTextField annotationFT;
+    private JCheckBox virgoModelCB;
+    private String annotaionStr;
 
 
-    public SettingDialog() {
+    public SettingDialog(Project project) {
         setContentPane(contentPane);
 //        setModal(true);
         getRootPane().setDefaultButton(okButton);
@@ -53,20 +65,21 @@ public class SettingDialog extends JFrame {
             }
         }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
-        fieldPublicRadioButton.addActionListener(new MActionListener());
-        fieldPrivateRadioButton.addActionListener(new MActionListener());
-        useSerializedNameCheckBox.addActionListener(new MActionListener());
         if (Config.getInstant().isFieldPrivateMode()) {
             fieldPrivateRadioButton.setSelected(true);
         } else {
             fieldPublicRadioButton.setSelected(true);
         }
+
+        virgoModelCB.setSelected(Config.getInstant().isVirgoMode());
+        filedPrefixCB.setSelected(Config.getInstant().isUseFiledNamePrefix());
+        filedPrefixTF.setEnabled(Config.getInstant().isUseFiledNamePrefix());
         useSerializedNameCheckBox.setSelected(Config.getInstant().isUseSerializedName());
         objectFromDataCB.setSelected(Config.getInstant().isObjectFromData());
         objectFromData1CB.setSelected(Config.getInstant().isObjectFromData1());
         arrayFromDataCB.setSelected(Config.getInstant().isArrayFromData());
         arrayFromData1CB.setSelected(Config.getInstant().isArrayFromData1());
-        reuseEntityCB.setSelected(Config.getInstant().isResuseEntity());
+        reuseEntityCB.setSelected(Config.getInstant().isReuseEntity());
         objectButton.setEnabled(objectFromDataCB.isSelected());
         object1Button.setEnabled(objectFromData1CB.isSelected());
         arrayButton.setEnabled(arrayFromDataCB.isSelected());
@@ -96,6 +109,127 @@ public class SettingDialog extends JFrame {
                 array1Button.setEnabled(arrayFromData1CB.isSelected());
             }
         });
+
+
+        filedPrefixCB.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                filedPrefixTF.setEnabled(filedPrefixCB.isSelected());
+            }
+        });
+
+        otherRB.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                annotationFT.setText("@{filed}");
+                annotationFT.setEnabled(otherRB.isSelected());
+                objectFromDataCB.setEnabled(false);
+                objectFromData1CB.setEnabled(false);
+                arrayFromDataCB.setEnabled(false);
+                arrayFromData1CB.setEnabled(false);
+                annotationFT.setEnabled(false);
+                objectFromDataCB.setSelected(false);
+                objectFromData1CB.setSelected(false);
+                arrayFromDataCB.setSelected(false);
+                arrayFromData1CB.setSelected(false);
+                objectButton.setEnabled(false);
+                object1Button.setEnabled(false);
+                arrayButton.setEnabled(false);
+                array1Button.setEnabled(false);
+            }
+        });
+
+
+
+
+        String filedPrefix=null;
+        filedPrefix=Config.getInstant().getFiledNamePreFixStr();
+//        if(TextUtils.isEmpty(filedPrefix)){
+            JavaCodeStyleManager styleManager = JavaCodeStyleManager.getInstance(project);
+            filedPrefix=styleManager.getPrefixByVariableKind(VariableKind.FIELD
+            );
+//        }
+        filedPrefixTF.setText(filedPrefix);
+
+
+
+        gsonJRB.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                if(gsonJRB.isSelected()){
+                    annotationFT.setText(Strings.gsonAnnotation);
+                }
+                objectFromDataCB.setEnabled(true);
+                objectFromData1CB.setEnabled(true);
+                arrayFromDataCB.setEnabled(true);
+                arrayFromData1CB.setEnabled(true);
+                annotationFT.setEnabled(false);
+            }
+        });
+        fastJsonRB.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+
+                if(fastJsonRB.isSelected()){
+                    annotationFT.setText(Strings.fastAnnotation);
+                }
+                objectFromDataCB.setEnabled(false);
+                objectFromData1CB.setEnabled(false);
+                arrayFromDataCB.setEnabled(false);
+                arrayFromData1CB.setEnabled(false);
+                annotationFT.setEnabled(false);
+                objectFromDataCB.setSelected(false);
+                objectFromData1CB.setSelected(false);
+                arrayFromDataCB.setSelected(false);
+                arrayFromData1CB.setSelected(false);
+                objectButton.setEnabled(false);
+                object1Button.setEnabled(false);
+                arrayButton.setEnabled(false);
+                array1Button.setEnabled(false);
+
+            }
+        });
+        jackRB.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                if(jackRB.isSelected()){
+                    annotationFT.setText(Strings.jackAnnotation);
+
+                }
+                annotationFT.setEnabled(false);
+                objectFromDataCB.setEnabled(false);
+                objectFromData1CB.setEnabled(false);
+                arrayFromDataCB.setEnabled(false);
+                arrayFromData1CB.setEnabled(false);
+                annotationFT.setEnabled(false);
+                objectFromDataCB.setSelected(false);
+                objectFromData1CB.setSelected(false);
+                arrayFromDataCB.setSelected(false);
+                arrayFromData1CB.setSelected(false);
+                objectButton.setEnabled(false);
+                object1Button.setEnabled(false);
+                arrayButton.setEnabled(false);
+                array1Button.setEnabled(false);
+            }
+        });
+
+        annotaionStr=Config.getInstant().getAnnotationStr();
+
+
+        if(annotaionStr.equals(Strings.gsonAnnotation)){
+            gsonJRB.setSelected(true);
+            annotationFT.setEnabled(false);
+        }else if(annotaionStr.equals(Strings.fastAnnotation)){
+            fastJsonRB.setSelected(true);
+            annotationFT.setEnabled(false);
+        }else if(annotaionStr.equals(Strings.jackAnnotation)){
+            jackRB.setSelected(true);
+            annotationFT.setEnabled(false);
+        }else {
+            otherRB.setSelected(true);
+            annotationFT.setEnabled(true);
+        }
+        annotationFT.setText(annotaionStr);
 
         objectButton.addActionListener(new ActionListener() {
             @Override
@@ -137,7 +271,6 @@ public class SettingDialog extends JFrame {
                 editDialog.setVisible(true);
             }
         });
-        setText();
 
 
     }
@@ -150,9 +283,12 @@ public class SettingDialog extends JFrame {
         Config.getInstant().setArrayFromData1(arrayFromData1CB.isSelected());
         Config.getInstant().setObjectFromData(objectFromDataCB.isSelected());
         Config.getInstant().setObjectFromData1(objectFromData1CB.isSelected());
-        Config.getInstant().setResuseEntity(reuseEntityCB.isSelected());
+        Config.getInstant().setReuseEntity(reuseEntityCB.isSelected());
         Config.getInstant().setSuffixStr(suffixEdit.getText());
-
+        Config.getInstant().setVirgoMode(virgoModelCB.isSelected());
+        Config.getInstant().setFiledNamePreFixStr(filedPrefixTF.getText());
+        Config.getInstant().setAnnotationStr(annotationFT.getText());
+        Config.getInstant().setUseFiledNamePrefix(filedPrefixCB.isSelected());
         Config.getInstant().save();
         dispose();
     }
@@ -161,45 +297,13 @@ public class SettingDialog extends JFrame {
         // TODO: place custom component creation code here
     }
 
-    class MActionListener implements ActionListener {
-
-        @Override
-        public void actionPerformed(ActionEvent actionEvent) {
-            setText();
-
-        }
-    }
-
-    public void setText() {
-        if (useSerializedNameCheckBox.isSelected()) {
-
-            if (fieldPublicRadioButton.isSelected()) {
-                exampleLB.setText(Strings.publicUseSerializedNameStr);
-            } else {
-                exampleLB.setText(Strings.privateUseSerializedNameStr);
-            }
-
-        } else {
-
-            if (fieldPublicRadioButton.isSelected()) {
-                exampleLB.setText(Strings.publicStr);
-            } else {
-                exampleLB.setText(Strings.privateStr);
-            }
 
 
-        }
-        exampleLB.setCaretPosition(0);
-    }
+
 
     private void onCancel() {
         dispose();
     }
 
-    public static void main(String[] args) {
-        SettingDialog dialog = new SettingDialog();
-        dialog.pack();
-        dialog.setVisible(true);
-        System.exit(0);
-    }
+
 }

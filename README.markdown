@@ -10,7 +10,7 @@
   
   [swft 版](https://github.com/EnjoySR/ESJsonFormat-Xcode);
   
-  版本1.2.0(看下面的 1.2 动图吧)
+  版本1.2.0
 >1.2.0 版本更新内容:
 1. ######新增处女座模式 →_→ 
 *  修复List 泛型错误的问题;

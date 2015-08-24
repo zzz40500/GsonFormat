@@ -10,6 +10,12 @@
   
   [swft 版](https://github.com/EnjoySR/ESJsonFormat-Xcode);
   
+  版本1.2.0(看下面的 1.2 动图吧)
+>1.2.0 版本更新内容:
+1. ######新增处女座模式 →_→ 
+*  修复List 泛型错误的问题;
+* 支持 自定义 Filed Name 前缀
+* 支持除Gson数据转换库 (eg: Jackson, FastJson)
   
   版本1.1.3
 >1.1.3 版本更新内容:
@@ -69,6 +75,9 @@ this,instanceof,native,new,goto,const,volatile,return,finally)其余暂不支持
 我这边的快捷键是 command+n;
 
 
+####1.2.0 截图 ####
+
+![1.2.0 .gif](http://upload-images.jianshu.io/upload_images/166866-807eeac79234746e.gif?imageMogr2/auto-orient/strip)
 
 
 ####简单的实体类:####

@@ -12,10 +12,21 @@
   
   版本1.2.0
 >1.2.0 版本更新内容:
-1. ######新增处女座模式 →_→ 
+
+1. 增处女座模式 →_→ 
 *  修复List 泛型错误的问题;
-* 支持 自定义 Filed Name 前缀
+* 支持 自定义 Filed Name 
 * 支持除Gson数据转换库 (eg: Jackson, FastJson)
+
+######news channels 
+
+● Added Virgo mode. 
+
+● Support Field name Custom. 
+
+● Support Data Conversion Library(eg:Gson,Jack,FastJson) 
+
+
   
   版本1.1.3
 >1.1.3 版本更新内容:

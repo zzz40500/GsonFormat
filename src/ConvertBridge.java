@@ -98,6 +98,8 @@ public class ConvertBridge {
             json = new JSONObject(jsonStr);
         } catch (Exception e) {
             String jsonTS = filterAnnotation(jsonStr);
+
+            jsonTS=jsonTS.replaceAll("^[\\s\\S]*?\\{","{");
             try {
                 json = new JSONObject(jsonTS);
             } catch (Exception e2) {
@@ -140,6 +142,15 @@ public class ConvertBridge {
         mFilterClass = null;
     }
 
+
+    public static void main(String[] args) {
+
+        String s="";
+        s=s.replaceAll("^[\\s\\S]*?\\{","{");
+
+        System.out.print(s);
+    }
+
     private void initFilterClass() {
 
 
@@ -152,6 +163,7 @@ public class ConvertBridge {
 
             InnerClassEntity innerClassEntity1 = new InnerClassEntity();
             innerClassEntity1.setClassName(psiClass.getName());
+            innerClassEntity1.setAutoCreateClassName(psiClass.getName());
             innerClassEntity1.setFields(initFilterField(psiClass));
             innerClassEntity1.setPsiClass(psiClass);
             recursionInnerClass(innerClassEntity1);
@@ -168,6 +180,7 @@ public class ConvertBridge {
             for (PsiClass psiClass : innerClasss) {
                 InnerClassEntity innerClassEntity1 = new InnerClassEntity();
                 innerClassEntity1.setClassName(psiClass.getName());
+                innerClassEntity1.setAutoCreateClassName(psiClass.getName());
                 innerClassEntity1.setFields(initFilterField(psiClass));
                 innerClassEntity1.setPsiClass(psiClass);
                 recursionInnerClass(innerClassEntity1);
@@ -280,6 +293,7 @@ public class ConvertBridge {
 
         if(Config.getInstant().isVirgoMode()){
             mGenerateEntity.setClassName("");
+            mGenerateEntity.setAutoCreateClassName("");
             mGenerateEntity.setPsiClass(mGeneratClass);
             mGenerateEntity.setFields(createFields(json, fieldList, mGenerateEntity));
             FieldsDialog fieldsDialog=new FieldsDialog(mJsonUtilsDialog,mGenerateEntity,mFactory,
@@ -399,12 +413,10 @@ public class ConvertBridge {
 
 
 
-        FieldEntity fieldEntity =  typeByValue(parentClass, filedName, type);
+        FieldEntity fieldEntity =  typeByValue(parentClass, key, type);
         fieldEntity.setFieldName(filedName);
-        fieldEntity.setKey(key);
-        if(type!=null && !(fieldEntity instanceof  InnerClassEntity)) {
-            fieldEntity.setValue(type.toString());
-        }
+        fieldEntity.setAutoCreateFiledName(filedName);
+
 
         return  fieldEntity;
 
@@ -422,7 +434,7 @@ public class ConvertBridge {
 
             InnerClassEntity classEntity    = checkInnerClass((JSONObject) type);
             if (classEntity == null) {
-                typeStr =  createClassSubName( key, type, parentClass) ;
+                typeStr =  createSubClassName(key, type, parentClass) ;
                 InnerClassEntity innerClassEntity=   createJSonObjectClassSub(typeStr, (JSONObject) type, parentClass);
                 innerClassEntity.setKey(key);
                 innerClassEntity.setType("%s");
@@ -465,8 +477,14 @@ public class ConvertBridge {
 
             fieldEntity.setType(typeStr);
             noteBean=fieldEntity;
+            if(type!=null && !(noteBean instanceof  InnerClassEntity)) {
+                noteBean.setValue(type.toString());
+            }
 
         }
+
+        noteBean.setKey(key);
+
         return noteBean;
     }
 
@@ -485,7 +503,9 @@ public class ConvertBridge {
                         had=true;
                         break;
                     }
-
+                }
+                if(!had){
+                    break;
                 }
 
             }
@@ -500,12 +520,13 @@ public class ConvertBridge {
     private InnerClassEntity createJSonObjectClassSub(String className, JSONObject json, InnerClassEntity parentClass) {
 
         InnerClassEntity subClassEntity=new InnerClassEntity();
-        subClassEntity.setClassName(className);
+
         Set<String> set = json.keySet();
         List<String> list = new ArrayList<String>(set);
         List<FieldEntity> fields = createFields(json, list, subClassEntity);
         subClassEntity.setFields(fields);
         subClassEntity.setClassName(className);
+        subClassEntity.setAutoCreateClassName(className);
         if (Config.getInstant().isReuseEntity()) {
             mFilterClass.add(subClassEntity);
         }
@@ -514,7 +535,7 @@ public class ConvertBridge {
 
     }
 
-    private String createClassSubName( String key, Object o, InnerClassEntity parentClass) {
+    private String createSubClassName(String key, Object o, InnerClassEntity parentClass) {
 
         String name = "";
         if(o instanceof  JSONObject){
@@ -555,7 +576,8 @@ public class ConvertBridge {
                 InnerClassEntity innerClassEntity=   createJSonObjectClassSub(typeStr, (JSONObject) type, parentClass);
                 innerClassEntity.setType(typeStr);
                 innerClassEntity.setKey(key);
-                innerClassEntity.setClassName(createClassSubName(key, type, parentClass));
+                innerClassEntity.setClassName(createSubClassName(key, type, parentClass));
+                innerClassEntity.setAutoCreateClassName(innerClassEntity.getClassName());
                 noteBean=innerClassEntity;
             } else {
 
@@ -614,6 +636,12 @@ public class ConvertBridge {
         if (TextUtils.isEmpty(str)) {
             return str;
         }
+       String temp = str.replaceAll("^_+", "");
+
+        if( !TextUtils.isEmpty(temp)){
+            str=temp;
+        }
+
         String[] strings = str.split("_");
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(strings[0]);

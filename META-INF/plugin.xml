@@ -2,6 +2,10 @@
     <name>GsonFormat</name>
     <description><![CDATA[
 <html>quickly to convert a JSON string to an InnerClassEntity class ..<br>
+<br>
+ ● Support Data Conversion Library(eg:Gson,Jack,FastJson)<br>
+ ● Added Virgo mode.<br>
+ ● Support Field name Custom.<br>
 <a href="https://github.com/zzz40500/GsonFormat"> openSource</a>
       </html>
       ]]>

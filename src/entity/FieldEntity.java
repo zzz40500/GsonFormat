@@ -20,6 +20,16 @@ public class FieldEntity {
     private String value;
     private String extra;
 
+    private  String autoCreateFiledName;
+
+    public String getAutoCreateFiledName() {
+        return autoCreateFiledName;
+    }
+
+    public void setAutoCreateFiledName(String autoCreateFiledName) {
+        this.autoCreateFiledName = autoCreateFiledName;
+    }
+
     private InnerClassEntity targetClass;
 
 
@@ -47,6 +57,9 @@ public class FieldEntity {
     }
 
     public void setFieldName(String fieldName) {
+        if(TextUtils.isEmpty(fieldName)){
+            return;
+        }
         this.fieldName = fieldName;
     }
 
@@ -90,16 +103,22 @@ public class FieldEntity {
 
 
 
-        if(targetClass  == null){
-
-        }else{
-            String regex = getType().replaceAll("%s", "(\\w+)").replaceAll(".", "\\.");
-            Pattern pattern = Pattern.compile(regex);
-            Matcher matcher = pattern.matcher(s);
-            if (matcher.find()&&matcher.groupCount()>0) {
-                targetClass.setClassName(matcher.group(1));
-            }
-        }
+//        if(targetClass  == null){
+//
+//        }else{
+//            String regex = getType().replaceAll("%s", "(\\w+)").replaceAll(".", "\\.");
+//            Pattern pattern = Pattern.compile(regex);
+//            Matcher matcher = pattern.matcher(s);
+//            if (matcher.find()&&matcher.groupCount()>0) {
+//
+//                String temp=matcher.group(1);
+//                if(TextUtils.isEmpty(temp)){
+//                    targetClass.setClassName(targetClass.getAutoCreateClassName());
+//                }else{
+//                    targetClass.setClassName(temp);
+//                }
+//            }
+//        }
     }
 
     public String getKey() {

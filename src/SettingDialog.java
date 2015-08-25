@@ -144,11 +144,11 @@ public class SettingDialog extends JFrame {
 
         String filedPrefix=null;
         filedPrefix=Config.getInstant().getFiledNamePreFixStr();
-//        if(TextUtils.isEmpty(filedPrefix)){
+        if(TextUtils.isEmpty(filedPrefix)){
             JavaCodeStyleManager styleManager = JavaCodeStyleManager.getInstance(project);
             filedPrefix=styleManager.getPrefixByVariableKind(VariableKind.FIELD
             );
-//        }
+        }
         filedPrefixTF.setText(filedPrefix);
 
 

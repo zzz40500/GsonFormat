@@ -72,8 +72,8 @@ public class Strings {
 
         public static  final  String gsonAnnotation="@com.google.gson.annotations.SerializedName\\s*\\(\\s*\"{filed}\"\\s*\\)";
         public static  final  String gsonFullNameAnnotation="@com.google.gson.annotations.SerializedName(\"{filed}\")";
-        public static  final  String fastFullNameAnnotation="@com.alibaba.fastjson.annotation.JSONField(\"{filed}\")";
-        public static  final  String fastAnnotation="@com.alibaba.fastjson.annotation.JSONField\\s*\\(\\s*\"{filed}\"\\s*\\)";
-        public static  final  String jackAnnotation="@com.fasterxml.jackson.annotation.JsonProperty\\s*\\(\\s*name\\s*=\\s*\"{filed}\"\\s*\\)";
-        public static  final  String jackFullNameAnnotation="@com.fasterxml.jackson.annotation.JsonProperty(name=\"{filed}\")";
+        public static  final  String fastFullNameAnnotation="@com.alibaba.fastjson.annotation.JSONField(name=\"{filed}\")";
+        public static  final  String fastAnnotation="@com.alibaba.fastjson.annotation.JSONField\\s*\\(\\s*name\\s*=\\s*\"{filed}\"\\s*\\)";
+        public static  final  String jackAnnotation="@com.fasterxml.jackson.annotation.JsonProperty\\s*\\(\\s*\"{filed}\"\\s*\\)";
+        public static  final  String jackFullNameAnnotation="@com.fasterxml.jackson.annotation.JsonProperty(\"{filed}\")";
 }

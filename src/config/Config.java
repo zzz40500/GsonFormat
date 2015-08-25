@@ -33,7 +33,7 @@ public class Config {
 
 
     /**
-     * 处女座模�?
+     * 处女座模�?
      */
     private boolean virgoMode=true;
 
@@ -43,7 +43,7 @@ public class Config {
     private String entityPackName;
 
     /**
-     * 错误次数,前两次提醒哪里查看错误日�?.
+     * 错误次数,前两次提醒哪里查看错误日�?.
      */
     private int errorCount;
 
@@ -295,7 +295,7 @@ public class Config {
 
     public boolean isToastError() {
 
-       if( Config.getInstant().getErrorCount()>3){
+       if( Config.getInstant().getErrorCount()<3){
            Config.getInstant().setErrorCount(Config.getInstant().getErrorCount() + 1);
            Config.getInstant().save();
            return true;

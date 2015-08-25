@@ -145,7 +145,7 @@ public class JSONObject {
      * Construct an empty JSONObject.
      */
     public JSONObject() {
-        this.map = new LinkedHashMap<>();
+        this.map = new LinkedHashMap<String, Object>();
     }
 
     /**

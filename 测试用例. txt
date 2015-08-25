@@ -31,12 +31,11 @@
 }
 
 
-测试2: 测试List泛型
+测试3: 测试List泛型
 
 { "list": [1,2,3,4] }
 
-测试3: 测试多重嵌套
-
+测试4: 测试多重嵌套
 {
 "kind": "youtube#searchListResponse",
 "etag": "\"k1sYjErg4tK7WaQQxvJkW5fVrfg/usRLzp_l5ss-L8Yb9ScY-VDAEOo\"",
@@ -103,15 +102,15 @@
 ]
 }
 
-测试
+测试 5
 
 {
-    "r":0,
+    "_r":0,
     "err":"None",
     "photo":"http://xxxx.com/photo.jpg"
 }
 
-测试
+测试 6
 {
     "mesg": "获取商品列表（某类型）",
     "data": {

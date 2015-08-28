@@ -10,6 +10,8 @@
   
   [swft 版](https://github.com/EnjoySR/ESJsonFormat-Xcode);
   
+  [Json 新视觉](https://github.com/tianzhijiexian/JsonAnnotation)
+  
   版本1.2.0
 >1.2.0 版本更新内容:
 

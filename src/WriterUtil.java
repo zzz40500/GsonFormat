@@ -23,8 +23,8 @@ public class WriterUtil extends WriteCommandAction.Simple {
     public InnerClassEntity  mInnerClassEntity;
 
     public WriterUtil(JsonUtilsDialog mJsonUtilsDialog, JLabel jLabel,
-                       PsiFile mFile, Project project, PsiClass mClass, PsiFile... files) {
-        super(project, files);
+                       PsiFile mFile, Project project, PsiClass mClass) {
+        super(project, null);
         mFactory = JavaPsiFacade.getElementFactory(project);
         this.mFile = mFile;
         this.project = project;

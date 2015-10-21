@@ -18,7 +18,6 @@ public class FieldEntity {
     private String type;
     private String fieldName;
     private String value;
-    private String extra;
 
     private  String autoCreateFiledName;
 
@@ -63,13 +62,6 @@ public class FieldEntity {
         this.fieldName = fieldName;
     }
 
-    public String getExtra() {
-        return extra;
-    }
-
-    public void setExtra(String extra) {
-        this.extra = extra;
-    }
 
     public void setValue(String value) {
         this.value = value;
@@ -130,7 +122,7 @@ public class FieldEntity {
     }
 
 
-    public void generateFiled(PsiElementFactory mFactory, PsiClass mClass) {
+    public void generateFiled(PsiElementFactory mFactory, PsiClass mClass,InnerClassEntity classEntity) {
 
         if (generate) {
 
@@ -141,9 +133,11 @@ public class FieldEntity {
             } else {
                 filedName = getFieldName();
             }
-            if (!TextUtils.isEmpty(getExtra())) {
-                filedSb.append(getExtra()).append("\n");
+            if (!TextUtils.isEmpty(classEntity.getExtra())) {
+                filedSb.append(classEntity.getExtra()).append("\n");
+                classEntity.setExtra(null);
             }
+
             if (!filedName.equals(getKey()) || Config.getInstant().isUseSerializedName()) {
 
                 filedSb.append(Config.getInstant().geFullNametAnnotation().replaceAll("\\{filed\\}", getKey()));

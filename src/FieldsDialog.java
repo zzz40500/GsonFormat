@@ -113,6 +113,7 @@ public class FieldsDialog extends JFrame {
 
     private void onOK() {
 
+        this.setAlwaysOnTop(false);
         if(mGenerateClass ==null){
             try {
                 mGenerateClass= PsiClassUtil.getPsiClass(mFile, project, generateClassStr);
@@ -137,9 +138,24 @@ public class FieldsDialog extends JFrame {
                 Config.getInstant().save();
             }
 
-            WriterUtil writerUtil=  new WriterUtil(null, null , mFile,project, mGenerateClass,null);
-            writerUtil.mInnerClassEntity=mInnerClassEntity;
-            writerUtil.execute() ;
+            try {
+                WriterUtil writerUtil=  new WriterUtil(null, null , mFile,project, mGenerateClass);
+                writerUtil.mInnerClassEntity=mInnerClassEntity;
+                writerUtil.execute() ;
+            }catch (Exception e){
+                e.printStackTrace();
+                mJsonUtilsDialog.errorLB.setText("parse err !!");
+                Writer writer = new StringWriter();
+                PrintWriter printWriter = new PrintWriter(writer);
+                e.printStackTrace(printWriter);
+                printWriter.close();
+                mJsonUtilsDialog.mErrorInfo = writer.toString();
+                mJsonUtilsDialog.setVisible(true);
+
+//                Toast.make(project, mJsonUtilsDialog.generateClassP, MessageType.ERROR, "the path is not allowed");
+                dispose();
+            }
+
         }
         dispose();
     }

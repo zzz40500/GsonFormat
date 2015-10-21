@@ -40,7 +40,7 @@ public class JsonUtilsDialog extends JFrame {
         this.mFile = file;
         this.mProject = project;
         setContentPane(contentPane2);
-        setTitle("GsonFormat 1.2 ");
+        setTitle("GsonFormat 1.2.1 ");
         getRootPane().setDefaultButton(okButton);
         this.setAlwaysOnTop(true);
         initGeneratePanel(file);
@@ -165,6 +165,7 @@ public class JsonUtilsDialog extends JFrame {
     }
 
     private void onOK() {
+        this.setAlwaysOnTop(false);
         String jsonSTR = editTP.getText();
         if(TextUtils.isEmpty(jsonSTR)){
             return;
@@ -234,10 +235,5 @@ public class JsonUtilsDialog extends JFrame {
 
     public static void main(String[] args) {
 
-
-        String s="dfdf.dfdf.dfdf.java";
-
-
-       System.out.print(s.replaceAll(".java$", ""));
     }
 }

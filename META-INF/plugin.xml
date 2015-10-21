@@ -10,10 +10,10 @@
       </html>
       ]]>
     </description>
-    <version>1.2.0</version>
+    <version>1.2.1</version>
     <vendor email="wyh405003836@126.com">zzz40500</vendor>
     <!-- please see http://confluence.jetbrains.net/display/IDEADEV/Build+Number+Ranges for description -->
-    <idea-version since-build="107.117"/>
+    <idea-version since-build="107.118"/>
 
 
 

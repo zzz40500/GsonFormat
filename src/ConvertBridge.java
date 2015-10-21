@@ -4,6 +4,7 @@ import com.intellij.psi.*;
 import config.Config;
 import entity.FieldEntity;
 import entity.InnerClassEntity;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.http.util.TextUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -15,10 +16,7 @@ import javax.swing.*;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -40,12 +38,12 @@ public class ConvertBridge {
     private List<String> mFilterFields;
 
     private List<InnerClassEntity> mFilterClass;
-    private  String generateClassName;
-    private InnerClassEntity mGenerateEntity =new InnerClassEntity();
+    private String generateClassName;
+    private InnerClassEntity mGenerateEntity = new InnerClassEntity();
 
-    private StringBuilder fullFilterRegex =null;
-    private StringBuilder briefFilterRegex =null;
-    private String filterRegex=null;
+    private StringBuilder fullFilterRegex = null;
+    private StringBuilder briefFilterRegex = null;
+    private String filterRegex = null;
 
 
     public ConvertBridge(JsonUtilsDialog mJsonUtilsDialog, JLabel errorInfoLb,
@@ -65,26 +63,24 @@ public class ConvertBridge {
         mFilterFields = new ArrayList<String>();
         mFilterClass = new ArrayList<InnerClassEntity>();
 
-        fullFilterRegex =new StringBuilder();
-        briefFilterRegex =new StringBuilder();
-        String[] arg=Config.getInstant().getAnnotationStr().replace("{filed}", "(\\w+)").split("\\.");
+        fullFilterRegex = new StringBuilder();
+        briefFilterRegex = new StringBuilder();
+        String[] arg = Config.getInstant().getAnnotationStr().replace("{filed}", "(\\w+)").split("\\.");
 
         for (int i = 0; i < arg.length; i++) {
             String s = arg[i];
-            if(i== arg.length-1){
+            if (i == arg.length - 1) {
                 briefFilterRegex.append(s);
                 fullFilterRegex.append(s);
                 Matcher matcher = Pattern.compile("\\w+").matcher(s);
-                if(matcher.find()){
-                    filterRegex=matcher.group();
+                if (matcher.find()) {
+                    filterRegex = matcher.group();
                 }
 
-            }else{
+            } else {
                 fullFilterRegex.append(s).append("\\s*\\.\\s*");
             }
         }
-
-
 
 
     }
@@ -99,7 +95,7 @@ public class ConvertBridge {
         } catch (Exception e) {
             String jsonTS = filterAnnotation(jsonStr);
 
-            jsonTS=jsonTS.replaceAll("^[\\s\\S]*?\\{","{");
+            jsonTS = jsonTS.replaceAll("^[\\s\\S]*?\\{", "{");
             try {
                 json = new JSONObject(jsonTS);
             } catch (Exception e2) {
@@ -110,8 +106,8 @@ public class ConvertBridge {
                 e2.printStackTrace(printWriter);
                 printWriter.close();
                 mJsonUtilsDialog.mErrorInfo = writer.toString();
-                if (Config.getInstant().isToastError()){
-                    Toast.make(project, errorInfoLb,MessageType.ERROR,"click to see details");
+                if (Config.getInstant().isToastError()) {
+                    Toast.make(project, errorInfoLb, MessageType.ERROR, "click to see details");
                 }
             }
         }
@@ -129,9 +125,9 @@ public class ConvertBridge {
                 e2.printStackTrace(printWriter);
                 printWriter.close();
                 mJsonUtilsDialog.mErrorInfo = writer.toString();
-                errorInfoLb.setText("path err !!");
-                if (Config.getInstant().isToastError()){
-                    Toast.make(project, errorInfoLb,MessageType.ERROR,"click to see details");
+                errorInfoLb.setText("parse err !!");
+                if (Config.getInstant().isToastError()) {
+                    Toast.make(project, errorInfoLb, MessageType.ERROR, "click to see details");
                 }
 
             }
@@ -145,16 +141,15 @@ public class ConvertBridge {
 
     public static void main(String[] args) {
 
-        String s="";
-        s=s.replaceAll("^[\\s\\S]*?\\{","{");
+//        String s = "";
+//        s = s.replaceAll("^[\\s\\S]*?\\{", "{");
 
-        System.out.print(s);
     }
 
     private void initFilterClass() {
 
 
-        if(mGeneratClass == null){
+        if (mGeneratClass == null) {
             return;
 
         }
@@ -200,7 +195,7 @@ public class ConvertBridge {
     public List<String> initFilterFieldStr(PsiClass mClass) {
 
         ArrayList<String> filterFields = new ArrayList<String>();
-        if(mClass != null) {
+        if (mClass != null) {
             PsiField[] psiFields = mClass.getAllFields();
             for (PsiField psiField : psiFields) {
                 String psiFieldText = filterAnnotation(psiField.getText());
@@ -244,34 +239,34 @@ public class ConvertBridge {
         ArrayList<FieldEntity> filterFields = new ArrayList<FieldEntity>();
         for (PsiField psiField : psiFields) {
             String psiFieldText = filterAnnotation(psiField.getText());
-            String key=null;
+            String key = null;
             if (psiFieldText.contains("SerializedName")) {
                 boolean isSerializedName = false;
                 psiFieldText = psiFieldText.trim();
                 Pattern pattern = Pattern.compile("@com\\s*\\.\\s*google\\s*\\.\\s*gson\\s*\\.\\s*annotations\\s*\\.\\s*SerializedName\\s*\\(\\s*\"(\\w+)\"\\s*\\)");
                 Matcher matcher = pattern.matcher(psiFieldText);
                 if (matcher.find()) {
-                    key=matcher.group(1);
+                    key = matcher.group(1);
 
                     isSerializedName = true;
                 }
                 Pattern pattern2 = Pattern.compile("@\\s*SerializedName\\s*\\(\\s*\"(\\w+)\"\\s*\\)");
                 Matcher matcher2 = pattern2.matcher(psiFieldText);
                 if (matcher2.find()) {
-                    key=matcher2.group(1);
+                    key = matcher2.group(1);
 
                     isSerializedName = true;
                 }
                 if (!isSerializedName) {
-                    key=psiField.getName();
+                    key = psiField.getName();
 
                 }
             } else {
-                key=psiField.getName();
+                key = psiField.getName();
 
             }
-            if(key!=null){
-                FieldEntity  fieldEntity=new FieldEntity();
+            if (key != null) {
+                FieldEntity fieldEntity = new FieldEntity();
                 fieldEntity.setKey(key);
                 filterFields.add(fieldEntity);
             }
@@ -291,21 +286,21 @@ public class ConvertBridge {
         }
 
 
-        if(Config.getInstant().isVirgoMode()){
+        if (Config.getInstant().isVirgoMode()) {
             mGenerateEntity.setClassName("");
             mGenerateEntity.setAutoCreateClassName("");
             mGenerateEntity.setPsiClass(mGeneratClass);
             mGenerateEntity.setFields(createFields(json, fieldList, mGenerateEntity));
-            FieldsDialog fieldsDialog=new FieldsDialog(mJsonUtilsDialog,mGenerateEntity,mFactory,
-                    mGeneratClass,currentClass,mFile,project,generateClassName);
+            FieldsDialog fieldsDialog = new FieldsDialog(mJsonUtilsDialog, mGenerateEntity, mFactory,
+                    mGeneratClass, currentClass, mFile, project, generateClassName);
             fieldsDialog.setSize(800, 500);
             fieldsDialog.setLocationRelativeTo(null);
             fieldsDialog.setVisible(true);
             mJsonUtilsDialog.setVisible(false);
-        }else{
-            if(mGeneratClass ==null){
+        } else {
+            if (mGeneratClass == null) {
                 try {
-                    mGeneratClass= PsiClassUtil.getPsiClass(mFile, project,generateClassName);
+                    mGeneratClass = PsiClassUtil.getPsiClass(mFile, project, generateClassName);
                 } catch (Throwable throwable) {
                     throwable.printStackTrace();
                     mJsonUtilsDialog.errorLB.setText("data err !!");
@@ -315,31 +310,43 @@ public class ConvertBridge {
                     printWriter.close();
                     mJsonUtilsDialog.mErrorInfo = writer.toString();
                     mJsonUtilsDialog.setVisible(true);
-                    Toast.make(project,mJsonUtilsDialog.generateClassP, MessageType.ERROR,"the path is not allowed");
+                    Toast.make(project, mJsonUtilsDialog.generateClassP, MessageType.ERROR, "the path is not allowed");
                 }
 
             }
-            if(mGeneratClass!= null){
+            if (mGeneratClass != null) {
                 mGenerateEntity.setPsiClass(mGeneratClass);
-                String[] arg=generateClassName.split("\\.");
-                if(arg.length>1){
-                    Config.getInstant().setEntityPackName(generateClassName.substring(0,generateClassName.length()-arg[arg.length-1].length()));
+                String[] arg = generateClassName.split("\\.");
+                if (arg.length > 1) {
+                    Config.getInstant().setEntityPackName(generateClassName.substring(0, generateClassName.length() - arg[arg.length - 1].length()));
                     Config.getInstant().save();
                 }
                 Config.getInstant().setEntityPackName(generateClassName);
-                mGenerateEntity.setFields(createFields(json, fieldList, mGenerateEntity));
-                WriterUtil writerUtil=  new WriterUtil(null, null , mFile,project, mGeneratClass,null);
-                writerUtil.mInnerClassEntity=mGenerateEntity;
-                writerUtil.execute() ;
+                try {
+                    mGenerateEntity.setFields(createFields(json, fieldList, mGenerateEntity));
+                    WriterUtil writerUtil = new WriterUtil(null, null, mFile, project, mGeneratClass);
+                    writerUtil.mInnerClassEntity = mGenerateEntity;
+                    writerUtil.execute();
+                }catch (Exception e){
+                    e.printStackTrace();
+                    mJsonUtilsDialog.errorLB.setText("parse err !!");
+                    Writer writer = new StringWriter();
+                    PrintWriter printWriter = new PrintWriter(writer);
+                    e.printStackTrace(printWriter);
+                    printWriter.close();
+                    mJsonUtilsDialog.mErrorInfo = writer.toString();
+                    mJsonUtilsDialog.setVisible(true);
+                    if (Config.getInstant().isToastError()) {
+                        Toast.make(project, errorInfoLb, MessageType.ERROR, "click to see details");
+                    }
+                    return;
+                }
             }
             //消失
             mJsonUtilsDialog.dispose();
 
 
         }
-
-
-
 
 
     }
@@ -352,18 +359,24 @@ public class ConvertBridge {
         sb.append("/** \n");
         for (int i = 0; i < list.size(); i++) {
             String key = list.get(i);
-            sb.append("* " + key + " : " + json.get(key) + "\n");
+
+
+            sb.append("* ").append(key).append(" : ");
+            sb.append(json.get(key).toString().replaceAll("\r", "")
+                    .replaceAll("\t ", "").replaceAll("\f", ""));
+            sb.append("\n");
         }
         sb.append("*/ \n");
 
-        List<String> listEntityList=new ArrayList<String>();
-        boolean writeExtra=true;
+
+        List<String> listEntityList = new ArrayList<String>();
+        boolean writeExtra = true;
 
 
         for (int i = 0; i < list.size(); i++) {
             String key = list.get(i);
             Object type = json.get(key);
-            if( type instanceof  JSONArray){
+            if (type instanceof JSONArray) {
 
 
                 listEntityList.add(key);
@@ -373,9 +386,9 @@ public class ConvertBridge {
             FieldEntity fieldEntity = createFiled(parentClass, key, type);
 
             fieldEntities.add(fieldEntity);
-            if(writeExtra) {
-                writeExtra=false;
-                fieldEntity.setExtra(sb.toString());
+            if (writeExtra) {
+                writeExtra = false;
+                parentClass.setExtra(sb.toString());
             }
         }
 
@@ -386,78 +399,74 @@ public class ConvertBridge {
             FieldEntity fieldEntity = createFiled(parentClass, key, type);
 
             fieldEntities.add(fieldEntity);
-            if(writeExtra) {
-                writeExtra=false;
-                fieldEntity.setExtra(sb.toString());
-            }
+//            if (writeExtra) {
+//                writeExtra = false;
+//                fieldEntity.setExtra(sb.toString());
+//            }
 
         }
 
         return fieldEntities;
     }
 
-    private  FieldEntity createFiled(InnerClassEntity parentClass,String key, Object type){
+    private FieldEntity createFiled(InnerClassEntity parentClass, String key, Object type) {
 
-        String   filedName=key;
+        String filedName = key;
         if (CheckUtil.getInstant().checkKeyWord(filedName)) {
             filedName = filedName + "X";
         }
 
         if (Config.getInstant().isUseSerializedName()) {
-            if(Config.getInstant().isUseFiledNamePrefix() && !TextUtils.isEmpty(Config.getInstant().getFiledNamePreFixStr())){
-                filedName=Config.getInstant().getFiledNamePreFixStr()+"_"+filedName;
+            if (Config.getInstant().isUseFiledNamePrefix() && !TextUtils.isEmpty(Config.getInstant().getFiledNamePreFixStr())) {
+                filedName = Config.getInstant().getFiledNamePreFixStr() + "_" + filedName;
             }
             filedName = captureStringLeaveUnderscore(filedName);
         }
 
 
-
-
-        FieldEntity fieldEntity =  typeByValue(parentClass, key, type);
+        FieldEntity fieldEntity = typeByValue(parentClass, key, type);
         fieldEntity.setFieldName(filedName);
         fieldEntity.setAutoCreateFiledName(filedName);
 
 
-        return  fieldEntity;
+        return fieldEntity;
 
     }
 
 
-
-
     private FieldEntity typeByValue(InnerClassEntity parentClass, String key, Object type) {
 
-        FieldEntity noteBean=null;
+        FieldEntity noteBean = null;
         String typeStr;
 
         if (type instanceof JSONObject) {
 
-            InnerClassEntity classEntity    = checkInnerClass((JSONObject) type);
+            InnerClassEntity classEntity = checkInnerClass((JSONObject) type);
             if (classEntity == null) {
-                typeStr =  createSubClassName(key, type, parentClass) ;
-                InnerClassEntity innerClassEntity=   createJSonObjectClassSub(typeStr, (JSONObject) type, parentClass);
+                typeStr = createSubClassName(key, type, parentClass);
+                InnerClassEntity innerClassEntity = createJSonObjectClassSub(typeStr, (JSONObject) type, parentClass);
                 innerClassEntity.setKey(key);
                 innerClassEntity.setType("%s");
-                noteBean=innerClassEntity;
+                noteBean = innerClassEntity;
 
             } else {
-                typeStr=classEntity.getFiledPackName();
+                typeStr = classEntity.getFiledPackName();
 
-                FieldEntity fieldEntity=new FieldEntity();
+                FieldEntity fieldEntity = new FieldEntity();
                 fieldEntity.setKey(key);
                 fieldEntity.setTargetClass(classEntity);
                 fieldEntity.setType("%s");
-                noteBean=fieldEntity;
+                noteBean = fieldEntity;
 
 
             }
         } else if (type instanceof JSONArray) {
 
-            FieldEntity fieldEntity=  handJSONArray(parentClass, type, key,listStr);
-            noteBean=fieldEntity;
-        } else{
+            FieldEntity fieldEntity = handJSONArray(parentClass, (JSONArray) type, key, listStr);
+            noteBean = fieldEntity;
+        } else {
 
-            FieldEntity fieldEntity=new FieldEntity();
+            FieldEntity fieldEntity = new FieldEntity();
             fieldEntity.setKey(key);
             if (type instanceof Boolean) {
                 typeStr = "boolean";
@@ -476,8 +485,8 @@ public class ConvertBridge {
             }
 
             fieldEntity.setType(typeStr);
-            noteBean=fieldEntity;
-            if(type!=null && !(noteBean instanceof  InnerClassEntity)) {
+            noteBean = fieldEntity;
+            if (type != null && !(noteBean instanceof InnerClassEntity)) {
                 noteBean.setValue(type.toString());
             }
 
@@ -497,14 +506,14 @@ public class ConvertBridge {
             while (keys.hasNext()) {
                 String key = keys.next();
                 had = false;
-                for(FieldEntity fieldEntity:innerClassEntity.getFields()){
+                for (FieldEntity fieldEntity : innerClassEntity.getFields()) {
 
-                    if(fieldEntity.getKey().equals(key)){
-                        had=true;
+                    if (fieldEntity.getKey().equals(key)) {
+                        had = true;
                         break;
                     }
                 }
-                if(!had){
+                if (!had) {
                     break;
                 }
 
@@ -512,14 +521,15 @@ public class ConvertBridge {
             if (had) {
 
 //
-                return  innerClassEntity;
+                return innerClassEntity;
             }
         }
         return null;
     }
+
     private InnerClassEntity createJSonObjectClassSub(String className, JSONObject json, InnerClassEntity parentClass) {
 
-        InnerClassEntity subClassEntity=new InnerClassEntity();
+        InnerClassEntity subClassEntity = new InnerClassEntity();
 
         Set<String> set = json.keySet();
         List<String> list = new ArrayList<String>(set);
@@ -531,14 +541,14 @@ public class ConvertBridge {
             mFilterClass.add(subClassEntity);
         }
 
-        return  subClassEntity;
+        return subClassEntity;
 
     }
 
     private String createSubClassName(String key, Object o, InnerClassEntity parentClass) {
 
         String name = "";
-        if(o instanceof  JSONObject){
+        if (o instanceof JSONObject) {
             if (TextUtils.isEmpty(key)) {
                 return key;
             }
@@ -555,73 +565,79 @@ public class ConvertBridge {
 
     }
 
-    private FieldEntity  handJSONArray(InnerClassEntity parentClass, Object o, String key,String s){
-        FieldEntity fieldEntity=null;
-        JSONArray jsonArray = (JSONArray) o;
+    private FieldEntity handJSONArray(InnerClassEntity parentClass, JSONArray jsonArray, String key, String preListType) {
+        FieldEntity fieldEntity = null;
+        if(jsonArray.length()>0){
             Object item = jsonArray.get(0);
-            fieldEntity  = listTypeByValue(parentClass, key, item,s);
-        return  fieldEntity;
+            fieldEntity = listTypeByValue(parentClass, key, item, preListType);
+        }else{
+             fieldEntity = new FieldEntity();
+            fieldEntity.setKey(key);
+
+            fieldEntity.setType( String.format(preListType, "?"));
+
+        }
+        return fieldEntity;
     }
 
-    public static final String  listStr="java.util.List<%s>";
+    public static final String listStr = "java.util.List<%s>";
 
 
-    private FieldEntity listTypeByValue(InnerClassEntity parentClass, String key, Object type,String s) {
-        FieldEntity noteBean=null;
+    private FieldEntity listTypeByValue(InnerClassEntity parentClass, String key, Object type, String s) {
+        FieldEntity noteBean = null;
         String typeStr;
         if (type instanceof JSONObject) {
             InnerClassEntity classEntity = checkInnerClass((JSONObject) type);
             if (classEntity == null) {
-                typeStr =s;
-                InnerClassEntity innerClassEntity=   createJSonObjectClassSub(typeStr, (JSONObject) type, parentClass);
+                typeStr = s;
+                InnerClassEntity innerClassEntity = createJSonObjectClassSub(typeStr, (JSONObject) type, parentClass);
                 innerClassEntity.setType(typeStr);
                 innerClassEntity.setKey(key);
                 innerClassEntity.setClassName(createSubClassName(key, type, parentClass));
                 innerClassEntity.setAutoCreateClassName(innerClassEntity.getClassName());
-                noteBean=innerClassEntity;
+                noteBean = innerClassEntity;
             } else {
 
-                typeStr=classEntity.getFiledPackName();
-                typeStr = String.format(s,typeStr);
-                FieldEntity fieldEntity=new FieldEntity();
+                typeStr = classEntity.getFiledPackName();
+                typeStr = String.format(s, typeStr);
+                FieldEntity fieldEntity = new FieldEntity();
                 fieldEntity.setKey(key);
                 fieldEntity.setTargetClass(classEntity);
                 fieldEntity.setType(typeStr);
-                noteBean=fieldEntity;
+                noteBean = fieldEntity;
             }
 
         } else if (type instanceof JSONArray) {
-            typeStr = String.format(s,listStr);
-            FieldEntity fieldEntity  = handJSONArray(parentClass, type,key,typeStr);
+            typeStr = String.format(s, listStr);
+            FieldEntity fieldEntity = handJSONArray(parentClass, (JSONArray) type, key, typeStr);
             fieldEntity.setKey(key);
-            noteBean=fieldEntity;
-        } else{
-            FieldEntity fieldEntity=new FieldEntity();
+            noteBean = fieldEntity;
+        } else {
+            FieldEntity fieldEntity = new FieldEntity();
             fieldEntity.setKey(key);
 
             if (type instanceof Boolean) {
-                typeStr = String.format(s,type.getClass().getSimpleName());
+                typeStr = String.format(s, type.getClass().getSimpleName());
 
             } else if (type instanceof Integer) {
-                typeStr = String.format(s,type.getClass().getSimpleName());
+                typeStr = String.format(s, type.getClass().getSimpleName());
 
             } else if (type instanceof Double) {
-                typeStr = String.format(s,type.getClass().getSimpleName());
+                typeStr = String.format(s, type.getClass().getSimpleName());
 
             } else if (type instanceof Long) {
-                typeStr = String.format(s,type.getClass().getSimpleName());
+                typeStr = String.format(s, type.getClass().getSimpleName());
             } else if (type instanceof String) {
-                typeStr = String.format(s,type.getClass().getSimpleName());
+                typeStr = String.format(s, type.getClass().getSimpleName());
 
             } else {
-                typeStr = String.format(s,"?");
+                typeStr = String.format(s, "?");
             }
             fieldEntity.setType(typeStr);
-            noteBean=fieldEntity;
+            noteBean = fieldEntity;
         }
         return noteBean;
     }
-
 
 
     public String captureName(String name) {
@@ -636,10 +652,10 @@ public class ConvertBridge {
         if (TextUtils.isEmpty(str)) {
             return str;
         }
-       String temp = str.replaceAll("^_+", "");
+        String temp = str.replaceAll("^_+", "");
 
-        if( !TextUtils.isEmpty(temp)){
-            str=temp;
+        if (!TextUtils.isEmpty(temp)) {
+            str = temp;
         }
 
         String[] strings = str.split("_");

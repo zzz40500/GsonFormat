@@ -20,6 +20,15 @@ public class InnerClassEntity extends FieldEntity {
     private String packName;
     private String className;
     private List<? extends FieldEntity> fields;
+    private String extra;
+
+    public String getExtra() {
+        return extra;
+    }
+
+    public void setExtra(String extra) {
+        this.extra = extra;
+    }
 
     private String autoCreateClassName;
 
@@ -49,16 +58,17 @@ public class InnerClassEntity extends FieldEntity {
         Matcher matcher = pattern.matcher(s);
         if (matcher.find() && matcher.groupCount() > 0) {
 
-            String temp=matcher.group(1);
-            if(TextUtils.isEmpty(temp)){
+            String temp = matcher.group(1);
+            if (TextUtils.isEmpty(temp)) {
                 setClassName(getAutoCreateClassName());
-            }else{
+            } else {
                 setClassName(matcher.group(1));
             }
 
         }
 
     }
+
 
     public String getPackName() {
         return packName;
@@ -137,7 +147,7 @@ public class InnerClassEntity extends FieldEntity {
                 ((InnerClassEntity) fieldEntity).generateSupperFiled(mFactory, mClass);
                 ((InnerClassEntity) fieldEntity).generateClass(mFactory, mClass);
             } else {
-                fieldEntity.generateFiled(mFactory, mClass);
+                fieldEntity.generateFiled(mFactory, mClass, this);
             }
         }
 
@@ -181,7 +191,7 @@ public class InnerClassEntity extends FieldEntity {
                     ((InnerClassEntity) fieldEntity).generateClass(mFactory, subClass);
                 } else {
 
-                    fieldEntity.generateFiled(mFactory, subClass);
+                    fieldEntity.generateFiled(mFactory, subClass, this);
                 }
             }
             if (Config.getInstant().isFieldPrivateMode()) {
@@ -206,8 +216,9 @@ public class InnerClassEntity extends FieldEntity {
             } else {
                 filedName = getFieldName();
             }
-            if (!TextUtils.isEmpty(getExtra())) {
-                filedSb.append(getExtra()).append("\n");
+            if (!TextUtils.isEmpty(this.getExtra())) {
+                filedSb.append(this.getExtra()).append("\n");
+                this.setExtra(null);
             }
             if (!filedName.equals(getKey()) || Config.getInstant().isUseSerializedName()) {
 
@@ -237,17 +248,32 @@ public class InnerClassEntity extends FieldEntity {
         for (FieldEntity field1 : fields) {
             if (field1.isGenerate()) {
                 String field = field1.getFieldName();
+                String arg = field;
+
                 String typeStr = field1.getRealType();
 
-                if(Config.getInstant().isUseFiledNamePrefix()){
-                  String   temp=field.replaceAll("^"+Config.getInstant().getFiledNamePreFixStr(),"");
-                    if(!TextUtils.isEmpty(temp)){
-                        field=temp;
+                if (Config.getInstant().isUseFiledNamePrefix()) {
+
+                    String temp = field.replaceAll("^" + Config.getInstant().getFiledNamePreFixStr(), "");
+
+                    if (!TextUtils.isEmpty(temp)) {
+                        field = temp;
+                        arg = field;
+                        if (arg.length() > 0) {
+
+                            if (arg.length() > 1) {
+                                arg = (arg.charAt(0) + "").toLowerCase() + arg.substring(1);
+                            } else {
+                                arg = arg.toLowerCase();
+                            }
+
+                        }
+
                     }
 
                 }
 
-                String method = "public void  set" + captureName(field) + "( " + typeStr + " " + field + ") {   this." + field1.getFieldName() + " = " + field + ";} ";
+                String method = "public void  set".concat(captureName(field)).concat("( ").concat(typeStr).concat(" ").concat(arg).concat(") {   this.").concat(field1.getFieldName()).concat(" = ").concat(arg).concat(";} ");
                 mClass.add(mFactory.createMethodFromText(method, mClass));
             }
         }
@@ -270,22 +296,27 @@ public class InnerClassEntity extends FieldEntity {
                 String field = field1.getFieldName();
 
                 String typeStr = field1.getRealType();
-                if(Config.getInstant().isUseFiledNamePrefix()){
-                    String   temp=field.replaceAll("^"+Config.getInstant().getFiledNamePreFixStr(),"");
-                    if(!TextUtils.isEmpty(temp)){
-                        field=temp;
+                if (Config.getInstant().isUseFiledNamePrefix()) {
+                    String temp = field.replaceAll("^" + Config.getInstant().getFiledNamePreFixStr(), "");
+                    if (!TextUtils.isEmpty(temp)) {
+                        field = temp;
                     }
-
                 }
 
+                if (typeStr.equals("boolean")) {
 
-                if (typeStr.equals(" boolean ")) {
-
-                    String method = "public " + typeStr + "   is" + captureName(field) + "() {   return " + field1.getFieldName() + " ;} ";
+                    String method = "public ".concat( typeStr ).concat( "   is" ).concat(
+                            captureName(field) ).concat( "() {   return " ).concat(
+                            field1.getFieldName() ).concat( " ;} ");
                     mClass.add(mFactory.createMethodFromText(method, mClass));
                 } else {
 
-                    String method = "public " + typeStr + "   get" + captureName(field) + "() {   return " + field1.getFieldName() + " ;} ";
+                    String method = "public "
+                            .concat( typeStr ).concat(
+                                    "   get" ).concat(
+                                    captureName(field) ).concat(
+                                    "() {   return " ).concat(
+                                    field1.getFieldName() ).concat( " ;} ");
                     mClass.add(mFactory.createMethodFromText(method, mClass));
                 }
             }

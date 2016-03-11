@@ -179,7 +179,7 @@ public class JsonUtilsDialog extends JFrame {
         }
         PsiClass generateClass=null;
         if (!currentClass.equals(generateClassName)) {
-            generateClass = PsiClassUtil.exsit(mFile, generateClassTF.getText());
+            generateClass = PsiClassUtil.exist(mFile, generateClassTF.getText());
         }else{
             generateClass=mClass;
         }

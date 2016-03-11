@@ -152,8 +152,7 @@ public class InnerClassEntity extends FieldEntity {
         }
 
         if (Config.getInstant().isFieldPrivateMode()) {
-            createSetMethod(mFactory, getFields(), mClass);
-            createGetMethod(mFactory, getFields(), mClass);
+            createGetAndSetMethod(mFactory, getFields(), mClass);
         }
 
     }
@@ -195,8 +194,8 @@ public class InnerClassEntity extends FieldEntity {
                 }
             }
             if (Config.getInstant().isFieldPrivateMode()) {
-                createSetMethod(mFactory, getFields(), subClass);
-                createGetMethod(mFactory, getFields(), subClass);
+
+                createGetAndSetMethod(mFactory, getFields(), subClass);
             }
             parentClass.add(subClass);
 //            if (Config.getInstant().getAnnotationStr().equals(Strings.fastAnnotation)) {
@@ -222,7 +221,7 @@ public class InnerClassEntity extends FieldEntity {
             }
             if (!filedName.equals(getKey()) || Config.getInstant().isUseSerializedName()) {
 
-                filedSb.append(Config.getInstant().geFullNametAnnotation().replaceAll("\\{filed\\}", getKey()));
+                filedSb.append(Config.getInstant().geFullNameAnnotation().replaceAll("\\{filed\\}", getKey()));
 //                filedSb.append("@com.google.gson.annotations.SerializedName(\"").append(getKey()).append("\")\n");
             }
 
@@ -243,14 +242,49 @@ public class InnerClassEntity extends FieldEntity {
         cla.add(mFactory.createMethodFromText(method, cla));
     }
 
-    private void createSetMethod(PsiElementFactory mFactory, List<? extends FieldEntity> fields, PsiClass mClass) {
+    public String captureName(String name) {
+
+        if (name.length() > 0) {
+            name = name.substring(0, 1).toUpperCase() + name.substring(1);
+        }
+        return name;
+    }
+
+
+    private void createGetAndSetMethod(PsiElementFactory mFactory, List<? extends FieldEntity> fields, PsiClass mClass) {
 
         for (FieldEntity field1 : fields) {
             if (field1.isGenerate()) {
                 String field = field1.getFieldName();
-                String arg = field;
 
                 String typeStr = field1.getRealType();
+                if (Config.getInstant().isUseFiledNamePrefix()) {
+                    String temp = field.replaceAll("^" + Config.getInstant().getFiledNamePreFixStr(), "");
+                    if (!TextUtils.isEmpty(temp)) {
+                        field = temp;
+                    }
+                }
+
+                if (typeStr.equals("boolean")) {
+
+                    String method = "public ".concat(typeStr).concat("   is").concat(
+                            captureName(field)).concat("() {   return ").concat(
+                            field1.getFieldName()).concat(" ;} ");
+                    mClass.add(mFactory.createMethodFromText(method, mClass));
+                } else {
+
+                    String method = "public "
+                            .concat(typeStr).concat(
+                                    "   get").concat(
+                                    captureName(field)).concat(
+                                    "() {   return ").concat(
+                                    field1.getFieldName()).concat(" ;} ");
+                    mClass.add(mFactory.createMethodFromText(method, mClass));
+                }
+
+
+                String arg = field;
+
 
                 if (Config.getInstant().isUseFiledNamePrefix()) {
 
@@ -273,52 +307,17 @@ public class InnerClassEntity extends FieldEntity {
 
                 }
 
-                String method = "public void  set".concat(captureName(field)).concat("( ").concat(typeStr).concat(" ").concat(arg).concat(") {   this.").concat(field1.getFieldName()).concat(" = ").concat(arg).concat(";} ");
-                mClass.add(mFactory.createMethodFromText(method, mClass));
-            }
-        }
+                String method = "public void  set".concat(captureName(field)).concat("( ").concat(typeStr).concat(" ").concat(arg).concat(") {   ");
 
-    }
+                if (field1.getFieldName().equals(arg)) {
 
-    public String captureName(String name) {
-
-        if (name.length() > 0) {
-            name = name.substring(0, 1).toUpperCase() + name.substring(1);
-        }
-        return name;
-    }
-
-
-    private void createGetMethod(PsiElementFactory mFactory, List<? extends FieldEntity> fields, PsiClass mClass) {
-
-        for (FieldEntity field1 : fields) {
-            if (field1.isGenerate()) {
-                String field = field1.getFieldName();
-
-                String typeStr = field1.getRealType();
-                if (Config.getInstant().isUseFiledNamePrefix()) {
-                    String temp = field.replaceAll("^" + Config.getInstant().getFiledNamePreFixStr(), "");
-                    if (!TextUtils.isEmpty(temp)) {
-                        field = temp;
-                    }
-                }
-
-                if (typeStr.equals("boolean")) {
-
-                    String method = "public ".concat( typeStr ).concat( "   is" ).concat(
-                            captureName(field) ).concat( "() {   return " ).concat(
-                            field1.getFieldName() ).concat( " ;} ");
-                    mClass.add(mFactory.createMethodFromText(method, mClass));
+                    method = method.concat("this.").concat(field1.getFieldName()).concat(" = ").concat(arg).concat(";} ");
                 } else {
+                    method = method.concat(field1.getFieldName()).concat(" = ").concat(arg).concat(";} ");
 
-                    String method = "public "
-                            .concat( typeStr ).concat(
-                                    "   get" ).concat(
-                                    captureName(field) ).concat(
-                                    "() {   return " ).concat(
-                                    field1.getFieldName() ).concat( " ;} ");
-                    mClass.add(mFactory.createMethodFromText(method, mClass));
                 }
+
+                mClass.add(mFactory.createMethodFromText(method, mClass));
             }
 
 

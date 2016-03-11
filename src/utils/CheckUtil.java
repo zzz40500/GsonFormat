@@ -4,12 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by qingwei on 2015/8/21.
+ * Created by dim on 2015/8/21.
  */
 public class CheckUtil {
 
     private static CheckUtil mCheckUtil;
     private List<String> mKeyWordList=new ArrayList<String>();
+    private List<String> mSimpleType=new ArrayList<String>();
 
     private CheckUtil(){
         mKeyWordList.add("abstract");
@@ -63,6 +64,17 @@ public class CheckUtil {
         mKeyWordList.add("volatile");
         mKeyWordList.add("while");
 
+        mSimpleType.add("String");
+        mSimpleType.add("boolean");
+        mSimpleType.add("Boolean");
+        mSimpleType.add("int");
+        mSimpleType.add("Integer");
+        mSimpleType.add("Float");
+        mSimpleType.add("float");
+        mSimpleType.add("Double");
+        mSimpleType.add("double");
+        mSimpleType.add("Long");
+        mSimpleType.add("long");
     }
 
    public static CheckUtil  getInstant(){
@@ -73,6 +85,10 @@ public class CheckUtil {
     }
 
 
+    public boolean checkSimpleType(String s){
+
+        return mSimpleType.contains(s);
+    }
     public boolean checkKeyWord(String key) {
 
         return mKeyWordList.contains(key);

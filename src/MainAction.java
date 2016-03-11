@@ -9,7 +9,7 @@ import com.intellij.psi.util.PsiUtilBase;
 
 /**
  * Created with IntelliJ IDEA.
- * User: zzz40500
+ * User: dim
  * Date: 14-7-4
  * Time: 下午1:44
  *
@@ -17,7 +17,7 @@ import com.intellij.psi.util.PsiUtilBase;
 public class MainAction extends BaseGenerateAction {
     protected PsiClass mClass;
     private PsiElementFactory mFactory;
-    private Project project;
+    private Project mProject;
 
     @SuppressWarnings("unused")
     public MainAction() {
@@ -43,15 +43,15 @@ public class MainAction extends BaseGenerateAction {
 
     public void actionPerformed(AnActionEvent event) {
 
-        project = event.getData(PlatformDataKeys.PROJECT);
+        mProject = event.getData(PlatformDataKeys.PROJECT);
         Editor editor = event.getData(PlatformDataKeys.EDITOR);
-        PsiFile mFile = PsiUtilBase.getPsiFileInEditor(editor, project);
+        PsiFile mFile = PsiUtilBase.getPsiFileInEditor(editor, mProject);
         mClass=getTargetClass(editor,mFile);
-        JsonUtilsDialog jsonD=new JsonUtilsDialog(mClass,mFactory,mFile,project);
+        JsonUtilsDialog jsonD=new JsonUtilsDialog(mClass,mFactory,mFile, mProject);
         jsonD.setmClass(mClass);
         jsonD.setmFactory(mFactory);
         jsonD.setmFile(mFile);
-        jsonD.setmProject(project);
+        jsonD.setmProject(mProject);
         jsonD.setSize(600, 400);
         jsonD.setLocationRelativeTo(null);
         jsonD.setVisible(true);

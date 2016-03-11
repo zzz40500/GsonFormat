@@ -19,7 +19,7 @@ public class FieldEntity {
     private String fieldName;
     private String value;
 
-    private  String autoCreateFiledName;
+    private String autoCreateFiledName;
 
     public String getAutoCreateFiledName() {
         return autoCreateFiledName;
@@ -56,7 +56,7 @@ public class FieldEntity {
     }
 
     public void setFieldName(String fieldName) {
-        if(TextUtils.isEmpty(fieldName)){
+        if (TextUtils.isEmpty(fieldName)) {
             return;
         }
         this.fieldName = fieldName;
@@ -76,9 +76,9 @@ public class FieldEntity {
     }
 
 
-    public String getRealType(){
-        if(targetClass != null){
-            return  String.format(type, targetClass.getClassName());
+    public String getRealType() {
+        if (targetClass != null) {
+            return String.format(type, targetClass.getClassName());
         }
         return type;
     }
@@ -91,26 +91,28 @@ public class FieldEntity {
 
     public void checkAndSetType(String s) {
 
+        if (CheckUtil.getInstant().checkSimpleType(type.trim())) {
+            //基本类型
+            if (CheckUtil.getInstant().checkSimpleType(s.trim())) {
+                this.type = s;
+            }
+        } else {
+            //实体类:
+            if (targetClass != null) {
+                String regex = getType().replaceAll("%s", "(\\w+)").replaceAll(".", "\\.");
+                Pattern pattern = Pattern.compile(regex);
+                Matcher matcher = pattern.matcher(s);
+                if (matcher.find() && matcher.groupCount() > 0) {
+                    String temp = matcher.group(1);
+                    if (TextUtils.isEmpty(temp)) {
+                        targetClass.setClassName(targetClass.getAutoCreateClassName());
+                    } else {
+                        targetClass.setClassName(temp);
+                    }
+                }
+            }
+        }
 
-
-
-
-//        if(targetClass  == null){
-//
-//        }else{
-//            String regex = getType().replaceAll("%s", "(\\w+)").replaceAll(".", "\\.");
-//            Pattern pattern = Pattern.compile(regex);
-//            Matcher matcher = pattern.matcher(s);
-//            if (matcher.find()&&matcher.groupCount()>0) {
-//
-//                String temp=matcher.group(1);
-//                if(TextUtils.isEmpty(temp)){
-//                    targetClass.setClassName(targetClass.getAutoCreateClassName());
-//                }else{
-//                    targetClass.setClassName(temp);
-//                }
-//            }
-//        }
     }
 
     public String getKey() {
@@ -122,7 +124,7 @@ public class FieldEntity {
     }
 
 
-    public void generateFiled(PsiElementFactory mFactory, PsiClass mClass,InnerClassEntity classEntity) {
+    public void generateFiled(PsiElementFactory mFactory, PsiClass mClass, InnerClassEntity classEntity) {
 
         if (generate) {
 
@@ -140,7 +142,7 @@ public class FieldEntity {
 
             if (!filedName.equals(getKey()) || Config.getInstant().isUseSerializedName()) {
 
-                filedSb.append(Config.getInstant().geFullNametAnnotation().replaceAll("\\{filed\\}", getKey()));
+                filedSb.append(Config.getInstant().geFullNameAnnotation().replaceAll("\\{filed\\}", getKey()));
 //                filedSb.append("@com.google.gson.annotations.SerializedName(\"").append(getKey()).append("\")\n");
             }
 

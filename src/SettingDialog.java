@@ -33,6 +33,8 @@ public class SettingDialog extends JFrame {
     private JRadioButton otherRB;
     private JTextField annotationFT;
     private JCheckBox virgoModelCB;
+    private JCheckBox generateCommentsCT;
+    private JRadioButton loganSquareCB;
     private String annotaionStr;
 
 
@@ -72,6 +74,7 @@ public class SettingDialog extends JFrame {
         }
 
         virgoModelCB.setSelected(Config.getInstant().isVirgoMode());
+        generateCommentsCT.setSelected(Config.getInstant().isGenerateComments());
         filedPrefixCB.setSelected(Config.getInstant().isUseFiledNamePrefix());
         filedPrefixTF.setEnabled(Config.getInstant().isUseFiledNamePrefix());
         useSerializedNameCheckBox.setSelected(Config.getInstant().isUseSerializedName());
@@ -138,25 +141,41 @@ public class SettingDialog extends JFrame {
                 array1Button.setEnabled(false);
             }
         });
+        loganSquareCB.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                annotationFT.setText("@{filed}");
+                annotationFT.setEnabled(otherRB.isSelected());
+                objectFromDataCB.setEnabled(false);
+                objectFromData1CB.setEnabled(false);
+                arrayFromDataCB.setEnabled(false);
+                arrayFromData1CB.setEnabled(false);
+                objectFromDataCB.setSelected(false);
+                objectFromData1CB.setSelected(false);
+                arrayFromDataCB.setSelected(false);
+                arrayFromData1CB.setSelected(false);
+                objectButton.setEnabled(false);
+                object1Button.setEnabled(false);
+                arrayButton.setEnabled(false);
+                array1Button.setEnabled(false);
+            }
+        });
 
 
-
-
-        String filedPrefix=null;
-        filedPrefix=Config.getInstant().getFiledNamePreFixStr();
-        if(TextUtils.isEmpty(filedPrefix)){
+        String filedPrefix = null;
+        filedPrefix = Config.getInstant().getFiledNamePreFixStr();
+        if (TextUtils.isEmpty(filedPrefix)) {
             JavaCodeStyleManager styleManager = JavaCodeStyleManager.getInstance(project);
-            filedPrefix=styleManager.getPrefixByVariableKind(VariableKind.FIELD
+            filedPrefix = styleManager.getPrefixByVariableKind(VariableKind.FIELD
             );
         }
         filedPrefixTF.setText(filedPrefix);
 
 
-
         gsonJRB.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                if(gsonJRB.isSelected()){
+                if (gsonJRB.isSelected()) {
                     annotationFT.setText(Strings.gsonAnnotation);
                 }
                 objectFromDataCB.setEnabled(true);
@@ -170,7 +189,7 @@ public class SettingDialog extends JFrame {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
 
-                if(fastJsonRB.isSelected()){
+                if (fastJsonRB.isSelected()) {
                     annotationFT.setText(Strings.fastAnnotation);
                 }
                 objectFromDataCB.setEnabled(false);
@@ -192,7 +211,7 @@ public class SettingDialog extends JFrame {
         jackRB.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                if(jackRB.isSelected()){
+                if (jackRB.isSelected()) {
                     annotationFT.setText(Strings.jackAnnotation);
 
                 }
@@ -213,19 +232,19 @@ public class SettingDialog extends JFrame {
             }
         });
 
-        annotaionStr=Config.getInstant().getAnnotationStr();
+        annotaionStr = Config.getInstant().getAnnotationStr();
 
 
-        if(annotaionStr.equals(Strings.gsonAnnotation)){
+        if (annotaionStr.equals(Strings.gsonAnnotation)) {
             gsonJRB.setSelected(true);
             annotationFT.setEnabled(false);
-        }else if(annotaionStr.equals(Strings.fastAnnotation)){
+        } else if (annotaionStr.equals(Strings.fastAnnotation)) {
             fastJsonRB.setSelected(true);
             annotationFT.setEnabled(false);
-        }else if(annotaionStr.equals(Strings.jackAnnotation)){
+        } else if (annotaionStr.equals(Strings.jackAnnotation)) {
             jackRB.setSelected(true);
             annotationFT.setEnabled(false);
-        }else {
+        } else {
             otherRB.setSelected(true);
             annotationFT.setEnabled(true);
         }
@@ -286,6 +305,7 @@ public class SettingDialog extends JFrame {
         Config.getInstant().setReuseEntity(reuseEntityCB.isSelected());
         Config.getInstant().setSuffixStr(suffixEdit.getText());
         Config.getInstant().setVirgoMode(virgoModelCB.isSelected());
+        Config.getInstant().setGenerateComments(generateCommentsCT.isSelected());
         Config.getInstant().setFiledNamePreFixStr(filedPrefixTF.getText());
         Config.getInstant().setAnnotationStr(annotationFT.getText());
         Config.getInstant().setUseFiledNamePrefix(filedPrefixCB.isSelected());
@@ -296,9 +316,6 @@ public class SettingDialog extends JFrame {
     private void createUIComponents() {
         // TODO: place custom component creation code here
     }
-
-
-
 
 
     private void onCancel() {

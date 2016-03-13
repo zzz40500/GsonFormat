@@ -10,7 +10,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Created by zzz40500 on 2015/7/15.
+ * Created by dim on 2015/7/15.
  */
 public class FieldEntity {
 
@@ -18,8 +18,9 @@ public class FieldEntity {
     private String type;
     private String fieldName;
     private String value;
-
     private String autoCreateFiledName;
+    private InnerClassEntity targetClass;
+    private boolean generate = true;
 
     public String getAutoCreateFiledName() {
         return autoCreateFiledName;
@@ -29,9 +30,6 @@ public class FieldEntity {
         this.autoCreateFiledName = autoCreateFiledName;
     }
 
-    private InnerClassEntity targetClass;
-
-
     public InnerClassEntity getTargetClass() {
         return targetClass;
     }
@@ -40,19 +38,26 @@ public class FieldEntity {
         this.targetClass = targetClass;
     }
 
-    private boolean generate = true;
-
     public boolean isGenerate() {
         return generate;
     }
 
     public void setGenerate(boolean generate) {
-
         this.generate = generate;
     }
 
     public String getFieldName() {
         return fieldName;
+    }
+
+    public String getGenerateFieldName() {
+
+        String field = CheckUtil.getInstant().handleArg(fieldName);
+        if (CheckUtil.getInstant().checkKeyWord(field)) {
+            return field + "X";
+        } else {
+            return field;
+        }
     }
 
     public void setFieldName(String fieldName) {
@@ -61,7 +66,6 @@ public class FieldEntity {
         }
         this.fieldName = fieldName;
     }
-
 
     public void setValue(String value) {
         this.value = value;
@@ -75,14 +79,12 @@ public class FieldEntity {
         return type;
     }
 
-
     public String getRealType() {
         if (targetClass != null) {
             return String.format(type, targetClass.getClassName());
         }
         return type;
     }
-
 
     public void setType(String type1) {
 
@@ -123,27 +125,18 @@ public class FieldEntity {
         return value;
     }
 
-
     public void generateFiled(PsiElementFactory mFactory, PsiClass mClass, InnerClassEntity classEntity) {
 
         if (generate) {
-
             StringBuilder filedSb = new StringBuilder();
-            String filedName = null;
-            if (CheckUtil.getInstant().checkKeyWord(getFieldName())) {
-                filedName = getFieldName() + "X";
-            } else {
-                filedName = getFieldName();
-            }
+            String filedName = getGenerateFieldName();
+
             if (!TextUtils.isEmpty(classEntity.getExtra())) {
                 filedSb.append(classEntity.getExtra()).append("\n");
                 classEntity.setExtra(null);
             }
-
             if (!filedName.equals(getKey()) || Config.getInstant().isUseSerializedName()) {
-
                 filedSb.append(Config.getInstant().geFullNameAnnotation().replaceAll("\\{filed\\}", getKey()));
-//                filedSb.append("@com.google.gson.annotations.SerializedName(\"").append(getKey()).append("\")\n");
             }
 
             if (Config.getInstant().isFieldPrivateMode()) {

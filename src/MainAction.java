@@ -8,7 +8,6 @@ import com.intellij.psi.*;
 import com.intellij.psi.util.PsiUtilBase;
 
 /**
- * Created with IntelliJ IDEA.
  * User: dim
  * Date: 14-7-4
  * Time: 下午1:44
@@ -48,18 +47,14 @@ public class MainAction extends BaseGenerateAction {
         PsiFile mFile = PsiUtilBase.getPsiFileInEditor(editor, mProject);
         mClass=getTargetClass(editor,mFile);
         JsonUtilsDialog jsonD=new JsonUtilsDialog(mClass,mFactory,mFile, mProject);
-        jsonD.setmClass(mClass);
-        jsonD.setmFactory(mFactory);
-        jsonD.setmFile(mFile);
-        jsonD.setmProject(mProject);
+        jsonD.setClass(mClass);
+        jsonD.setFactory(mFactory);
+        jsonD.setFile(mFile);
+        jsonD.setProject(mProject);
         jsonD.setSize(600, 400);
         jsonD.setLocationRelativeTo(null);
         jsonD.setVisible(true);
 
     }
-
-
-
-
 
 }

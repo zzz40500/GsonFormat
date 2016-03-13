@@ -67,7 +67,7 @@
                   <grid row="15" column="0" row-span="1" col-span="10" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
-                  <text value="filed(public) "/>
+                  <text value="filed (public) "/>
                 </properties>
               </component>
               <component id="afbc9" class="javax.swing.JRadioButton" binding="fieldPrivateRadioButton">
@@ -76,7 +76,7 @@
                 </constraints>
                 <properties>
                   <selected value="false"/>
-                  <text value="filed(private)"/>
+                  <text value="filed (private)"/>
                 </properties>
               </component>
               <component id="adef0" class="javax.swing.JCheckBox" binding="arrayFromDataCB">
@@ -183,7 +183,7 @@
                   <grid row="12" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
-                  <text value="field"/>
+                  <text value="Field"/>
                 </properties>
               </component>
               <component id="e1138" class="javax.swing.JLabel">
@@ -389,6 +389,7 @@
       <member id="8df86"/>
       <member id="80473"/>
       <member id="9cd04"/>
+      <member id="58b2a"/>
     </group>
   </buttonGroups>
 </form>

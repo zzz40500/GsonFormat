@@ -15,24 +15,28 @@ import javax.swing.*;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
  * Created by dim on 2015/8/21.
+ *  把 json 转成 实体类
  */
 public class ConvertBridge {
 
-    protected PsiClass mGenerateClass;
-    protected PsiClass mCurrentClass;
+    protected PsiClass mGeneratClass;
+    protected PsiClass currentClass;
     private PsiElementFactory mFactory;
-    private Project mProject;
+    private Project project;
 
     private PsiFile mFile;
-    private String mJsonStr;
+    private String jsonStr;
     private JsonUtilsDialog mJsonUtilsDialog;
-    private JLabel mErrorInfoLb;
+    private JLabel errorInfoLb;
 
     private List<String> mFilterFields;
 
@@ -40,9 +44,9 @@ public class ConvertBridge {
     private String generateClassName;
     private InnerClassEntity mGenerateEntity = new InnerClassEntity();
 
-    private StringBuilder mFullFilterRegex = null;
-    private StringBuilder mBriefFilterRegex = null;
-    private String mFilterRegex = null;
+    private StringBuilder fullFilterRegex = null;
+    private StringBuilder briefFilterRegex = null;
+    private String filterRegex = null;
 
 
     public ConvertBridge(JsonUtilsDialog mJsonUtilsDialog, JLabel errorInfoLb,
@@ -52,32 +56,32 @@ public class ConvertBridge {
 
         mFactory = JavaPsiFacade.getElementFactory(project);
         this.mFile = mFile;
-        this.mErrorInfoLb = errorInfoLb;
+        this.errorInfoLb = errorInfoLb;
         this.generateClassName = generateClassName;
         this.mJsonUtilsDialog = mJsonUtilsDialog;
-        this.mJsonStr = jsonStr;
-        this.mProject = project;
-        this.mGenerateClass = generateClass;
-        this.mCurrentClass = currentClass;
+        this.jsonStr = jsonStr;
+        this.project = project;
+        this.mGeneratClass = generateClass;
+        this.currentClass = currentClass;
         mFilterFields = new ArrayList<String>();
         mFilterClass = new ArrayList<InnerClassEntity>();
 
-        mFullFilterRegex = new StringBuilder();
-        mBriefFilterRegex = new StringBuilder();
+        fullFilterRegex = new StringBuilder();
+        briefFilterRegex = new StringBuilder();
         String[] arg = Config.getInstant().getAnnotationStr().replace("{filed}", "(\\w+)").split("\\.");
 
         for (int i = 0; i < arg.length; i++) {
             String s = arg[i];
             if (i == arg.length - 1) {
-                mBriefFilterRegex.append(s);
-                mFullFilterRegex.append(s);
+                briefFilterRegex.append(s);
+                fullFilterRegex.append(s);
                 Matcher matcher = Pattern.compile("\\w+").matcher(s);
                 if (matcher.find()) {
-                    mFilterRegex = matcher.group();
+                    filterRegex = matcher.group();
                 }
 
             } else {
-                mFullFilterRegex.append(s).append("\\s*\\.\\s*");
+                fullFilterRegex.append(s).append("\\s*\\.\\s*");
             }
         }
 
@@ -90,29 +94,31 @@ public class ConvertBridge {
         JSONObject json = null;
         mJsonUtilsDialog.mErrorInfo = null;
         try {
-            json = new JSONObject(mJsonStr);
+            json = new JSONObject(jsonStr);
         } catch (Exception e) {
-            String jsonTS = filterAnnotation(mJsonStr);
+            String jsonTS = filterComment(jsonStr);
 
             jsonTS = jsonTS.replaceAll("^[\\s\\S]*?\\{", "{");
             try {
                 json = new JSONObject(jsonTS);
             } catch (Exception e2) {
                 e2.printStackTrace();
-                mErrorInfoLb.setText("data err !!");
+                errorInfoLb.setText("data err !!");
                 Writer writer = new StringWriter();
                 PrintWriter printWriter = new PrintWriter(writer);
                 e2.printStackTrace(printWriter);
                 printWriter.close();
                 mJsonUtilsDialog.mErrorInfo = writer.toString();
                 if (Config.getInstant().isToastError()) {
-                    Toast.make(mProject, mErrorInfoLb, MessageType.ERROR, "click to see details");
+                    Toast.make(project, errorInfoLb, MessageType.ERROR, "click to see details");
                 }
             }
         }
         if (json != null) {
+
             try {
-                mFilterFields = initFilterFieldStr(mGenerateClass);
+
+                mFilterFields = initFilterFieldStr(mGeneratClass);
                 if (Config.getInstant().isReuseEntity()) {
                     initFilterClass();
                 }
@@ -124,9 +130,9 @@ public class ConvertBridge {
                 e2.printStackTrace(printWriter);
                 printWriter.close();
                 mJsonUtilsDialog.mErrorInfo = writer.toString();
-                mErrorInfoLb.setText("parse err !!");
+                errorInfoLb.setText("parse err !!");
                 if (Config.getInstant().isToastError()) {
-                    Toast.make(mProject, mErrorInfoLb, MessageType.ERROR, "click to see details");
+                    Toast.make(project, errorInfoLb, MessageType.ERROR, "click to see details");
                 }
 
             }
@@ -138,119 +144,134 @@ public class ConvertBridge {
     }
 
 
-
-
     private void initFilterClass() {
 
-        if (mGenerateClass == null) {
+
+        if (mGeneratClass == null) {
             return;
         }
-        PsiClass[] psiClasses = this.mGenerateClass.getAllInnerClasses();
+
+        PsiClass[] psiClasses = this.mGeneratClass.getAllInnerClasses();
         for (PsiClass psiClass : psiClasses) {
-            InnerClassEntity innerClassEntity1 = new InnerClassEntity();
-            innerClassEntity1.setClassName(psiClass.getName());
-            innerClassEntity1.setAutoCreateClassName(psiClass.getName());
-            innerClassEntity1.setFields(initFilterField(psiClass));
-            innerClassEntity1.setPsiClass(psiClass);
-            recursionInnerClass(innerClassEntity1);
+
+            InnerClassEntity item = new InnerClassEntity();
+            item.setClassName(psiClass.getName());
+            item.setAutoCreateClassName(psiClass.getName());
+            item.setFields(initFilterField(psiClass));
+            item.setPsiClass(psiClass);
+            recursionInnerClass(item);
         }
     }
 
+    /**
+     * 遍历所有的内部类.
+     *
+     * @param innerClassEntity
+     */
     private void recursionInnerClass(InnerClassEntity innerClassEntity) {
 
-        PsiClass[] innerClass = innerClassEntity.getPsiClass().getInnerClasses();
-        if (innerClass.length == 0) {
+        PsiClass[] innerClassArray = innerClassEntity.getPsiClass().getInnerClasses();
+        if (innerClassArray.length == 0) {
 
             mFilterClass.add(innerClassEntity);
         } else {
-            for (PsiClass psiClass : innerClass) {
-                InnerClassEntity innerClassEntity1 = new InnerClassEntity();
-                innerClassEntity1.setClassName(psiClass.getName());
-                innerClassEntity1.setAutoCreateClassName(psiClass.getName());
-                innerClassEntity1.setFields(initFilterField(psiClass));
-                innerClassEntity1.setPsiClass(psiClass);
-                recursionInnerClass(innerClassEntity1);
+            for (PsiClass psiClass : innerClassArray) {
+                InnerClassEntity item = new InnerClassEntity();
+                item.setClassName(psiClass.getName());
+                item.setAutoCreateClassName(psiClass.getName());
+                item.setFields(initFilterField(psiClass));
+                item.setPsiClass(psiClass);
+                recursionInnerClass(item);
             }
         }
     }
 
-    public String filterAnnotation(String str) {
+    /**
+     * 过滤掉// 和/** 注释
+     * @param str
+     * @return
+     */
+    public String filterComment(String str) {
 
         String temp = str.replaceAll("/\\*" +
                 "[\\S\\s]*?" +
                 "\\*/", "");
         return temp.replaceAll("//[\\S\\s]*?\n", "");
-
     }
 
+    /**
+     * 收集类的所有属性.
+     */
     public List<String> initFilterFieldStr(PsiClass mClass) {
 
-        ArrayList<String> filterFields = new ArrayList<String>();
+        ArrayList<String> filterFieldList = new ArrayList<String>();
         if (mClass != null) {
             PsiField[] psiFields = mClass.getAllFields();
             for (PsiField psiField : psiFields) {
-                String psiFieldText = filterAnnotation(psiField.getText());
-                if (mFilterRegex != null && psiFieldText.contains(mFilterRegex)) {
+                String psiFieldText = filterComment(psiField.getText());
+                if (filterRegex != null && psiFieldText.contains(filterRegex)) {
                     boolean isSerializedName = false;
-
                     psiFieldText = psiFieldText.trim();
 
-//                    Pattern pattern = Pattern.compile("@com\\s*\\.\\s*google\\s*\\.\\s*gson\\s*\\.\\s*annotations\\s*\\.\\s*SerializedName\\s*\\(\\s*\"(\\w+)\"\\s*\\)");
-//                                                        @com\\s*\\.\\s*google\\s*\\.\\s*gson\\s*\\.\\s*annotations\\s*\\.\\s*SerializedName\\(\"(\\w+)\"\\)
-                    Pattern pattern = Pattern.compile(mFullFilterRegex.toString());
+                    Pattern pattern = Pattern.compile(fullFilterRegex.toString());
                     Matcher matcher = pattern.matcher(psiFieldText);
                     if (matcher.find()) {
-                        filterFields.add(matcher.group(1));
+                        filterFieldList.add(matcher.group(1));
                         isSerializedName = true;
                     }
-//                    Pattern pattern2 = Pattern.compile("@\\s*SerializedName\\s*\\(\\s*\"(\\w+)\"\\s*\\)");
-                    Pattern pattern2 = Pattern.compile(mBriefFilterRegex.toString());
-                    Matcher matcher2 = pattern2.matcher(psiFieldText);
-                    if (matcher2.find()) {
-                        filterFields.add(matcher2.group(1));
+                    pattern = Pattern.compile(briefFilterRegex.toString());
+                    matcher = pattern.matcher(psiFieldText);
+                    if (matcher.find()) {
+                        filterFieldList.add(matcher.group(1));
                         isSerializedName = true;
                     }
                     if (!isSerializedName) {
-                        filterFields.add(psiField.getName());
+                        filterFieldList.add(psiField.getName());
                     }
                 } else {
-                    filterFields.add(psiField.getName());
+                    filterFieldList.add(psiField.getName());
                 }
             }
         }
 
-        return filterFields;
+        return filterFieldList;
 
 
     }
 
 
+    /**
+     *
+     * 收集类的属性
+     * */
     public List<FieldEntity> initFilterField(PsiClass mClass) {
+
         PsiField[] psiFields = mClass.getAllFields();
         ArrayList<FieldEntity> filterFields = new ArrayList<FieldEntity>();
+
         for (PsiField psiField : psiFields) {
-            String psiFieldText = filterAnnotation(psiField.getText());
+
+            String psiFieldText = filterComment(psiField.getText());
             String key = null;
-            if (psiFieldText.contains("SerializedName")) {
+            if (filterRegex != null && psiFieldText.contains(filterRegex)) {
+
                 boolean isSerializedName = false;
                 psiFieldText = psiFieldText.trim();
-                Pattern pattern = Pattern.compile("@com\\s*\\.\\s*google\\s*\\.\\s*gson\\s*\\.\\s*annotations\\s*\\.\\s*SerializedName\\s*\\(\\s*\"(\\w+)\"\\s*\\)");
+                Pattern pattern = Pattern.compile(fullFilterRegex.toString());
                 Matcher matcher = pattern.matcher(psiFieldText);
                 if (matcher.find()) {
                     key = matcher.group(1);
-
                     isSerializedName = true;
                 }
-                Pattern pattern2 = Pattern.compile("@\\s*SerializedName\\s*\\(\\s*\"(\\w+)\"\\s*\\)");
-                Matcher matcher2 = pattern2.matcher(psiFieldText);
-                if (matcher2.find()) {
-                    key = matcher2.group(1);
 
+                pattern = Pattern.compile(briefFilterRegex.toString());
+                matcher = pattern.matcher(psiFieldText);
+                if (matcher.find()) {
+                    key = matcher.group(1);
                     isSerializedName = true;
                 }
                 if (!isSerializedName) {
                     key = psiField.getName();
-
                 }
             } else {
                 key = psiField.getName();
@@ -268,6 +289,7 @@ public class ConvertBridge {
 
 
     public void parseJson(JSONObject json) {
+
         Set<String> set = json.keySet();
         List<String> fieldList = new ArrayList<String>();
         for (String key : set) {
@@ -275,23 +297,21 @@ public class ConvertBridge {
                 fieldList.add(key);
             }
         }
-
-
         if (Config.getInstant().isVirgoMode()) {
             mGenerateEntity.setClassName("");
             mGenerateEntity.setAutoCreateClassName("");
-            mGenerateEntity.setPsiClass(mGenerateClass);
+            mGenerateEntity.setPsiClass(mGeneratClass);
             mGenerateEntity.setFields(createFields(json, fieldList, mGenerateEntity));
             FieldsDialog fieldsDialog = new FieldsDialog(mJsonUtilsDialog, mGenerateEntity, mFactory,
-                    mGenerateClass, mCurrentClass, mFile, mProject, generateClassName);
+                    mGeneratClass, currentClass, mFile, project, generateClassName);
             fieldsDialog.setSize(800, 500);
             fieldsDialog.setLocationRelativeTo(null);
             fieldsDialog.setVisible(true);
             mJsonUtilsDialog.setVisible(false);
         } else {
-            if (mGenerateClass == null) {
+            if (mGeneratClass == null) {
                 try {
-                    mGenerateClass = PsiClassUtil.getPsiClass(mFile, mProject, generateClassName);
+                    mGeneratClass = PsiClassUtil.getPsiClass(mFile, project, generateClassName);
                 } catch (Throwable throwable) {
                     throwable.printStackTrace();
                     mJsonUtilsDialog.errorLB.setText("data err !!");
@@ -301,12 +321,12 @@ public class ConvertBridge {
                     printWriter.close();
                     mJsonUtilsDialog.mErrorInfo = writer.toString();
                     mJsonUtilsDialog.setVisible(true);
-                    Toast.make(mProject, mJsonUtilsDialog.generateClassP, MessageType.ERROR, "the path is not allowed");
+                    Toast.make(project, mJsonUtilsDialog.generateClassP, MessageType.ERROR, "the path is not allowed");
                 }
 
             }
-            if (mGenerateClass != null) {
-                mGenerateEntity.setPsiClass(mGenerateClass);
+            if (mGeneratClass != null) {
+                mGenerateEntity.setPsiClass(mGeneratClass);
                 String[] arg = generateClassName.split("\\.");
                 if (arg.length > 1) {
                     Config.getInstant().setEntityPackName(generateClassName.substring(0, generateClassName.length() - arg[arg.length - 1].length()));
@@ -315,10 +335,10 @@ public class ConvertBridge {
                 Config.getInstant().setEntityPackName(generateClassName);
                 try {
                     mGenerateEntity.setFields(createFields(json, fieldList, mGenerateEntity));
-                    WriterUtil writerUtil = new WriterUtil(null, null, mFile, mProject, mGenerateClass);
+                    WriterUtil writerUtil = new WriterUtil(null, null, mFile, project, mGeneratClass);
                     writerUtil.mInnerClassEntity = mGenerateEntity;
                     writerUtil.execute();
-                }catch (Exception e){
+                } catch (Exception e) {
                     e.printStackTrace();
                     mJsonUtilsDialog.errorLB.setText("parse err !!");
                     Writer writer = new StringWriter();
@@ -328,7 +348,7 @@ public class ConvertBridge {
                     mJsonUtilsDialog.mErrorInfo = writer.toString();
                     mJsonUtilsDialog.setVisible(true);
                     if (Config.getInstant().isToastError()) {
-                        Toast.make(mProject, mErrorInfoLb, MessageType.ERROR, "click to see details");
+                        Toast.make(project, errorInfoLb, MessageType.ERROR, "click to see details");
                     }
                     return;
                 }
@@ -345,13 +365,11 @@ public class ConvertBridge {
 
     private List<FieldEntity> createFields(JSONObject json, List<String> list, InnerClassEntity parentClass) {
 
-        List<FieldEntity> fieldEntities = new ArrayList<FieldEntity>();
+        List<FieldEntity> fieldEntityList = new ArrayList<FieldEntity>();
         StringBuilder sb = new StringBuilder();
         sb.append("/** \n");
         for (int i = 0; i < list.size(); i++) {
             String key = list.get(i);
-
-
             sb.append("* ").append(key).append(" : ");
             sb.append(json.get(key).toString().replaceAll("\r", "")
                     .replaceAll("\t ", "").replaceAll("\f", ""));
@@ -359,16 +377,13 @@ public class ConvertBridge {
         }
         sb.append("*/ \n");
 
-
         List<String> listEntityList = new ArrayList<String>();
         boolean writeExtra = Config.getInstant().isGenerateComments();
-
 
         for (int i = 0; i < list.size(); i++) {
             String key = list.get(i);
             Object type = json.get(key);
             if (type instanceof JSONArray) {
-
 
                 listEntityList.add(key);
                 continue;
@@ -376,9 +391,10 @@ public class ConvertBridge {
 
             FieldEntity fieldEntity = createFiled(parentClass, key, type);
 
-            fieldEntities.add(fieldEntity);
+            fieldEntityList.add(fieldEntity);
             if (writeExtra) {
                 writeExtra = false;
+
                 parentClass.setExtra(sb.toString());
             }
         }
@@ -388,21 +404,15 @@ public class ConvertBridge {
             Object type = json.get(key);
 
             FieldEntity fieldEntity = createFiled(parentClass, key, type);
-
-            fieldEntities.add(fieldEntity);
-//            if (writeExtra) {
-//                writeExtra = false;
-//                fieldEntity.setExtra(sb.toString());
-//            }
-
+            fieldEntityList.add(fieldEntity);
         }
 
-        return fieldEntities;
+        return fieldEntityList;
     }
 
     private FieldEntity createFiled(InnerClassEntity parentClass, String key, Object type) {
 
-        String filedName = key;
+        String filedName = CheckUtil.getInstant().handleArg(key);
         if (CheckUtil.getInstant().checkKeyWord(filedName)) {
             filedName = filedName + "X";
         }
@@ -427,7 +437,7 @@ public class ConvertBridge {
 
     private FieldEntity typeByValue(InnerClassEntity parentClass, String key, Object type) {
 
-        FieldEntity noteBean = null;
+        FieldEntity nodeBean = null;
         String typeStr;
 
         if (type instanceof JSONObject) {
@@ -438,23 +448,21 @@ public class ConvertBridge {
                 InnerClassEntity innerClassEntity = createJSonObjectClassSub(typeStr, (JSONObject) type, parentClass);
                 innerClassEntity.setKey(key);
                 innerClassEntity.setType("%s");
-                noteBean = innerClassEntity;
+                nodeBean = innerClassEntity;
 
             } else {
-                typeStr = classEntity.getFiledPackName();
 
+                typeStr = classEntity.getFieldPackName();
                 FieldEntity fieldEntity = new FieldEntity();
                 fieldEntity.setKey(key);
                 fieldEntity.setTargetClass(classEntity);
                 fieldEntity.setType("%s");
-                noteBean = fieldEntity;
-
-
+                nodeBean = fieldEntity;
             }
         } else if (type instanceof JSONArray) {
 
             FieldEntity fieldEntity = handJSONArray(parentClass, (JSONArray) type, key, listStr);
-            noteBean = fieldEntity;
+            nodeBean = fieldEntity;
         } else {
 
             FieldEntity fieldEntity = new FieldEntity();
@@ -476,16 +484,16 @@ public class ConvertBridge {
             }
 
             fieldEntity.setType(typeStr);
-            noteBean = fieldEntity;
-            if (type != null && !(noteBean instanceof InnerClassEntity)) {
-                noteBean.setValue(type.toString());
+            nodeBean = fieldEntity;
+            if (type != null && !(nodeBean instanceof InnerClassEntity)) {
+                nodeBean.setValue(type.toString());
             }
 
         }
 
-        noteBean.setKey(key);
+        nodeBean.setKey(key);
 
-        return noteBean;
+        return nodeBean;
     }
 
     private InnerClassEntity checkInnerClass(JSONObject jsonObject) {
@@ -507,10 +515,8 @@ public class ConvertBridge {
                 if (!had) {
                     break;
                 }
-
             }
             if (had) {
-
 //
                 return innerClassEntity;
             }
@@ -521,7 +527,6 @@ public class ConvertBridge {
     private InnerClassEntity createJSonObjectClassSub(String className, JSONObject json, InnerClassEntity parentClass) {
 
         InnerClassEntity subClassEntity = new InnerClassEntity();
-
         Set<String> set = json.keySet();
         List<String> list = new ArrayList<String>(set);
         List<FieldEntity> fields = createFields(json, list, subClassEntity);
@@ -531,13 +536,10 @@ public class ConvertBridge {
         if (Config.getInstant().isReuseEntity()) {
             mFilterClass.add(subClassEntity);
         }
-
         return subClassEntity;
-
     }
 
     private String createSubClassName(String key, Object o, InnerClassEntity parentClass) {
-
         String name = "";
         if (o instanceof JSONObject) {
             if (TextUtils.isEmpty(key)) {
@@ -557,17 +559,19 @@ public class ConvertBridge {
     }
 
     private FieldEntity handJSONArray(InnerClassEntity parentClass, JSONArray jsonArray, String key, String preListType) {
+
         FieldEntity fieldEntity = null;
-        if(jsonArray.length()>0){
+        if (jsonArray.length() > 0) {
+
             Object item = jsonArray.get(0);
             fieldEntity = listTypeByValue(parentClass, key, item, preListType);
-        }else{
-             fieldEntity = new FieldEntity();
+        } else {
+
+            fieldEntity = new FieldEntity();
             fieldEntity.setKey(key);
-
-            fieldEntity.setType( String.format(preListType, "?"));
-
+            fieldEntity.setType(String.format(preListType, "?"));
         }
+
         return fieldEntity;
     }
 
@@ -575,6 +579,7 @@ public class ConvertBridge {
 
 
     private FieldEntity listTypeByValue(InnerClassEntity parentClass, String key, Object type, String s) {
+
         FieldEntity noteBean = null;
         String typeStr;
         if (type instanceof JSONObject) {
@@ -589,7 +594,7 @@ public class ConvertBridge {
                 noteBean = innerClassEntity;
             } else {
 
-                typeStr = classEntity.getFiledPackName();
+                typeStr = classEntity.getFieldPackName();
                 typeStr = String.format(s, typeStr);
                 FieldEntity fieldEntity = new FieldEntity();
                 fieldEntity.setKey(key);
@@ -631,15 +636,22 @@ public class ConvertBridge {
     }
 
 
-    public String captureName(String name) {
+    public String captureName(String text) {
 
-        if (name.length() > 0) {
-            name = name.substring(0, 1).toUpperCase() + name.substring(1);
+        if (text.length() > 0) {
+            text = text.substring(0, 1).toUpperCase() + text.substring(1);
         }
-        return name;
+        return text;
     }
 
+    /**
+     *
+     * 转成驼峰
+     * @param str
+     * @return
+     */
     public String captureStringLeaveUnderscore(String str) {
+
         if (TextUtils.isEmpty(str)) {
             return str;
         }

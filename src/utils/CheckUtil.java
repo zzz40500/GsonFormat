@@ -2,6 +2,8 @@ package utils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by dim on 2015/8/21.
@@ -9,10 +11,10 @@ import java.util.List;
 public class CheckUtil {
 
     private static CheckUtil mCheckUtil;
-    private List<String> mKeyWordList=new ArrayList<String>();
-    private List<String> mSimpleType=new ArrayList<String>();
+    private List<String> mKeyWordList = new ArrayList<String>();
+    private List<String> mSimpleType = new ArrayList<String>();
 
-    private CheckUtil(){
+    private CheckUtil() {
         mKeyWordList.add("abstract");
         mKeyWordList.add("assert");
         mKeyWordList.add("boolean");
@@ -77,24 +79,30 @@ public class CheckUtil {
         mSimpleType.add("long");
     }
 
-   public static CheckUtil  getInstant(){
-        if(mCheckUtil == null){
-            mCheckUtil =new CheckUtil();
+    public static CheckUtil getInstant() {
+        if (mCheckUtil == null) {
+            mCheckUtil = new CheckUtil();
         }
-       return mCheckUtil;
+        return mCheckUtil;
     }
 
 
-    public boolean checkSimpleType(String s){
+    public boolean checkSimpleType(String s) {
 
         return mSimpleType.contains(s);
     }
-    public boolean checkKeyWord(String key) {
 
+    public boolean checkKeyWord(String key) {
         return mKeyWordList.contains(key);
     }
 
-
-
-
+    public String handleArg(String arg){
+        Pattern pattern = Pattern.compile("^\\d+");
+        Matcher matcher = pattern.matcher(arg);
+        if (matcher.find()) {
+            return "value"+arg;
+        } else {
+            return arg;
+        }
+    }
 }

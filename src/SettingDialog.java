@@ -9,6 +9,7 @@ import javax.swing.*;
 import java.awt.event.*;
 
 public class SettingDialog extends JFrame {
+
     private JPanel contentPane;
     private JRadioButton fieldPublicRadioButton;
     private JRadioButton fieldPrivateRadioButton;
@@ -37,7 +38,6 @@ public class SettingDialog extends JFrame {
     private JRadioButton loganSquareCB;
     private String annotaionStr;
 
-
     public SettingDialog(Project project) {
         setContentPane(contentPane);
 //        setModal(true);
@@ -49,7 +49,6 @@ public class SettingDialog extends JFrame {
                 onOK();
             }
         });
-
         cancelButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 onCancel();
@@ -112,15 +111,12 @@ public class SettingDialog extends JFrame {
                 array1Button.setEnabled(arrayFromData1CB.isSelected());
             }
         });
-
-
         filedPrefixCB.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 filedPrefixTF.setEnabled(filedPrefixCB.isSelected());
             }
         });
-
         otherRB.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
@@ -130,7 +126,6 @@ public class SettingDialog extends JFrame {
                 objectFromData1CB.setEnabled(false);
                 arrayFromDataCB.setEnabled(false);
                 arrayFromData1CB.setEnabled(false);
-                annotationFT.setEnabled(false);
                 objectFromDataCB.setSelected(false);
                 objectFromData1CB.setSelected(false);
                 arrayFromDataCB.setSelected(false);
@@ -144,7 +139,9 @@ public class SettingDialog extends JFrame {
         loganSquareCB.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                annotationFT.setText("@{filed}");
+                if (loganSquareCB.isSelected()) {
+                    annotationFT.setText(Strings.loganSquareAnnotation);
+                }
                 annotationFT.setEnabled(otherRB.isSelected());
                 objectFromDataCB.setEnabled(false);
                 objectFromData1CB.setEnabled(false);
@@ -160,8 +157,6 @@ public class SettingDialog extends JFrame {
                 array1Button.setEnabled(false);
             }
         });
-
-
         String filedPrefix = null;
         filedPrefix = Config.getInstant().getFiledNamePreFixStr();
         if (TextUtils.isEmpty(filedPrefix)) {
@@ -170,8 +165,6 @@ public class SettingDialog extends JFrame {
             );
         }
         filedPrefixTF.setText(filedPrefix);
-
-
         gsonJRB.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
@@ -205,7 +198,6 @@ public class SettingDialog extends JFrame {
                 object1Button.setEnabled(false);
                 arrayButton.setEnabled(false);
                 array1Button.setEnabled(false);
-
             }
         });
         jackRB.addActionListener(new ActionListener() {
@@ -213,7 +205,6 @@ public class SettingDialog extends JFrame {
             public void actionPerformed(ActionEvent actionEvent) {
                 if (jackRB.isSelected()) {
                     annotationFT.setText(Strings.jackAnnotation);
-
                 }
                 annotationFT.setEnabled(false);
                 objectFromDataCB.setEnabled(false);
@@ -233,8 +224,6 @@ public class SettingDialog extends JFrame {
         });
 
         annotaionStr = Config.getInstant().getAnnotationStr();
-
-
         if (annotaionStr.equals(Strings.gsonAnnotation)) {
             gsonJRB.setSelected(true);
             annotationFT.setEnabled(false);
@@ -249,7 +238,6 @@ public class SettingDialog extends JFrame {
             annotationFT.setEnabled(true);
         }
         annotationFT.setText(annotaionStr);
-
         objectButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
@@ -290,12 +278,11 @@ public class SettingDialog extends JFrame {
                 editDialog.setVisible(true);
             }
         });
-
-
     }
 
 
     private void onOK() {
+
         Config.getInstant().setFieldPrivateMode(fieldPrivateRadioButton.isSelected());
         Config.getInstant().setUseSerializedName(useSerializedNameCheckBox.isSelected());
         Config.getInstant().setArrayFromData(arrayFromDataCB.isSelected());
@@ -310,11 +297,12 @@ public class SettingDialog extends JFrame {
         Config.getInstant().setAnnotationStr(annotationFT.getText());
         Config.getInstant().setUseFiledNamePrefix(filedPrefixCB.isSelected());
         Config.getInstant().save();
+
         dispose();
+
     }
 
     private void createUIComponents() {
-        // TODO: place custom component creation code here
     }
 
 

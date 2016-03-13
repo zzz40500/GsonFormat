@@ -24,6 +24,7 @@ public class WriterUtil extends WriteCommandAction.Simple {
     public WriterUtil(JsonUtilsDialog mJsonUtilsDialog, JLabel jLabel,
                        PsiFile mFile, Project project, PsiClass mClass) {
         super(project, null);
+
         mFactory = JavaPsiFacade.getElementFactory(project);
         this.mFile = mFile;
         this.mProject = project;
@@ -34,7 +35,7 @@ public class WriterUtil extends WriteCommandAction.Simple {
     @Override
     protected void run() {
 
-        mInnerClassEntity.generateFiled(mFactory, mClass);
+        mInnerClassEntity.generateField(mProject, mFactory, mClass);
         JavaCodeStyleManager styleManager = JavaCodeStyleManager.getInstance(mProject);
         styleManager.optimizeImports(mFile);
         styleManager.shortenClassReferences(mClass);

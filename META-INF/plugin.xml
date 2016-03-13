@@ -2,10 +2,6 @@
     <name>GsonFormat</name>
     <description><![CDATA[
 <html>quickly to convert a JSON string to an InnerClassEntity class ..<br>
-<br>
- ● Support Data Conversion Library(eg:Gson,Jack,FastJson)<br>
- ● Added Virgo mode.<br>
- ● Support Field name Custom.<br>
 <a href="https://github.com/zzz40500/GsonFormat"> openSource</a>
       </html>
       ]]>
@@ -13,7 +9,7 @@
     <version>1.2.1</version>
     <vendor email="wyh405003836@126.com">zzz40500</vendor>
     <!-- please see http://confluence.jetbrains.net/display/IDEADEV/Build+Number+Ranges for description -->
-    <idea-version since-build="107.118"/>
+    <idea-version since-build="107.119"/>
 
 
 

@@ -141,6 +141,10 @@ public class Config {
         if(annotationStr.equals(Strings.fastAnnotation)){
             return Strings.fastFullNameAnnotation;
         }
+        if(annotationStr.equals(Strings.loganSquareAnnotation)){
+            return Strings.loganSquareFullNameAnnotation;
+        }
+
 
 //        "d\\s*\\(\\s*\"{filed}\"\\s*\\)\";"
         return annotationStr.replaceAll("\\(", "(").replaceAll("\\)",")").replaceAll("\\s\\*","");

@@ -85,6 +85,12 @@ public class FieldEntity {
         }
         return type;
     }
+    public String getGenerType(){
+        if (targetClass != null) {
+            return String.format(type, targetClass.getFieldPackName());
+        }
+        return type;
+    }
 
     public void setType(String type1) {
 
@@ -128,6 +134,7 @@ public class FieldEntity {
     public void generateFiled(PsiElementFactory mFactory, PsiClass mClass, InnerClassEntity classEntity) {
 
         if (generate) {
+
             StringBuilder filedSb = new StringBuilder();
             String filedName = getGenerateFieldName();
 
@@ -140,9 +147,9 @@ public class FieldEntity {
             }
 
             if (Config.getInstant().isFieldPrivateMode()) {
-                filedSb.append("private  ").append(getRealType()).append(" ").append(filedName).append(" ; ");
+                filedSb.append("private  ").append(getGenerType()).append(" ").append(filedName).append(" ; ");
             } else {
-                filedSb.append("public  ").append(getRealType()).append(" ").append(filedName).append(" ; ");
+                filedSb.append("public  ").append(getGenerType()).append(" ").append(filedName).append(" ; ");
             }
             mClass.add(mFactory.createFieldFromText(filedSb.toString(), mClass));
         }

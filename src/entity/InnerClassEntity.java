@@ -107,6 +107,9 @@ public class InnerClassEntity extends FieldEntity {
             fullClassName = getClassName();
         }
 
+        if(TextUtils.isEmpty(getType())){
+           return fullClassName;
+        }
         return String.format(getType(), fullClassName);
     }
 
@@ -213,8 +216,11 @@ public class InnerClassEntity extends FieldEntity {
 
             if (Config.getInstant().getAnnotationStr().equals(Strings.fastAnnotation)) {
                 subClass = parentClass.findInnerClassByName(className, false);
-                if (subClass != null) {
-                    subClass.addBefore(mFactory.createAnnotationFromText("@com.fasterxml.jackson.annotation.JsonIgnoreProperties(ignoreUnknown = true)", subClass), subClass);
+                try {
+                    if (subClass != null) {
+                        subClass.addBefore(mFactory.createAnnotationFromText("@com.fasterxml.jackson.annotation.JsonIgnoreProperties(ignoreUnknown = true)", subClass), subClass);
+                    }
+                } catch (Throwable throwable) {
                 }
             } else if (Config.getInstant().getAnnotationStr().equals(Strings.loganSquareAnnotation)) {
                 subClass = parentClass.findInnerClassByName(className, false);

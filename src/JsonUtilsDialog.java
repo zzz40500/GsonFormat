@@ -43,7 +43,7 @@ public class JsonUtilsDialog extends JFrame {
         this.mFile = file;
         this.mProject = project;
         setContentPane(contentPane2);
-        setTitle("GsonFormat 1.2.2 ");
+        setTitle("GsonFormat 1.2.2");
         getRootPane().setDefaultButton(okButton);
         this.setAlwaysOnTop(true);
         initGeneratePanel(file);
@@ -64,8 +64,8 @@ public class JsonUtilsDialog extends JFrame {
         });
         formatBtn.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                String json = editTP.getText();
 
+                String json = editTP.getText();
                 json = json.trim();
                 if (json.startsWith("{")) {
                     JSONObject jsonObject = new JSONObject(json);

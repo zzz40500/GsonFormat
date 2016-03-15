@@ -6,25 +6,15 @@
       </html>
       ]]>
     </description>
-    <version>1.2.1</version>
+    <version>1.2.2</version>
     <vendor email="wyh405003836@126.com">zzz40500</vendor>
-    <!-- please see http://confluence.jetbrains.net/display/IDEADEV/Build+Number+Ranges for description -->
     <idea-version since-build="107.119"/>
-
-
-
     <actions>
-        <!-- Add your actions here -->
         <action id="Gsonformat" class="MainAction" text="GsonFormat">
             <add-to-group group-id="GenerateGroup" anchor="first"/>
             <keyboard-shortcut keymap="$default" first-keystroke="alt s"/>
         </action>
     </actions>
-
-    <!-- Add your actions here -->
-
-
     <extensions defaultExtensionNs="com.intellij">
-        <!-- Add your extensions here -->
     </extensions>
 </idea-plugin>

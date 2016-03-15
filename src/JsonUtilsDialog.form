@@ -33,7 +33,13 @@
               </grid>
             </constraints>
             <properties>
+              <enabled value="true"/>
+              <focusPainted value="false"/>
+              <focusable value="false"/>
+              <opaque value="false"/>
+              <requestFocusEnabled value="false"/>
               <text value="Format "/>
+              <verifyInputWhenFocusTarget value="false"/>
             </properties>
           </component>
           <grid id="59e1" binding="generateClassP" layout-manager="CardLayout" hgap="0" vgap="0">
@@ -87,7 +93,7 @@
               <autoscrolls value="true"/>
               <background color="-4802890"/>
               <enabled value="true"/>
-              <foreground color="-2105377"/>
+              <foreground color="-4802890"/>
             </properties>
             <border type="none">
               <size top="2" left="2" bottom="2" right="2"/>
@@ -110,7 +116,9 @@
           <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="1" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
           <gridbag weightx="1.0" weighty="0.0"/>
         </constraints>
-        <properties/>
+        <properties>
+          <foreground color="-8825528"/>
+        </properties>
         <border type="none"/>
         <children>
           <grid id="9538f" layout-manager="GridLayoutManager" row-count="1" column-count="5" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">

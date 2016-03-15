@@ -24,7 +24,7 @@ import java.util.regex.Pattern;
 
 /**
  * Created by dim on 2015/8/21.
- *  把 json 转成 实体类
+ * 把 json 转成 实体类
  */
 public class ConvertBridge {
 
@@ -159,6 +159,9 @@ public class ConvertBridge {
             item.setAutoCreateClassName(psiClass.getName());
             item.setFields(initFilterField(psiClass));
             item.setPsiClass(psiClass);
+            item.setType(mGeneratClass.getName()+"."+psiClass.getName());
+            mFilterClass.add(item);
+
             recursionInnerClass(item);
         }
     }
@@ -171,23 +174,23 @@ public class ConvertBridge {
     private void recursionInnerClass(InnerClassEntity innerClassEntity) {
 
         PsiClass[] innerClassArray = innerClassEntity.getPsiClass().getInnerClasses();
-        if (innerClassArray.length == 0) {
 
-            mFilterClass.add(innerClassEntity);
-        } else {
-            for (PsiClass psiClass : innerClassArray) {
-                InnerClassEntity item = new InnerClassEntity();
-                item.setClassName(psiClass.getName());
-                item.setAutoCreateClassName(psiClass.getName());
-                item.setFields(initFilterField(psiClass));
-                item.setPsiClass(psiClass);
-                recursionInnerClass(item);
-            }
+        for (PsiClass psiClass : innerClassArray) {
+            InnerClassEntity item = new InnerClassEntity();
+            item.setClassName(psiClass.getName());
+            item.setAutoCreateClassName(psiClass.getName());
+            item.setFields(initFilterField(psiClass));
+            item.setPsiClass(psiClass);
+            item.setPackName(innerClassEntity.getFieldPackName());
+            item.setType("%s");
+            mFilterClass.add(item);
+            recursionInnerClass(item);
         }
     }
 
     /**
      * 过滤掉// 和/** 注释
+     *
      * @param str
      * @return
      */
@@ -241,9 +244,8 @@ public class ConvertBridge {
 
 
     /**
-     *
      * 收集类的属性
-     * */
+     */
     public List<FieldEntity> initFilterField(PsiClass mClass) {
 
         PsiField[] psiFields = mClass.getAllFields();
@@ -384,7 +386,6 @@ public class ConvertBridge {
             String key = list.get(i);
             Object type = json.get(key);
             if (type instanceof JSONArray) {
-
                 listEntityList.add(key);
                 continue;
             }
@@ -452,7 +453,6 @@ public class ConvertBridge {
 
             } else {
 
-                typeStr = classEntity.getFieldPackName();
                 FieldEntity fieldEntity = new FieldEntity();
                 fieldEntity.setKey(key);
                 fieldEntity.setTargetClass(classEntity);
@@ -505,8 +505,8 @@ public class ConvertBridge {
             while (keys.hasNext()) {
                 String key = keys.next();
                 had = false;
-                for (FieldEntity fieldEntity : innerClassEntity.getFields()) {
 
+                for (FieldEntity fieldEntity : innerClassEntity.getFields()) {
                     if (fieldEntity.getKey().equals(key)) {
                         had = true;
                         break;
@@ -645,8 +645,8 @@ public class ConvertBridge {
     }
 
     /**
-     *
      * 转成驼峰
+     *
      * @param str
      * @return
      */
@@ -667,11 +667,7 @@ public class ConvertBridge {
         for (int i = 1; i < strings.length; i++) {
             stringBuilder.append(captureName(strings[i]));
         }
-
         return stringBuilder.toString();
-
     }
-
-
 }
 

@@ -9,8 +9,6 @@ public class Config {
 
     private boolean fieldPrivateMode = true;
     private boolean generateComments =true;
-
-
     private boolean useSerializedName = false;
 
     private boolean objectFromData=false;
@@ -45,7 +43,7 @@ public class Config {
     private String entityPackName;
 
     /**
-     * 错误次数,前两次提醒哪里查看错误日�?.
+     * 错误次数,前两次提醒哪里查看错误日志.
      */
     private int errorCount;
 
@@ -89,7 +87,7 @@ public class Config {
             config.setObjectFromData1(PropertiesComponent.getInstance().getBoolean("objectFromData1", false));
             config.setArrayFromData(PropertiesComponent.getInstance().getBoolean("arrayFromData", false));
             config.setArrayFromData1(PropertiesComponent.getInstance().getBoolean("arrayFromData1", false));
-            config.setSuffixStr(PropertiesComponent.getInstance().getValue("suffixStr", "Entity"));
+            config.setSuffixStr(PropertiesComponent.getInstance().getValue("suffixStr", "Bean"));
             config.setReuseEntity(PropertiesComponent.getInstance().getBoolean("reuseEntity", false));
             config.setObjectFromDataStr(PropertiesComponent.getInstance().getValue("objectFromDataStr", Strings.objectFromObject));
             config.setObjectFromDataStr1(PropertiesComponent.getInstance().getValue("objectFromDataStr1", Strings.objectFromObject1));
@@ -146,7 +144,6 @@ public class Config {
         }
 
 
-//        "d\\s*\\(\\s*\"{filed}\"\\s*\\)\";"
         return annotationStr.replaceAll("\\(", "(").replaceAll("\\)",")").replaceAll("\\s\\*","");
     }
 

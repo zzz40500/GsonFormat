@@ -11,8 +11,7 @@ public class ErrorDialog extends JFrame {
 
     public ErrorDialog(String errorInfo) {
         setContentPane(contentPane);
-
-        setTitle("error info");
+        setTitle("Error Info");
         getRootPane().setDefaultButton(okButton);
         this.setAlwaysOnTop(true);
         editTP.setText(errorInfo);

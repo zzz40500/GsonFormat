@@ -15,11 +15,14 @@
 
     <actions>
         <!-- Add your actions here -->
-        <action
-                id="MainAction" class="MainAction" text="GsonFormat">
+        <action id="Gsonformat" class="MainAction" text="GsonFormat">
             <add-to-group group-id="GenerateGroup" anchor="first"/>
+            <keyboard-shortcut keymap="$default" first-keystroke="alt s"/>
         </action>
     </actions>
+
+    <!-- Add your actions here -->
+
 
     <extensions defaultExtensionNs="com.intellij">
         <!-- Add your extensions here -->

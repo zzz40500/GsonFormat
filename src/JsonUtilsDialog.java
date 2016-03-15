@@ -1,3 +1,4 @@
+import com.intellij.json.psi.JsonObject;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.MessageType;
 import com.intellij.psi.PsiClass;
@@ -6,6 +7,8 @@ import com.intellij.psi.PsiFile;
 import com.intellij.psi.impl.source.PsiJavaFileImpl;
 import config.Config;
 import org.apache.http.util.TextUtils;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import utils.PsiClassUtil;
 import utils.Toast;
 
@@ -25,6 +28,7 @@ public class JsonUtilsDialog extends JFrame {
     private JLabel generateClassLB;
     private JTextField generateClassTF;
     public JPanel generateClassP;
+    private JButton formatBtn;
     protected PsiClass mClass;
     protected PsiElementFactory mFactory;
     protected PsiFile mFile;
@@ -56,6 +60,23 @@ public class JsonUtilsDialog extends JFrame {
                 } else {
                     onOK();
                 }
+            }
+        });
+        formatBtn.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                String json = editTP.getText();
+
+                json = json.trim();
+                if (json.startsWith("{")) {
+                    JSONObject jsonObject = new JSONObject(json);
+                    String formatJson = jsonObject.toString(4);
+                    editTP.setText(formatJson);
+                } else if (json.startsWith("[")) {
+                    JSONArray jsonArray = new JSONArray(json);
+                    String formatJson = jsonArray.toString(4);
+                    editTP.setText(formatJson);
+                }
+
             }
         });
         editTP.addKeyListener(new KeyAdapter() {

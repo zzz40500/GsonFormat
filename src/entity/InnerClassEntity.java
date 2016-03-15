@@ -124,14 +124,20 @@ public class InnerClassEntity extends FieldEntity {
     public void generateField(Project project, PsiElementFactory mFactory, PsiClass mClass) {
 
         try {
-            if (Config.getInstant().getAnnotationStr().equals(Strings.fastAnnotation)) {
-                mClass.addBefore(mFactory.createAnnotationFromText("@com.fasterxml.jackson.annotation.JsonIgnoreProperties(ignoreUnknown = true)", mClass), mClass);
-            }else if(Config.getInstant().getAnnotationStr().equals(Strings.loganSquareAnnotation)){
-                mClass.addBefore(mFactory.createAnnotationFromText("@com.bluelinelabs.logansquare.annotation.JsonObject", mClass), mClass);
-            }
 
+            if (Config.getInstant().getAnnotationStr().equals(Strings.fastAnnotation)) {
+                Pattern pattern = Pattern.compile("@.*?JsonIgnoreProperties");
+                if (!pattern.matcher(mClass.getFirstChild().getText()).find()) {
+                    mClass.addBefore(mFactory.createAnnotationFromText("@com.fasterxml.jackson.annotation.JsonIgnoreProperties(ignoreUnknown = true)", mClass), mClass);
+                }
+            } else if (Config.getInstant().getAnnotationStr().equals(Strings.loganSquareAnnotation)) {
+
+                Pattern pattern = Pattern.compile("@.*?JsonObject");
+                if (!pattern.matcher(mClass.getFirstChild().getText()).find()) {
+                    mClass.addBefore(mFactory.createAnnotationFromText("@com.bluelinelabs.logansquare.annotation.JsonObject", mClass), mClass);
+                }
+            }
         } catch (Throwable e) {
-            e.printStackTrace();
         }
 
         if (Config.getInstant().isObjectFromData()) {
@@ -162,13 +168,13 @@ public class InnerClassEntity extends FieldEntity {
             createGetAndSetMethod(mFactory, getFields(), mClass);
         }
 
+
     }
 
     public void generateClass(PsiElementFactory mFactory, PsiClass parentClass) {
 
         if (isGenerate()) {
             String classContent =
-//                    "@com.fasterxml.jackson.annotation.JsonIgnoreProperties(ignoreUnknown = true)"+
                     "public static class " + className + "{}";
             PsiClass subClass = mFactory.createClassFromText(classContent, null).getInnerClasses()[0];
 
@@ -203,11 +209,22 @@ public class InnerClassEntity extends FieldEntity {
 
                 createGetAndSetMethod(mFactory, getFields(), subClass);
             }
-//            parentClass.add(mFactory.createAnnotationFromText("@com.fasterxml.jackson.annotation.JsonIgnoreProperties(ignoreUnknown = true)", subClass));
             parentClass.add(subClass);
-//            if (Config.getInstant().getAnnotationStr().equals(Strings.fastAnnotation)) {
-//                subClass.addBefore(mFactory.createAnnotationFromText("@com.fasterxml.jackson.annotation.JsonIgnoreProperties(ignoreUnknown = true)", subClass), subClass);
-//            }
+
+            if (Config.getInstant().getAnnotationStr().equals(Strings.fastAnnotation)) {
+                subClass = parentClass.findInnerClassByName(className, false);
+                if (subClass != null) {
+                    subClass.addBefore(mFactory.createAnnotationFromText("@com.fasterxml.jackson.annotation.JsonIgnoreProperties(ignoreUnknown = true)", subClass), subClass);
+                }
+            } else if (Config.getInstant().getAnnotationStr().equals(Strings.loganSquareAnnotation)) {
+                subClass = parentClass.findInnerClassByName(className, false);
+                try {
+                    if (subClass != null) {
+                        subClass.addBefore(mFactory.createAnnotationFromText("@com.bluelinelabs.logansquare.annotation.JsonObject", subClass), subClass);
+                    }
+                } catch (Throwable throwable) {
+                }
+            }
         }
     }
 
@@ -227,7 +244,6 @@ public class InnerClassEntity extends FieldEntity {
             if (!filedName.equals(getKey()) || Config.getInstant().isUseSerializedName()) {
 
                 filedSb.append(Config.getInstant().geFullNameAnnotation().replaceAll("\\{filed\\}", getKey()));
-//                filedSb.append("@com.google.gson.annotations.SerializedName(\"").append(getKey()).append("\")\n");
             }
 
             if (Config.getInstant().isFieldPrivateMode()) {

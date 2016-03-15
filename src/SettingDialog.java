@@ -233,6 +233,9 @@ public class SettingDialog extends JFrame {
         } else if (annotaionStr.equals(Strings.jackAnnotation)) {
             jackRB.setSelected(true);
             annotationFT.setEnabled(false);
+        } else if (annotaionStr.equals(Strings.loganSquareAnnotation)) {
+            loganSquareCB.setSelected(true);
+            annotationFT.setEnabled(false);
         } else {
             otherRB.setSelected(true);
             annotationFT.setEnabled(true);

@@ -85,7 +85,7 @@ public class FieldEntity {
         }
         return type;
     }
-    public String getGenerType(){
+    public String getFullNameType(){
         if (targetClass != null) {
             return String.format(type, targetClass.getFieldPackName());
         }
@@ -147,9 +147,9 @@ public class FieldEntity {
             }
 
             if (Config.getInstant().isFieldPrivateMode()) {
-                filedSb.append("private  ").append(getGenerType()).append(" ").append(filedName).append(" ; ");
+                filedSb.append("private  ").append(getFullNameType()).append(" ").append(filedName).append(" ; ");
             } else {
-                filedSb.append("public  ").append(getGenerType()).append(" ").append(filedName).append(" ; ");
+                filedSb.append("public  ").append(getFullNameType()).append(" ").append(filedName).append(" ; ");
             }
             mClass.add(mFactory.createFieldFromText(filedSb.toString(), mClass));
         }

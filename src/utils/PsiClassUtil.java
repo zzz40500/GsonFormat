@@ -9,12 +9,12 @@ import org.apache.http.util.TextUtils;
 import java.io.File;
 
 /**
- * Created by zzz40500 on 15/8/22.
+ * Created by dim on 15/8/22.
  */
 public class PsiClassUtil {
 
 
-    public static  PsiClass exsit(PsiFile psiFile, String generateClass){
+    public static  PsiClass exist(PsiFile psiFile, String generateClass){
         PsiClass psiClass = null;
         PsiDirectory psiDirectory =null;
         if(psiFile instanceof PsiJavaFileImpl){
@@ -29,7 +29,6 @@ public class PsiClassUtil {
                 }
             }
         }
-
         if(psiDirectory ==null || psiDirectory.getVirtualFile().getCanonicalPath()==null){
             return null;
         }
@@ -100,7 +99,6 @@ public class PsiClassUtil {
             if((psiFile1 instanceof  PsiJavaFile )&& ((PsiJavaFile) psiFile1).getClasses().length>0 ){
                 psiClass=((PsiJavaFile) psiFile1).getClasses()[0];
             }
-
             if(psiClass != null) {
                 FileEditorManager manager = FileEditorManager.getInstance(project);
                 manager.openFile(psiClass.getContainingFile().getVirtualFile(), true, true);
@@ -122,16 +120,10 @@ public class PsiClassUtil {
 
                 FileEditorManager manager = FileEditorManager.getInstance(project);
                 manager.openFile(psiClass.getContainingFile().getVirtualFile(), true, true);
-
         }
 
         return psiClass;
-
     }
-
-
-
-
     public static PsiDirectory createPackageInSourceRoot(String packageName, PsiDirectory sourcePackageRoot) {
         return DirectoryUtil.createSubdirectories(packageName, sourcePackageRoot, ".");
     }

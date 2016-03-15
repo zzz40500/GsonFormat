@@ -8,16 +8,15 @@ import javax.swing.*;
 
 /**
  * Created with IntelliJ IDEA.
- * User: zzz40500
+ * User: dim
  * Date: 14-7-4
  * Time: 下午3:58
- * To change this template use File | Settings | File Templates.
  */
 public class WriterUtil extends WriteCommandAction.Simple {
 
     protected PsiClass mClass;
     private PsiElementFactory mFactory;
-    private Project project;
+    private Project mProject;
     private PsiFile mFile;
 
     public InnerClassEntity  mInnerClassEntity;
@@ -25,9 +24,10 @@ public class WriterUtil extends WriteCommandAction.Simple {
     public WriterUtil(JsonUtilsDialog mJsonUtilsDialog, JLabel jLabel,
                        PsiFile mFile, Project project, PsiClass mClass) {
         super(project, null);
+
         mFactory = JavaPsiFacade.getElementFactory(project);
         this.mFile = mFile;
-        this.project = project;
+        this.mProject = project;
         this.mClass = mClass;
 
     }
@@ -35,8 +35,8 @@ public class WriterUtil extends WriteCommandAction.Simple {
     @Override
     protected void run() {
 
-        mInnerClassEntity.generateFiled(mFactory, mClass);
-        JavaCodeStyleManager styleManager = JavaCodeStyleManager.getInstance(project);
+        mInnerClassEntity.generateField(mProject, mFactory, mClass);
+        JavaCodeStyleManager styleManager = JavaCodeStyleManager.getInstance(mProject);
         styleManager.optimizeImports(mFile);
         styleManager.shortenClassReferences(mClass);
     }

@@ -3,6 +3,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 public class ErrorDialog extends JFrame {
+
     private JPanel contentPane;
     private JTextPane editTP;
     private JButton okButton;
@@ -10,12 +11,10 @@ public class ErrorDialog extends JFrame {
 
     public ErrorDialog(String errorInfo) {
         setContentPane(contentPane);
-        setTitle("error info");
+        setTitle("Error Info");
         getRootPane().setDefaultButton(okButton);
         this.setAlwaysOnTop(true);
         editTP.setText(errorInfo);
-
-
         okButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 dispose();

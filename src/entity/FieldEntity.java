@@ -10,7 +10,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Created by zzz40500 on 2015/7/15.
+ * Created by dim on 2015/7/15.
  */
 public class FieldEntity {
 
@@ -18,8 +18,9 @@ public class FieldEntity {
     private String type;
     private String fieldName;
     private String value;
-
-    private  String autoCreateFiledName;
+    private String autoCreateFiledName;
+    private InnerClassEntity targetClass;
+    private boolean generate = true;
 
     public String getAutoCreateFiledName() {
         return autoCreateFiledName;
@@ -29,9 +30,6 @@ public class FieldEntity {
         this.autoCreateFiledName = autoCreateFiledName;
     }
 
-    private InnerClassEntity targetClass;
-
-
     public InnerClassEntity getTargetClass() {
         return targetClass;
     }
@@ -40,14 +38,11 @@ public class FieldEntity {
         this.targetClass = targetClass;
     }
 
-    private boolean generate = true;
-
     public boolean isGenerate() {
         return generate;
     }
 
     public void setGenerate(boolean generate) {
-
         this.generate = generate;
     }
 
@@ -55,13 +50,22 @@ public class FieldEntity {
         return fieldName;
     }
 
+    public String getGenerateFieldName() {
+
+        String field = CheckUtil.getInstant().handleArg(fieldName);
+        if (CheckUtil.getInstant().checkKeyWord(field)) {
+            return field + "X";
+        } else {
+            return field;
+        }
+    }
+
     public void setFieldName(String fieldName) {
-        if(TextUtils.isEmpty(fieldName)){
+        if (TextUtils.isEmpty(fieldName)) {
             return;
         }
         this.fieldName = fieldName;
     }
-
 
     public void setValue(String value) {
         this.value = value;
@@ -75,14 +79,18 @@ public class FieldEntity {
         return type;
     }
 
-
-    public String getRealType(){
-        if(targetClass != null){
-            return  String.format(type, targetClass.getClassName());
+    public String getRealType() {
+        if (targetClass != null) {
+            return String.format(type, targetClass.getClassName());
         }
         return type;
     }
-
+    public String getFullNameType(){
+        if (targetClass != null) {
+            return String.format(type, targetClass.getFieldPackName());
+        }
+        return type;
+    }
 
     public void setType(String type1) {
 
@@ -91,26 +99,28 @@ public class FieldEntity {
 
     public void checkAndSetType(String s) {
 
+        if (CheckUtil.getInstant().checkSimpleType(type.trim())) {
+            //基本类型
+            if (CheckUtil.getInstant().checkSimpleType(s.trim())) {
+                this.type = s;
+            }
+        } else {
+            //实体类:
+            if (targetClass != null) {
+                String regex = getType().replaceAll("%s", "(\\w+)").replaceAll(".", "\\.");
+                Pattern pattern = Pattern.compile(regex);
+                Matcher matcher = pattern.matcher(s);
+                if (matcher.find() && matcher.groupCount() > 0) {
+                    String temp = matcher.group(1);
+                    if (TextUtils.isEmpty(temp)) {
+                        targetClass.setClassName(targetClass.getAutoCreateClassName());
+                    } else {
+                        targetClass.setClassName(temp);
+                    }
+                }
+            }
+        }
 
-
-
-
-//        if(targetClass  == null){
-//
-//        }else{
-//            String regex = getType().replaceAll("%s", "(\\w+)").replaceAll(".", "\\.");
-//            Pattern pattern = Pattern.compile(regex);
-//            Matcher matcher = pattern.matcher(s);
-//            if (matcher.find()&&matcher.groupCount()>0) {
-//
-//                String temp=matcher.group(1);
-//                if(TextUtils.isEmpty(temp)){
-//                    targetClass.setClassName(targetClass.getAutoCreateClassName());
-//                }else{
-//                    targetClass.setClassName(temp);
-//                }
-//            }
-//        }
     }
 
     public String getKey() {
@@ -121,33 +131,25 @@ public class FieldEntity {
         return value;
     }
 
-
-    public void generateFiled(PsiElementFactory mFactory, PsiClass mClass,InnerClassEntity classEntity) {
+    public void generateFiled(PsiElementFactory mFactory, PsiClass mClass, InnerClassEntity classEntity) {
 
         if (generate) {
 
             StringBuilder filedSb = new StringBuilder();
-            String filedName = null;
-            if (CheckUtil.getInstant().checkKeyWord(getFieldName())) {
-                filedName = getFieldName() + "X";
-            } else {
-                filedName = getFieldName();
-            }
+            String filedName = getGenerateFieldName();
+
             if (!TextUtils.isEmpty(classEntity.getExtra())) {
                 filedSb.append(classEntity.getExtra()).append("\n");
                 classEntity.setExtra(null);
             }
-
             if (!filedName.equals(getKey()) || Config.getInstant().isUseSerializedName()) {
-
-                filedSb.append(Config.getInstant().geFullNametAnnotation().replaceAll("\\{filed\\}", getKey()));
-//                filedSb.append("@com.google.gson.annotations.SerializedName(\"").append(getKey()).append("\")\n");
+                filedSb.append(Config.getInstant().geFullNameAnnotation().replaceAll("\\{filed\\}", getKey()));
             }
 
             if (Config.getInstant().isFieldPrivateMode()) {
-                filedSb.append("private  ").append(getRealType()).append(" ").append(filedName).append(" ; ");
+                filedSb.append("private  ").append(getFullNameType()).append(" ").append(filedName).append(" ; ");
             } else {
-                filedSb.append("public  ").append(getRealType()).append(" ").append(filedName).append(" ; ");
+                filedSb.append("public  ").append(getFullNameType()).append(" ").append(filedName).append(" ; ");
             }
             mClass.add(mFactory.createFieldFromText(filedSb.toString(), mClass));
         }

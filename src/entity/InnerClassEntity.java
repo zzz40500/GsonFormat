@@ -1,7 +1,10 @@
 package entity;
 
+import com.intellij.openapi.project.Project;
+import com.intellij.psi.JavaPsiFacade;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElementFactory;
+import com.intellij.psi.search.GlobalSearchScope;
 import config.Config;
 import config.Strings;
 import org.apache.http.util.TextUtils;
@@ -12,15 +15,19 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Created by zzz40500 on 2015/7/15.
+ * Created by dim on 2015/7/15.
  */
 public class InnerClassEntity extends FieldEntity {
 
-
+    private PsiClass psiClass;
     private String packName;
     private String className;
     private List<? extends FieldEntity> fields;
+    /**
+     * 存储 comment
+     */
     private String extra;
+    private String autoCreateClassName;
 
     public String getExtra() {
         return extra;
@@ -29,8 +36,6 @@ public class InnerClassEntity extends FieldEntity {
     public void setExtra(String extra) {
         this.extra = extra;
     }
-
-    private String autoCreateClassName;
 
     public String getAutoCreateClassName() {
         return autoCreateClassName;
@@ -43,9 +48,6 @@ public class InnerClassEntity extends FieldEntity {
     public <T extends FieldEntity> void setFields(List<T> fields) {
         this.fields = fields;
     }
-
-    private PsiClass psiClass;
-
 
     public String getRealType() {
         return String.format(super.getType(), className);
@@ -69,7 +71,6 @@ public class InnerClassEntity extends FieldEntity {
 
     }
 
-
     public String getPackName() {
         return packName;
     }
@@ -90,7 +91,6 @@ public class InnerClassEntity extends FieldEntity {
         return fields;
     }
 
-
     public PsiClass getPsiClass() {
         return psiClass;
     }
@@ -99,9 +99,7 @@ public class InnerClassEntity extends FieldEntity {
         this.psiClass = psiClass;
     }
 
-    public String getFiledPackName() {
-
-
+    public String getFieldPackName() {
         String fullClassName;
         if (!TextUtils.isEmpty(getPackName())) {
             fullClassName = getPackName() + "." + getClassName();
@@ -109,21 +107,41 @@ public class InnerClassEntity extends FieldEntity {
             fullClassName = getClassName();
         }
 
+        if(TextUtils.isEmpty(getType())){
+           return fullClassName;
+        }
         return String.format(getType(), fullClassName);
     }
 
+    private PsiClass getPsiClassByName(Project project, String cls) {
+        GlobalSearchScope searchScope = GlobalSearchScope.allScope(project);
+        JavaPsiFacade javaPsiFacade = JavaPsiFacade.getInstance(project);
+        return javaPsiFacade.findClass(cls, searchScope);
+    }
 
-    public void generateFiled(PsiElementFactory mFactory, PsiClass mClass) {
+//    public void addImportClass(PsiClass mClass,PsiElementFactory mFactory,Project project){
+//
+//        mClass.addBefore(mFactory.createImportStatement(getPsiClassByName(project, "java.util.List")),mClass);
+//    }
 
+    public void generateField(Project project, PsiElementFactory mFactory, PsiClass mClass) {
 
         try {
+
             if (Config.getInstant().getAnnotationStr().equals(Strings.fastAnnotation)) {
-                mClass.addBefore(mFactory.createAnnotationFromText("@com.fasterxml.jackson.annotation.JsonIgnoreProperties(ignoreUnknown = true)", mClass), mClass);
+                Pattern pattern = Pattern.compile("@.*?JsonIgnoreProperties");
+                if (!pattern.matcher(mClass.getFirstChild().getText()).find()) {
+                    mClass.addBefore(mFactory.createAnnotationFromText("@com.fasterxml.jackson.annotation.JsonIgnoreProperties(ignoreUnknown = true)", mClass), mClass);
+                }
+            } else if (Config.getInstant().getAnnotationStr().equals(Strings.loganSquareAnnotation)) {
+
+                Pattern pattern = Pattern.compile("@.*?JsonObject");
+                if (!pattern.matcher(mClass.getFirstChild().getText()).find()) {
+                    mClass.addBefore(mFactory.createAnnotationFromText("@com.bluelinelabs.logansquare.annotation.JsonObject", mClass), mClass);
+                }
             }
         } catch (Throwable e) {
-
         }
-
 
         if (Config.getInstant().isObjectFromData()) {
             createMethod(mFactory, Config.getInstant().getObjectFromDataStr().replace("$ClassName$", mClass.getName()).trim(), mClass);
@@ -142,8 +160,6 @@ public class InnerClassEntity extends FieldEntity {
 
         for (FieldEntity fieldEntity : getFields()) {
             if (fieldEntity instanceof InnerClassEntity) {
-
-
                 ((InnerClassEntity) fieldEntity).generateSupperFiled(mFactory, mClass);
                 ((InnerClassEntity) fieldEntity).generateClass(mFactory, mClass);
             } else {
@@ -152,9 +168,9 @@ public class InnerClassEntity extends FieldEntity {
         }
 
         if (Config.getInstant().isFieldPrivateMode()) {
-            createSetMethod(mFactory, getFields(), mClass);
-            createGetMethod(mFactory, getFields(), mClass);
+            createGetAndSetMethod(mFactory, getFields(), mClass);
         }
+
 
     }
 
@@ -184,10 +200,8 @@ public class InnerClassEntity extends FieldEntity {
             for (FieldEntity fieldEntity : getFields()) {
 
                 if (fieldEntity instanceof InnerClassEntity) {
-
                     ((InnerClassEntity) fieldEntity).generateSupperFiled(mFactory, subClass);
-                    ((InnerClassEntity) fieldEntity).setPackName(getFiledPackName());
-
+                    ((InnerClassEntity) fieldEntity).setPackName(getFieldPackName());
                     ((InnerClassEntity) fieldEntity).generateClass(mFactory, subClass);
                 } else {
 
@@ -195,13 +209,28 @@ public class InnerClassEntity extends FieldEntity {
                 }
             }
             if (Config.getInstant().isFieldPrivateMode()) {
-                createSetMethod(mFactory, getFields(), subClass);
-                createGetMethod(mFactory, getFields(), subClass);
+
+                createGetAndSetMethod(mFactory, getFields(), subClass);
             }
             parentClass.add(subClass);
-//            if (Config.getInstant().getAnnotationStr().equals(Strings.fastAnnotation)) {
-//                subClass.addBefore(mFactory.createAnnotationFromText("@com.fasterxml.jackson.annotation.JsonIgnoreProperties(ignoreUnknown = true)", subClass), subClass);
-//            }
+
+            if (Config.getInstant().getAnnotationStr().equals(Strings.fastAnnotation)) {
+                subClass = parentClass.findInnerClassByName(className, false);
+                try {
+                    if (subClass != null) {
+                        subClass.addBefore(mFactory.createAnnotationFromText("@com.fasterxml.jackson.annotation.JsonIgnoreProperties(ignoreUnknown = true)", subClass), subClass);
+                    }
+                } catch (Throwable throwable) {
+                }
+            } else if (Config.getInstant().getAnnotationStr().equals(Strings.loganSquareAnnotation)) {
+                subClass = parentClass.findInnerClassByName(className, false);
+                try {
+                    if (subClass != null) {
+                        subClass.addBefore(mFactory.createAnnotationFromText("@com.bluelinelabs.logansquare.annotation.JsonObject", subClass), subClass);
+                    }
+                } catch (Throwable throwable) {
+                }
+            }
         }
     }
 
@@ -210,11 +239,9 @@ public class InnerClassEntity extends FieldEntity {
         if (isGenerate()) {
 
             StringBuilder filedSb = new StringBuilder();
-            String filedName = null;
-            if (CheckUtil.getInstant().checkKeyWord(getFieldName())) {
-                filedName = getFieldName() + "X";
-            } else {
-                filedName = getFieldName();
+            String filedName = getGenerateFieldName();
+            if (CheckUtil.getInstant().checkKeyWord(filedName)) {
+                filedName = filedName + "X";
             }
             if (!TextUtils.isEmpty(this.getExtra())) {
                 filedSb.append(this.getExtra()).append("\n");
@@ -222,8 +249,7 @@ public class InnerClassEntity extends FieldEntity {
             }
             if (!filedName.equals(getKey()) || Config.getInstant().isUseSerializedName()) {
 
-                filedSb.append(Config.getInstant().geFullNametAnnotation().replaceAll("\\{filed\\}", getKey()));
-//                filedSb.append("@com.google.gson.annotations.SerializedName(\"").append(getKey()).append("\")\n");
+                filedSb.append(Config.getInstant().geFullNameAnnotation().replaceAll("\\{filed\\}", getKey()));
             }
 
             if (Config.getInstant().isFieldPrivateMode()) {
@@ -234,7 +260,7 @@ public class InnerClassEntity extends FieldEntity {
                 filedSb.append("public  ");
             }
 
-            filedSb.append(getFiledPackName()).append(" ").append(filedName).append(" ; ");
+            filedSb.append(getFieldPackName()).append(" ").append(filedName).append(" ; ");
             prentClass.add(mFactory.createFieldFromText(filedSb.toString(), prentClass));
         }
     }
@@ -243,15 +269,44 @@ public class InnerClassEntity extends FieldEntity {
         cla.add(mFactory.createMethodFromText(method, cla));
     }
 
-    private void createSetMethod(PsiElementFactory mFactory, List<? extends FieldEntity> fields, PsiClass mClass) {
+    public String captureName(String name) {
+
+        if (name.length() > 0) {
+            name = name.substring(0, 1).toUpperCase() + name.substring(1);
+        }
+        return name;
+    }
+
+    private void createGetAndSetMethod(PsiElementFactory mFactory, List<? extends FieldEntity> fields, PsiClass mClass) {
 
         for (FieldEntity field1 : fields) {
             if (field1.isGenerate()) {
-                String field = field1.getFieldName();
-                String arg = field;
-
+                String field = field1.getGenerateFieldName();
                 String typeStr = field1.getRealType();
+                if (Config.getInstant().isUseFiledNamePrefix()) {
+                    String temp = field.replaceAll("^" + Config.getInstant().getFiledNamePreFixStr(), "");
+                    if (!TextUtils.isEmpty(temp)) {
 
+                        field = temp;
+                    }
+                }
+                if (typeStr.equals("boolean") || typeStr.equals("Boolean")) {
+                    String method = "public ".concat(typeStr).concat("   is").concat(
+                            captureName(field)).concat("() {   return ").concat(
+                            field1.getGenerateFieldName()).concat(" ;} ");
+                    mClass.add(mFactory.createMethodFromText(method, mClass));
+                } else {
+
+                    String method = "public "
+                            .concat(typeStr).concat(
+                                    "   get").concat(
+                                    captureName(field)).concat(
+                                    "() {   return ").concat(
+                                    field1.getGenerateFieldName()).concat(" ;} ");
+                    mClass.add(mFactory.createMethodFromText(method, mClass));
+                }
+
+                String arg = field;
                 if (Config.getInstant().isUseFiledNamePrefix()) {
 
                     String temp = field.replaceAll("^" + Config.getInstant().getFiledNamePreFixStr(), "");
@@ -266,77 +321,21 @@ public class InnerClassEntity extends FieldEntity {
                             } else {
                                 arg = arg.toLowerCase();
                             }
-
                         }
-
                     }
-
                 }
 
-                String method = "public void  set".concat(captureName(field)).concat("( ").concat(typeStr).concat(" ").concat(arg).concat(") {   this.").concat(field1.getFieldName()).concat(" = ").concat(arg).concat(";} ");
+                String method = "public void  set".concat(captureName(field)).concat("( ").concat(typeStr).concat(" ").concat(arg).concat(") {   ");
+                if (field1.getGenerateFieldName().equals(arg)) {
+                    method = method.concat("this.").concat(field1.getGenerateFieldName()).concat(" = ").concat(arg).concat(";} ");
+                } else {
+                    method = method.concat(field1.getGenerateFieldName()).concat(" = ").concat(arg).concat(";} ");
+                }
+
                 mClass.add(mFactory.createMethodFromText(method, mClass));
             }
         }
 
-    }
-
-    public String captureName(String name) {
-
-        if (name.length() > 0) {
-            name = name.substring(0, 1).toUpperCase() + name.substring(1);
-        }
-        return name;
-    }
-
-
-    private void createGetMethod(PsiElementFactory mFactory, List<? extends FieldEntity> fields, PsiClass mClass) {
-
-        for (FieldEntity field1 : fields) {
-            if (field1.isGenerate()) {
-                String field = field1.getFieldName();
-
-                String typeStr = field1.getRealType();
-                if (Config.getInstant().isUseFiledNamePrefix()) {
-                    String temp = field.replaceAll("^" + Config.getInstant().getFiledNamePreFixStr(), "");
-                    if (!TextUtils.isEmpty(temp)) {
-                        field = temp;
-                    }
-                }
-
-                if (typeStr.equals("boolean")) {
-
-                    String method = "public ".concat( typeStr ).concat( "   is" ).concat(
-                            captureName(field) ).concat( "() {   return " ).concat(
-                            field1.getFieldName() ).concat( " ;} ");
-                    mClass.add(mFactory.createMethodFromText(method, mClass));
-                } else {
-
-                    String method = "public "
-                            .concat( typeStr ).concat(
-                                    "   get" ).concat(
-                                    captureName(field) ).concat(
-                                    "() {   return " ).concat(
-                                    field1.getFieldName() ).concat( " ;} ");
-                    mClass.add(mFactory.createMethodFromText(method, mClass));
-                }
-            }
-
-
-        }
-
-    }
-
-    public static void main(String[] args) {
-        String s = "dfdfd";
-
-
-        Pattern pattern = Pattern.compile("(\\w+)");
-        Matcher matcher = pattern.matcher(s);
-        if (matcher.find() && matcher.groupCount() > 0) {
-
-            System.out.print(matcher.group(1));
-            System.out.print(matcher.groupCount());
-        }
     }
 
 

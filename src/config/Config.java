@@ -3,12 +3,12 @@ package config;
 import com.intellij.ide.util.PropertiesComponent;
 
 /**
- * Created by zzz40500 on 15/5/31.
+ * Created by dim on 15/5/31.
  */
 public class Config {
 
     private boolean fieldPrivateMode = true;
-
+    private boolean generateComments =true;
     private boolean useSerializedName = false;
 
     private boolean objectFromData=false;
@@ -33,7 +33,7 @@ public class Config {
 
 
     /**
-     * 处女座模�?
+     * 处女座模
      */
     private boolean virgoMode=true;
 
@@ -43,7 +43,7 @@ public class Config {
     private String entityPackName;
 
     /**
-     * 错误次数,前两次提醒哪里查看错误日�?.
+     * 错误次数,前两次提醒哪里查看错误日志.
      */
     private int errorCount;
 
@@ -74,6 +74,7 @@ public class Config {
         PropertiesComponent.getInstance().setValue("errorCount", errorCount + "");
         PropertiesComponent.getInstance().setValue("entityPackName", entityPackName + "");
         PropertiesComponent.getInstance().setValue("useFiledNamePrefix", useFiledNamePrefix + "");
+        PropertiesComponent.getInstance().setValue("generateComments", generateComments + "");
     }
 
     private static Config config;
@@ -86,7 +87,7 @@ public class Config {
             config.setObjectFromData1(PropertiesComponent.getInstance().getBoolean("objectFromData1", false));
             config.setArrayFromData(PropertiesComponent.getInstance().getBoolean("arrayFromData", false));
             config.setArrayFromData1(PropertiesComponent.getInstance().getBoolean("arrayFromData1", false));
-            config.setSuffixStr(PropertiesComponent.getInstance().getValue("suffixStr", "Entity"));
+            config.setSuffixStr(PropertiesComponent.getInstance().getValue("suffixStr", "Bean"));
             config.setReuseEntity(PropertiesComponent.getInstance().getBoolean("reuseEntity", false));
             config.setObjectFromDataStr(PropertiesComponent.getInstance().getValue("objectFromDataStr", Strings.objectFromObject));
             config.setObjectFromDataStr1(PropertiesComponent.getInstance().getValue("objectFromDataStr1", Strings.objectFromObject1));
@@ -98,6 +99,7 @@ public class Config {
             config.setErrorCount(PropertiesComponent.getInstance().getOrInitInt("errorCount", 0));
             config.setVirgoMode(PropertiesComponent.getInstance().getBoolean("virgoMode", true));
             config.setUseFiledNamePrefix(PropertiesComponent.getInstance().getBoolean("useFiledNamePrefix", false));
+            config.setGenerateComments(PropertiesComponent.getInstance().getBoolean("generateComments", true));
 
         }
         return config;
@@ -126,7 +128,7 @@ public class Config {
     public String getEntityPackName() {
         return entityPackName;
     }
-    public String geFullNametAnnotation(){
+    public String geFullNameAnnotation(){
 
         if(annotationStr.equals(Strings.gsonAnnotation)){
             return Strings.gsonFullNameAnnotation;
@@ -137,12 +139,22 @@ public class Config {
         if(annotationStr.equals(Strings.fastAnnotation)){
             return Strings.fastFullNameAnnotation;
         }
+        if(annotationStr.equals(Strings.loganSquareAnnotation)){
+            return Strings.loganSquareFullNameAnnotation;
+        }
 
-//        "d\\s*\\(\\s*\"{filed}\"\\s*\\)\";"
+
         return annotationStr.replaceAll("\\(", "(").replaceAll("\\)",")").replaceAll("\\s\\*","");
     }
 
 
+    public boolean isGenerateComments() {
+        return generateComments;
+    }
+
+    public void setGenerateComments(boolean generateComments) {
+        this.generateComments = generateComments;
+    }
 
     public void setEntityPackName(String entityPackName) {
         this.entityPackName = entityPackName;

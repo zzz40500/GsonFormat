@@ -15,7 +15,7 @@ import org.jdesktop.swingx.treetable.TreeTableNode;
  */
 public class FiledTreeTableModel extends DefaultTreeTableModel {
 
-    private String[] _names = {" Key ", "Value", "Data Types"," FiledName "};
+    private String[] _names = {" Key ", "Value", "Data Type"," Field name "};
     private Class[] _types = {Object.class,Object.class, Object.class, Object.class};
 
 
@@ -102,13 +102,12 @@ public class FiledTreeTableModel extends DefaultTreeTableModel {
     @Override
     public boolean isCellEditable(Object node, int column) {
 
-
-
         if(column == 2){
+
             return  true;
         }
-
         if(column == 3){
+
             return  true;
         }
         return false;

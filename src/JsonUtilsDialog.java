@@ -1,3 +1,4 @@
+import com.intellij.json.psi.JsonObject;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.MessageType;
 import com.intellij.psi.PsiClass;
@@ -6,6 +7,8 @@ import com.intellij.psi.PsiFile;
 import com.intellij.psi.impl.source.PsiJavaFileImpl;
 import config.Config;
 import org.apache.http.util.TextUtils;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import utils.PsiClassUtil;
 import utils.Toast;
 
@@ -14,6 +17,7 @@ import java.awt.*;
 import java.awt.event.*;
 
 public class JsonUtilsDialog extends JFrame {
+
     private CardLayout cardLayout;
     private JPanel contentPane2;
     private JButton okButton;
@@ -24,32 +28,29 @@ public class JsonUtilsDialog extends JFrame {
     private JLabel generateClassLB;
     private JTextField generateClassTF;
     public JPanel generateClassP;
-
-
+    private JButton formatBtn;
     protected PsiClass mClass;
     protected PsiElementFactory mFactory;
     protected PsiFile mFile;
     protected Project mProject;
-
     public String mErrorInfo = null;
     public String currentClass = null;
 
     public JsonUtilsDialog(PsiClass mClass, PsiElementFactory factory, PsiFile file, Project project) throws HeadlessException {
+
         this.mClass = mClass;
         this.mFactory = factory;
         this.mFile = file;
         this.mProject = project;
         setContentPane(contentPane2);
-        setTitle("GsonFormat 1.2.1 ");
+        setTitle("GsonFormat 1.2.2");
         getRootPane().setDefaultButton(okButton);
         this.setAlwaysOnTop(true);
         initGeneratePanel(file);
-
         initListener();
     }
 
     private void initListener() {
-
 
         okButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -61,16 +62,31 @@ public class JsonUtilsDialog extends JFrame {
                 }
             }
         });
+        formatBtn.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+
+                String json = editTP.getText();
+                json = json.trim();
+                if (json.startsWith("{")) {
+                    JSONObject jsonObject = new JSONObject(json);
+                    String formatJson = jsonObject.toString(4);
+                    editTP.setText(formatJson);
+                } else if (json.startsWith("[")) {
+                    JSONArray jsonArray = new JSONArray(json);
+                    String formatJson = jsonArray.toString(4);
+                    editTP.setText(formatJson);
+                }
+
+            }
+        });
         editTP.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent keyEvent) {
                 super.keyReleased(keyEvent);
-                if (keyEvent.getKeyCode() == KeyEvent.VK_ENTER ) {
+                if (keyEvent.getKeyCode() == KeyEvent.VK_ENTER) {
 
-                        onOK();
+                    onOK();
                 }
-
-
             }
         });
         generateClassP.addKeyListener(new KeyAdapter() {
@@ -78,9 +94,8 @@ public class JsonUtilsDialog extends JFrame {
             public void keyReleased(KeyEvent keyEvent) {
                 super.keyReleased(keyEvent);
                 if (keyEvent.getKeyCode() == KeyEvent.VK_ENTER) {
-                        editTP.requestFocus(true);
+                    editTP.requestFocus(true);
                 }
-
             }
         });
         errorLB.addMouseListener(new MouseAdapter() {
@@ -94,7 +109,6 @@ public class JsonUtilsDialog extends JFrame {
                     errorDialog.setLocationRelativeTo(null);
                     errorDialog.setVisible(true);
                 }
-
             }
         });
         cancelButton.addActionListener(new ActionListener() {
@@ -107,15 +121,12 @@ public class JsonUtilsDialog extends JFrame {
                 openSettingDialog();
             }
         });
-
-
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent e) {
                 onCancel();
             }
         });
-
         contentPane2.registerKeyboardAction(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 onCancel();
@@ -124,6 +135,7 @@ public class JsonUtilsDialog extends JFrame {
     }
 
     private void initGeneratePanel(PsiFile file) {
+
         cardLayout = (CardLayout) generateClassP.getLayout();
         generateClassTF.setBackground(errorLB.getBackground());
         currentClass = ((PsiJavaFileImpl) file).getPackageName() + "." + file.getName().split("\\.")[0];
@@ -151,13 +163,10 @@ public class JsonUtilsDialog extends JFrame {
             public void mouseClicked(MouseEvent mouseEvent) {
                 super.mouseClicked(mouseEvent);
                 cardLayout.next(generateClassP);
-
-
-                if(generateClassLB.getText().equals(currentClass) &&! TextUtils.isEmpty( Config.getInstant().getEntityPackName() )&& !Config.getInstant().getEntityPackName().equals("null")){
-                    generateClassLB.setText( Config.getInstant().getEntityPackName());
-                    generateClassTF.setText( Config.getInstant().getEntityPackName());
+                if (generateClassLB.getText().equals(currentClass) && !TextUtils.isEmpty(Config.getInstant().getEntityPackName()) && !Config.getInstant().getEntityPackName().equals("null")) {
+                    generateClassLB.setText(Config.getInstant().getEntityPackName());
+                    generateClassTF.setText(Config.getInstant().getEntityPackName());
                 }
-
                 generateClassTF.requestFocus(true);
             }
 
@@ -165,27 +174,26 @@ public class JsonUtilsDialog extends JFrame {
     }
 
     private void onOK() {
+
         this.setAlwaysOnTop(false);
         String jsonSTR = editTP.getText();
-        if(TextUtils.isEmpty(jsonSTR)){
+        if (TextUtils.isEmpty(jsonSTR)) {
             return;
         }
-
-        String generateClassName=generateClassTF.getText().replaceAll(" ","").replaceAll(".java$", "");
-
-        if(TextUtils.isEmpty(generateClassName)|| generateClassName.endsWith(".")){
-            Toast.make(mProject,generateClassP, MessageType.ERROR,"the path is not allowed");
+        String generateClassName = generateClassTF.getText().replaceAll(" ", "").replaceAll(".java$", "");
+        if (TextUtils.isEmpty(generateClassName) || generateClassName.endsWith(".")) {
+            Toast.make(mProject, generateClassP, MessageType.ERROR, "the path is not allowed");
             return;
         }
-        PsiClass generateClass=null;
+        PsiClass generateClass = null;
         if (!currentClass.equals(generateClassName)) {
-            generateClass = PsiClassUtil.exsit(mFile, generateClassTF.getText());
-        }else{
-            generateClass=mClass;
+            generateClass = PsiClassUtil.exist(mFile, generateClassTF.getText());
+        } else {
+            generateClass = mClass;
         }
 
         new ConvertBridge(
-                this, errorLB, jsonSTR, mFile, mProject,generateClass,
+                this, errorLB, jsonSTR, mFile, mProject, generateClass,
                 mClass, generateClassName).run();
     }
 
@@ -194,34 +202,33 @@ public class JsonUtilsDialog extends JFrame {
     }
 
 
-    public PsiClass getmClass() {
+    public PsiClass getClss() {
         return mClass;
     }
 
-    public void setmClass(PsiClass mClass) {
+    public void setClass(PsiClass mClass) {
         this.mClass = mClass;
     }
 
-    public PsiElementFactory getmFactory() {
+    public PsiElementFactory getFactory() {
         return mFactory;
     }
 
-    public void setmFactory(PsiElementFactory mFactory) {
+    public void setFactory(PsiElementFactory mFactory) {
         this.mFactory = mFactory;
     }
 
-
-    public void setmProject(Project mProject) {
+    public void setProject(Project mProject) {
         this.mProject = mProject;
     }
 
-    public void setmFile(PsiFile mFile) {
+    public void setFile(PsiFile mFile) {
         this.mFile = mFile;
     }
 
     private void createUIComponents() {
-    }
 
+    }
 
     public void openSettingDialog() {
 
@@ -233,7 +240,5 @@ public class JsonUtilsDialog extends JFrame {
 
     }
 
-    public static void main(String[] args) {
 
-    }
 }

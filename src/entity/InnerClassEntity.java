@@ -1,9 +1,7 @@
 package entity;
 
 import com.intellij.openapi.project.Project;
-import com.intellij.psi.JavaPsiFacade;
-import com.intellij.psi.PsiClass;
-import com.intellij.psi.PsiElementFactory;
+import com.intellij.psi.*;
 import com.intellij.psi.search.GlobalSearchScope;
 import config.Config;
 import config.Strings;
@@ -107,8 +105,8 @@ public class InnerClassEntity extends FieldEntity {
             fullClassName = getClassName();
         }
 
-        if(TextUtils.isEmpty(getType())){
-           return fullClassName;
+        if (TextUtils.isEmpty(getType())) {
+            return fullClassName;
         }
         return String.format(getType(), fullClassName);
     }
@@ -129,15 +127,23 @@ public class InnerClassEntity extends FieldEntity {
         try {
 
             if (Config.getInstant().getAnnotationStr().equals(Strings.fastAnnotation)) {
-                Pattern pattern = Pattern.compile("@.*?JsonIgnoreProperties");
-                if (!pattern.matcher(mClass.getFirstChild().getText()).find()) {
-                    mClass.addBefore(mFactory.createAnnotationFromText("@com.fasterxml.jackson.annotation.JsonIgnoreProperties(ignoreUnknown = true)", mClass), mClass);
-                }
-            } else if (Config.getInstant().getAnnotationStr().equals(Strings.loganSquareAnnotation)) {
 
+//                PsiModifierList modifierList = mClass.getModifierList();
+//                PsiElement firstChild = modifierList.getFirstChild();
+//                Pattern pattern = Pattern.compile("@.*?JsonIgnoreProperties");
+
+//                if (!pattern.matcher(firstChild.getText()).find()) {
+//                    PsiAnnotation annotationFromText =
+//                            mFactory.createAnnotationFromText("@com.fasterxml.jackson.annotation.JsonIgnoreProperties(ignoreUnknown = true)", mClass);
+//                    modifierList.addBefore(annotationFromText, firstChild);
+//                }
+            } else if (Config.getInstant().getAnnotationStr().equals(Strings.loganSquareAnnotation)) {
+                PsiModifierList modifierList = mClass.getModifierList();
+                PsiElement firstChild = modifierList.getFirstChild();
                 Pattern pattern = Pattern.compile("@.*?JsonObject");
-                if (!pattern.matcher(mClass.getFirstChild().getText()).find()) {
-                    mClass.addBefore(mFactory.createAnnotationFromText("@com.bluelinelabs.logansquare.annotation.JsonObject", mClass), mClass);
+                if (firstChild != null && !pattern.matcher(firstChild.getText()).find()) {
+                    PsiAnnotation annotationFromText = mFactory.createAnnotationFromText("@com.bluelinelabs.logansquare.annotation.JsonObject", mClass);
+                    modifierList.addBefore(annotationFromText, firstChild);
                 }
             }
         } catch (Throwable e) {
@@ -214,21 +220,27 @@ public class InnerClassEntity extends FieldEntity {
             }
             parentClass.add(subClass);
 
-            if (Config.getInstant().getAnnotationStr().equals(Strings.fastAnnotation)) {
-                subClass = parentClass.findInnerClassByName(className, false);
-                try {
-                    if (subClass != null) {
-                        subClass.addBefore(mFactory.createAnnotationFromText("@com.fasterxml.jackson.annotation.JsonIgnoreProperties(ignoreUnknown = true)", subClass), subClass);
-                    }
-                } catch (Throwable throwable) {
-                }
+            if (Config.getInstant().getAnnotationStr().equals(Strings.jackAnnotation)) {
+//                subClass = parentClass.findInnerClassByName(className, false);
+//                if (subClass != null) {
+//
+//                    PsiModifierList modifierList = subClass.getModifierList();
+//                    PsiAnnotation annotationFromText =
+//                            mFactory.createAnnotationFromText("@com.fasterxml.jackson.annotation.JsonIgnoreProperties(ignoreUnknown = true)", subClass);
+//
+//                    PsiElement firstChild = modifierList.getFirstChild();
+//                    modifierList.addBefore(annotationFromText, firstChild);
+//
+//                }
+
             } else if (Config.getInstant().getAnnotationStr().equals(Strings.loganSquareAnnotation)) {
                 subClass = parentClass.findInnerClassByName(className, false);
-                try {
-                    if (subClass != null) {
-                        subClass.addBefore(mFactory.createAnnotationFromText("@com.bluelinelabs.logansquare.annotation.JsonObject", subClass), subClass);
-                    }
-                } catch (Throwable throwable) {
+                if (subClass != null) {
+                    PsiModifierList modifierList = subClass.getModifierList();
+                    PsiAnnotation annotationFromText =
+                            mFactory.createAnnotationFromText("@com.bluelinelabs.logansquare.annotation.JsonObject", subClass);
+                    PsiElement firstChild = modifierList.getFirstChild();
+                    modifierList.addBefore(annotationFromText, firstChild);
                 }
             }
         }

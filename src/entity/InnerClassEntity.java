@@ -18,9 +18,10 @@ import java.util.regex.Pattern;
 public class InnerClassEntity extends FieldEntity {
 
     private PsiClass psiClass;
-    private String packName;
+    private String fieldTypeSuffix;
     private String className;
     private List<? extends FieldEntity> fields;
+    private String packName;
     /**
      * 存储 comment
      */
@@ -47,6 +48,15 @@ public class InnerClassEntity extends FieldEntity {
         this.fields = fields;
     }
 
+
+    public String getPackName() {
+        return packName;
+    }
+
+    public void setPackName(String packName) {
+        this.packName = packName;
+    }
+
     public String getRealType() {
         return String.format(super.getType(), className);
     }
@@ -69,12 +79,12 @@ public class InnerClassEntity extends FieldEntity {
 
     }
 
-    public String getPackName() {
-        return packName;
+    public String getFieldTypeSuffix() {
+        return fieldTypeSuffix;
     }
 
-    public void setPackName(String packName) {
-        this.packName = packName;
+    public void setFieldTypeSuffix(String fieldTypeSuffix) {
+        this.fieldTypeSuffix = fieldTypeSuffix;
     }
 
     public String getClassName() {
@@ -97,10 +107,10 @@ public class InnerClassEntity extends FieldEntity {
         this.psiClass = psiClass;
     }
 
-    public String getFieldPackName() {
+    public String getClassFieldType() {
         String fullClassName;
-        if (!TextUtils.isEmpty(getPackName())) {
-            fullClassName = getPackName() + "." + getClassName();
+        if (!TextUtils.isEmpty(getFieldTypeSuffix())) {
+            fullClassName = getFieldTypeSuffix() + "." + getClassName();
         } else {
             fullClassName = getClassName();
         }
@@ -108,7 +118,10 @@ public class InnerClassEntity extends FieldEntity {
         if (TextUtils.isEmpty(getType())) {
             return fullClassName;
         }
-        return String.format(getType(), fullClassName);
+
+        String string=getType().replaceAll("List<","java.util.List<");
+
+        return String.format(string, fullClassName);
     }
 
     private PsiClass getPsiClassByName(Project project, String cls) {
@@ -207,7 +220,7 @@ public class InnerClassEntity extends FieldEntity {
 
                 if (fieldEntity instanceof InnerClassEntity) {
                     ((InnerClassEntity) fieldEntity).generateSupperFiled(mFactory, subClass);
-                    ((InnerClassEntity) fieldEntity).setPackName(getFieldPackName());
+                    ((InnerClassEntity) fieldEntity).setFieldTypeSuffix(getClassFieldType());
                     ((InnerClassEntity) fieldEntity).generateClass(mFactory, subClass);
                 } else {
 
@@ -272,7 +285,7 @@ public class InnerClassEntity extends FieldEntity {
                 filedSb.append("public  ");
             }
 
-            filedSb.append(getFieldPackName()).append(" ").append(filedName).append(" ; ");
+            filedSb.append(getClassFieldType()).append(" ").append(filedName).append(" ; ");
             prentClass.add(mFactory.createFieldFromText(filedSb.toString(), prentClass));
         }
     }

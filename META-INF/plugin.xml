@@ -6,9 +6,9 @@
       </html>
       ]]>
     </description>
-    <version>1.2.2</version>
+    <version>1.2.3</version>
     <vendor email="wyh405003836@126.com">zzz40500</vendor>
-    <idea-version since-build="107.119"/>
+    <idea-version since-build="107.120"/>
     <actions>
         <action id="Gsonformat" class="MainAction" text="GsonFormat">
             <add-to-group group-id="GenerateGroup" anchor="first"/>

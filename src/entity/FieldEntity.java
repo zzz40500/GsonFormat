@@ -85,9 +85,20 @@ public class FieldEntity {
         }
         return type;
     }
-    public String getFullNameType(){
+
+
+    public String getFullNameType() {
         if (targetClass != null) {
-            return String.format(type, targetClass.getFieldPackName());
+
+            String typeStr = null;
+            if (TextUtils.isEmpty(targetClass.getPackName())) {
+                typeStr = targetClass.getClassName();
+            } else {
+                typeStr = targetClass.getPackName() + "." + targetClass.getClassName();
+
+            }
+            String string=type.replaceAll("List<","java.util.List<");
+            return String.format(string, typeStr);
         }
         return type;
     }

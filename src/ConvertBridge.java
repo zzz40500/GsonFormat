@@ -159,7 +159,8 @@ public class ConvertBridge {
             item.setAutoCreateClassName(psiClass.getName());
             item.setFields(initFilterField(psiClass));
             item.setPsiClass(psiClass);
-            item.setType(mGeneratClass.getName()+"."+psiClass.getName());
+            item.setPackName(mGeneratClass.getName());
+            item.setType(".%s");
             mFilterClass.add(item);
 
             recursionInnerClass(item);
@@ -181,7 +182,7 @@ public class ConvertBridge {
             item.setAutoCreateClassName(psiClass.getName());
             item.setFields(initFilterField(psiClass));
             item.setPsiClass(psiClass);
-            item.setPackName(innerClassEntity.getFieldPackName());
+            item.setPackName(innerClassEntity.getPackName()+"."+innerClassEntity.getClassName());
             item.setType("%s");
             mFilterClass.add(item);
             recursionInnerClass(item);
@@ -575,7 +576,8 @@ public class ConvertBridge {
         return fieldEntity;
     }
 
-    public static final String listStr = "java.util.List<%s>";
+    public static final String listStr = "List<%s>";
+//    public static final String listStr = "java.util.List<%s>";
 
 
     private FieldEntity listTypeByValue(InnerClassEntity parentClass, String key, Object type, String s) {
@@ -594,7 +596,7 @@ public class ConvertBridge {
                 noteBean = innerClassEntity;
             } else {
 
-                typeStr = classEntity.getFieldPackName();
+                typeStr = classEntity.getClassFieldType();
                 typeStr = String.format(s, typeStr);
                 FieldEntity fieldEntity = new FieldEntity();
                 fieldEntity.setKey(key);

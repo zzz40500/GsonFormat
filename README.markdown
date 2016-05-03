@@ -57,11 +57,11 @@ v1.2.2  (English)
 
 ##打开方法
 1. 使用Generate的快捷键.  
-  快捷键:图中选中的部分
+  快捷键:图中选中的部分  
 ![Generate快捷键.png](http://upload-images.jianshu.io/upload_images/166866-2c5168c72b7155ba.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
- 我这边的快捷键是 command+n;
+ 
 * 使用 GsonFommat 的快捷键.  
-默认 option + s (mac), alt + s (mac)
+默认 option + s (mac), alt + s (win)
 通过以下方式修改快捷键: 
 ![修改快捷键.png](http://upload-images.jianshu.io/upload_images/166866-f9e20ca0ad7b9ae4.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 

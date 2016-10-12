@@ -19,13 +19,13 @@
 
 v1.2.2  (English)   
 > 
-1. Support field type changes.
-* Support shortcut to open GsonFormat, default option + s (mac), alt + s (win)
+1. Supports field type changes.
+* Supports shortcut to open GsonFormat, default option + s (mac), alt + s (win)
 * Support for field name changes.
-* Support add the prefix field.
-* Support for multiple conversion library (Gson, Jackjson, FastJson, LoganSquare).
-* Support private and public modes.
-* Support Filter superclass an existing fields.
+* Support to add the prefix field.
+* Support for multiple conversion libraries (Gson, Jackjson, FastJson, LoganSquare).
+* Support for private and public modes.
+* Supports filtering of superclass into existing fields.
 
 版本1.2.2 (中文)   
 > 

@@ -9,12 +9,19 @@
     <version>1.3.0</version>
     <vendor email="wyh405003836@126.com">zzz40500</vendor>
     <idea-version since-build="107.120"/>
+    <change-notes><![CDATA[
+  <p>
+  1.3.0
+  <ul>
+  <li>New: Support for autovalue</li>
+  </ul>
+  </p>
+]]></change-notes>
     <actions>
         <action id="Gsonformat" class="org.gsonformat.intellij.MainAction" text="GsonFormat">
             <add-to-group group-id="GenerateGroup" anchor="first"/>
             <keyboard-shortcut keymap="$default" first-keystroke="alt s"/>
         </action>
     </actions>
-    <extensions defaultExtensionNs="com.intellij">
-    </extensions>
+    <extensions defaultExtensionNs="com.intellij"/>
 </idea-plugin>

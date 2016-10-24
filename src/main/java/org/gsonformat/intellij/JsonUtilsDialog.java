@@ -43,8 +43,9 @@ public class JsonUtilsDialog extends JFrame {
         this.mFactory = factory;
         this.mFile = file;
         this.mProject = project;
+
         setContentPane(contentPane2);
-        setTitle("GsonFormat 1.2.3");
+        setTitle("GsonFormat");
         getRootPane().setDefaultButton(okButton);
         this.setAlwaysOnTop(true);
         initGeneratePanel(file);

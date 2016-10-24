@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="main.java.org.gsonformat.intellij.JsonUtilsDialog">
+<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="org.gsonformat.intellij.JsonUtilsDialog">
   <grid id="cbd77" binding="contentPane2" layout-manager="GridBagLayout">
     <constraints>
       <xy x="48" y="54" width="827" height="624"/>

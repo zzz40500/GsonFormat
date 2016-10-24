@@ -3,6 +3,7 @@ package entity;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElementFactory;
 import config.Config;
+import config.Strings;
 import org.apache.http.util.TextUtils;
 import utils.CheckUtil;
 
@@ -157,12 +158,17 @@ public class FieldEntity {
                 filedSb.append(Config.getInstant().geFullNameAnnotation().replaceAll("\\{filed\\}", getKey()));
             }
 
-            if (Config.getInstant().isFieldPrivateMode()) {
-                filedSb.append("private  ").append(getFullNameType()).append(" ").append(filedName).append(" ; ");
-            } else {
-                filedSb.append("public  ").append(getFullNameType()).append(" ").append(filedName).append(" ; ");
+            if (Config.getInstant().getAnnotationStr().equals(Strings.autoValueAnnotation)) {
+                filedSb.append(String.format("public abstract %s %s() ; ", getFullNameType(), filedName));
+                mClass.add(mFactory.createMethodFromText(filedSb.toString(), mClass));
+            }else {
+                if (Config.getInstant().isFieldPrivateMode()) {
+                    filedSb.append("private  ").append(getFullNameType()).append(" ").append(filedName).append(" ; ");
+                } else {
+                    filedSb.append("public  ").append(getFullNameType()).append(" ").append(filedName).append(" ; ");
+                }
+                mClass.add(mFactory.createFieldFromText(filedSb.toString(), mClass));
             }
-            mClass.add(mFactory.createFieldFromText(filedSb.toString(), mClass));
         }
     }
 

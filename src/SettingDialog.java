@@ -36,6 +36,7 @@ public class SettingDialog extends JFrame {
     private JCheckBox virgoModelCB;
     private JCheckBox generateCommentsCT;
     private JRadioButton loganSquareCB;
+    private JRadioButton autoValueRadioButton;
     private String annotaionStr;
 
     public SettingDialog(Project project) {
@@ -222,6 +223,15 @@ public class SettingDialog extends JFrame {
                 array1Button.setEnabled(false);
             }
         });
+        autoValueRadioButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (autoValueRadioButton.isSelected()) {
+                    annotationFT.setText(Strings.autoValueAnnotation);
+                }
+            }
+        });
+
 
         annotaionStr = Config.getInstant().getAnnotationStr();
         if (annotaionStr.equals(Strings.gsonAnnotation)) {
@@ -235,6 +245,9 @@ public class SettingDialog extends JFrame {
             annotationFT.setEnabled(false);
         } else if (annotaionStr.equals(Strings.loganSquareAnnotation)) {
             loganSquareCB.setSelected(true);
+            annotationFT.setEnabled(false);
+        } else if (annotaionStr.equals(Strings.autoValueAnnotation)) {
+            autoValueRadioButton.setSelected(true);
             annotationFT.setEnabled(false);
         } else {
             otherRB.setSelected(true);

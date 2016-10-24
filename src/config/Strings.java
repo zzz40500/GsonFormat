@@ -69,6 +69,10 @@ public class Strings {
             "\n" +
             "    }";
 
+    public static final String autoValueMethodTemplate = "public static com.google.gson.TypeAdapter<$className$> typeAdapter(com.google.gson.Gson gson) {\n" +
+            "    return new AutoValue_$className$.GsonTypeAdapter(gson);\n" +
+            "}";
+
     public static final String gsonAnnotation = "@com.google.gson.annotations.SerializedName\\s*\\(\\s*\"{filed}\"\\s*\\)";
     public static final String gsonFullNameAnnotation = "@com.google.gson.annotations.SerializedName(\"{filed}\")";
     public static final String fastFullNameAnnotation = "@com.alibaba.fastjson.annotation.JSONField(name=\"{filed}\")";
@@ -76,5 +80,6 @@ public class Strings {
     public static final String jackAnnotation = "@com.fasterxml.jackson.annotation.JsonProperty\\s*\\(\\s*\"{filed}\"\\s*\\)";
     public static final String loganSquareAnnotation = "@com.bluelinelabs.logansquare.annotation.JsonField\\s*\\(\\s*name\\s*=\\s*\"{filed}\"\\s*\\)";
     public static final String jackFullNameAnnotation = "@com.fasterxml.jackson.annotation.JsonProperty(\"{filed}\")";
+    public static final String autoValueAnnotation = "autoValue";
     public static final String loganSquareFullNameAnnotation = "@com.bluelinelabs.logansquare.annotation.JsonField(name=\"{filed}\")";
 }

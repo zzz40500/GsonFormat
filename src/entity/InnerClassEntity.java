@@ -162,20 +162,7 @@ public class InnerClassEntity extends FieldEntity {
         } catch (Throwable e) {
         }
 
-        if (Config.getInstant().isObjectFromData()) {
-            createMethod(mFactory, Config.getInstant().getObjectFromDataStr().replace("$ClassName$", mClass.getName()).trim(), mClass);
-        }
-        if (Config.getInstant().isObjectFromData1()) {
-            createMethod(mFactory, Config.getInstant().getObjectFromDataStr1().replace("$ClassName$", mClass.getName()).trim(), mClass);
-
-        }
-        if (Config.getInstant().isArrayFromData()) {
-            createMethod(mFactory, Config.getInstant().getArrayFromDataStr().replace("$ClassName$", mClass.getName()).trim(), mClass);
-
-        }
-        if (Config.getInstant().isArrayFromData1()) {
-            createMethod(mFactory, Config.getInstant().getArrayFromData1Str().replace("$ClassName$", mClass.getName()).trim(), mClass);
-        }
+        createExtraMethod(mFactory, mClass);
 
         for (FieldEntity fieldEntity : getFields()) {
             if (fieldEntity instanceof InnerClassEntity) {
@@ -190,7 +177,24 @@ public class InnerClassEntity extends FieldEntity {
             createGetAndSetMethod(mFactory, getFields(), mClass);
         }
 
+    }
 
+    private void createExtraMethod(PsiElementFactory mFactory, PsiClass mClass) {
+        if (Config.getInstant().isObjectFromData()) {
+            createMethod(mFactory, Config.getInstant().getObjectFromDataStr().replace("$ClassName$", mClass.getName()).trim(), mClass);
+        }
+        if (Config.getInstant().isObjectFromData1()) {
+            createMethod(mFactory, Config.getInstant().getObjectFromDataStr1().replace("$ClassName$", mClass.getName()).trim(), mClass);
+        }
+        if (Config.getInstant().isArrayFromData()) {
+            createMethod(mFactory, Config.getInstant().getArrayFromDataStr().replace("$ClassName$", mClass.getName()).trim(), mClass);
+        }
+        if (Config.getInstant().isArrayFromData1()) {
+            createMethod(mFactory, Config.getInstant().getArrayFromData1Str().replace("$ClassName$", mClass.getName()).trim(), mClass);
+        }
+        if (Config.getInstant().getAnnotationStr().equals(Strings.autoValueAnnotation)) {
+            createMethod(mFactory, Strings.autoValueMethodTemplate.replace("$className$", mClass.getName()).trim(), mClass);
+        }
     }
 
     public void generateClass(PsiElementFactory mFactory, PsiClass parentClass) {
@@ -198,26 +202,15 @@ public class InnerClassEntity extends FieldEntity {
         if (isGenerate()) {
             String classContent =
                     "public static class " + className + "{}";
+            if (Config.getInstant().getAnnotationStr().equals(Strings.autoValueAnnotation)) {
+                classContent = "public abstract static class " + className + "{}";
+            }
             PsiClass subClass = mFactory.createClassFromText(classContent, null).getInnerClasses()[0];
 
-            if (Config.getInstant().isObjectFromData()) {
-                createMethod(mFactory, Config.getInstant().getObjectFromDataStr().replace("$ClassName$", subClass.getName()).trim(), subClass);
-            }
-            if (Config.getInstant().isObjectFromData1()) {
-                createMethod(mFactory, Config.getInstant().getObjectFromDataStr1().replace("$ClassName$", subClass.getName()).trim(), subClass);
-            }
-            if (Config.getInstant().isArrayFromData()) {
-                createMethod(mFactory, Config.getInstant().getArrayFromDataStr().replace("$ClassName$", subClass.getName()).trim(), subClass);
-
-            }
-            if (Config.getInstant().isArrayFromData1()) {
-                createMethod(mFactory, Config.getInstant().getArrayFromData1Str().replace("$ClassName$", subClass.getName()).trim(), subClass);
-
-            }
+            createExtraMethod(mFactory, subClass);
 
 
             for (FieldEntity fieldEntity : getFields()) {
-
                 if (fieldEntity instanceof InnerClassEntity) {
                     ((InnerClassEntity) fieldEntity).generateSupperFiled(mFactory, subClass);
                     ((InnerClassEntity) fieldEntity).setFieldTypeSuffix(getClassFieldType());
@@ -228,7 +221,6 @@ public class InnerClassEntity extends FieldEntity {
                 }
             }
             if (Config.getInstant().isFieldPrivateMode()) {
-
                 createGetAndSetMethod(mFactory, getFields(), subClass);
             }
             parentClass.add(subClass);

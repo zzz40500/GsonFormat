@@ -343,16 +343,14 @@ public class ConvertBridge {
                     writerUtil.execute();
                 } catch (Exception e) {
                     e.printStackTrace();
-                    mJsonUtilsDialog.errorLB.setText("parse err !!");
+                    mJsonUtilsDialog.errorLB.setText("parse json err !!!");
                     Writer writer = new StringWriter();
                     PrintWriter printWriter = new PrintWriter(writer);
                     e.printStackTrace(printWriter);
                     printWriter.close();
                     mJsonUtilsDialog.mErrorInfo = writer.toString();
                     mJsonUtilsDialog.setVisible(true);
-                    if (Config.getInstant().isToastError()) {
-                        Toast.make(project, errorInfoLb, MessageType.ERROR, "click to see details");
-                    }
+                    Toast.make(project, errorInfoLb, MessageType.ERROR, "click to see details");
                     return;
                 }
             }

@@ -20,8 +20,3 @@ intellij {
 //        password publishPassword
 //    }
 }
-
-dependencies {
-    compile group: 'org.swinglabs.swingx', name: 'swingx-all', version: '1.6.3'
-}
-

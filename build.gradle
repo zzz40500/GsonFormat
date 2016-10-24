@@ -1,0 +1,26 @@
+buildscript {
+    repositories {
+        maven { url 'http://dl.bintray.com/jetbrains/intellij-plugin-service' }
+    }
+}
+plugins {
+    id "org.jetbrains.intellij" version "0.1.10"
+}
+
+apply plugin: 'org.jetbrains.intellij'
+apply plugin: 'java'
+
+intellij {
+    version 'IC-2016.2.5'
+    pluginName 'GsonFormat'
+    updateSinceUntilBuild false
+
+//    publish {
+//        pluginId '7910'
+//        username publishUsername
+//        password publishPassword
+//    }
+
+//     Uncomment to test against Android Studio
+//     intellij.alternativeIdePath = '/Applications/Android Studio.app'
+}

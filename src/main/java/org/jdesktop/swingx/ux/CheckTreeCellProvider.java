@@ -10,7 +10,7 @@ import javax.swing.JPanel;
 import javax.swing.JTree;
 import javax.swing.tree.TreePath;
 
-import entity.FieldEntity;
+import org.gsonformat.intellij.entity.FieldEntity;
 import org.jdesktop.swingx.renderer.CellContext;
 import org.jdesktop.swingx.renderer.ComponentProvider;
 import org.jdesktop.swingx.treetable.DefaultMutableTreeTableNode;

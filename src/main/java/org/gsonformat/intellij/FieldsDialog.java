@@ -1,16 +1,19 @@
 package org.gsonformat.intellij;
 
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.MessageType;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElementFactory;
-import entity.FieldEntity;
-import entity.InnerClassEntity;
-import main.java.src.cn.vearn.checktreetable.FiledTreeTableModel;
-import main.java.src.org.jdesktop.swingx.ux.CheckTreeTableManager;
+import cn.vearn.checktreetable.FiledTreeTableModel;
+import com.intellij.psi.PsiFile;
+import org.gsonformat.intellij.config.Config;
+import org.gsonformat.intellij.entity.FieldEntity;
+import org.gsonformat.intellij.entity.InnerClassEntity;
+import org.gsonformat.intellij.utils.PsiClassUtil;
+import org.gsonformat.intellij.utils.Toast;
+import org.jdesktop.swingx.ux.CheckTreeTableManager;
 import org.jdesktop.swingx.JXTreeTable;
 import org.jdesktop.swingx.treetable.DefaultMutableTreeTableNode;
-import utils.PsiClassUtil;
-import utils.Toast;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;

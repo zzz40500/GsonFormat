@@ -1,9 +1,12 @@
 package org.gsonformat.intellij.entity;
 
+import com.intellij.openapi.project.Project;
 import com.intellij.psi.*;
 import com.intellij.psi.search.GlobalSearchScope;
 import org.apache.http.util.TextUtils;
-import utils.CheckUtil;
+import org.gsonformat.intellij.config.Config;
+import org.gsonformat.intellij.config.Strings;
+import org.gsonformat.intellij.utils.CheckUtil;
 
 import java.util.List;
 import java.util.regex.Matcher;

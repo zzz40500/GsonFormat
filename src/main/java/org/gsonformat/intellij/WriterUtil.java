@@ -1,12 +1,13 @@
 package org.gsonformat.intellij;
 
 import com.intellij.openapi.command.WriteCommandAction;
+import com.intellij.openapi.project.Project;
 import com.intellij.psi.JavaPsiFacade;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElementFactory;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.codeStyle.JavaCodeStyleManager;
-import entity.InnerClassEntity;
+import org.gsonformat.intellij.entity.InnerClassEntity;
 
 import javax.swing.*;
 

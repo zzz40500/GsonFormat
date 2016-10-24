@@ -2,6 +2,7 @@ package org.gsonformat.intellij.utils;
 
 import com.intellij.ide.util.DirectoryUtil;
 import com.intellij.openapi.fileEditor.FileEditorManager;
+import com.intellij.openapi.project.Project;
 import com.intellij.psi.*;
 import com.intellij.psi.impl.source.PsiJavaFileImpl;
 import org.apache.http.util.TextUtils;

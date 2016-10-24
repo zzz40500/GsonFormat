@@ -1,10 +1,15 @@
 package org.gsonformat.intellij;
 
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.MessageType;
 import com.intellij.psi.*;
-import entity.FieldEntity;
-import entity.InnerClassEntity;
 import org.apache.http.util.TextUtils;
+import org.gsonformat.intellij.config.Config;
+import org.gsonformat.intellij.entity.FieldEntity;
+import org.gsonformat.intellij.entity.InnerClassEntity;
+import org.gsonformat.intellij.utils.CheckUtil;
+import org.gsonformat.intellij.utils.PsiClassUtil;
+import org.gsonformat.intellij.utils.Toast;
 import org.json.JSONArray;
 import org.json.JSONObject;
 

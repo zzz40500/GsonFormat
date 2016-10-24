@@ -3,6 +3,8 @@ package org.gsonformat.intellij.entity;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElementFactory;
 import org.apache.http.util.TextUtils;
+import org.gsonformat.intellij.config.Config;
+import org.gsonformat.intellij.config.Strings;
 import org.gsonformat.intellij.utils.CheckUtil;
 
 import java.util.regex.Matcher;

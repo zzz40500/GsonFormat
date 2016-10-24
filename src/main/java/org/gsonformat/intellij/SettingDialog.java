@@ -1,8 +1,11 @@
 package org.gsonformat.intellij;
 
+import com.intellij.openapi.project.Project;
 import com.intellij.psi.codeStyle.JavaCodeStyleManager;
 import com.intellij.psi.codeStyle.VariableKind;
 import org.apache.http.util.TextUtils;
+import org.gsonformat.intellij.config.Config;
+import org.gsonformat.intellij.config.Strings;
 
 import javax.swing.*;
 import java.awt.event.*;

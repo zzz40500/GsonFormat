@@ -4,7 +4,7 @@
  */
 package org.jdesktop.swingx.ux;
 
-import entity.FieldEntity;
+import org.gsonformat.intellij.entity.FieldEntity;
 
 import javax.swing.*;
 import javax.swing.event.ChangeListener;

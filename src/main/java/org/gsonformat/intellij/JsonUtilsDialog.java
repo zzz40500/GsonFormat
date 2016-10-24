@@ -1,14 +1,17 @@
 package org.gsonformat.intellij;
 
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.MessageType;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElementFactory;
+import com.intellij.psi.PsiFile;
 import com.intellij.psi.impl.source.PsiJavaFileImpl;
 import org.apache.http.util.TextUtils;
+import org.gsonformat.intellij.config.Config;
+import org.gsonformat.intellij.utils.PsiClassUtil;
+import org.gsonformat.intellij.utils.Toast;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import utils.PsiClassUtil;
-import utils.Toast;
 
 import javax.swing.*;
 import java.awt.*;

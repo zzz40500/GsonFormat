@@ -1,5 +1,8 @@
 package org.gsonformat.intellij;
 
+import org.gsonformat.intellij.config.Config;
+import org.gsonformat.intellij.config.Strings;
+
 import javax.swing.*;
 import java.awt.event.*;
 

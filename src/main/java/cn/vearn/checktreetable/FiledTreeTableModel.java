@@ -4,7 +4,7 @@
  */
 package cn.vearn.checktreetable;
 
-import entity.FieldEntity;
+import org.gsonformat.intellij.entity.FieldEntity;
 import org.jdesktop.swingx.treetable.DefaultMutableTreeTableNode;
 import org.jdesktop.swingx.treetable.DefaultTreeTableModel;
 import org.jdesktop.swingx.treetable.TreeTableNode;

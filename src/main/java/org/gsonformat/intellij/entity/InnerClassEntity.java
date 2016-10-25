@@ -162,7 +162,6 @@ public class InnerClassEntity extends FieldEntity {
         } catch (Throwable e) {
         }
 
-        createExtraMethod(mFactory, mClass);
 
         for (FieldEntity fieldEntity : getFields()) {
             if (fieldEntity instanceof InnerClassEntity) {
@@ -173,10 +172,17 @@ public class InnerClassEntity extends FieldEntity {
             }
         }
 
-        if (Config.getInstant().isFieldPrivateMode()) {
-            createGetAndSetMethod(mFactory, getFields(), mClass);
-        }
+        configGetterAndSetter(mFactory, mClass);
 
+        createExtraMethod(mFactory, mClass);
+    }
+
+    private void configGetterAndSetter(PsiElementFactory mFactory, PsiClass mClass) {
+        if (!Config.getInstant().getAnnotationStr().equals(Strings.autoValueAnnotation)) {
+            if (Config.getInstant().isFieldPrivateMode()) {
+                createGetAndSetMethod(mFactory, getFields(), mClass);
+            }
+        }
     }
 
     private void createExtraMethod(PsiElementFactory mFactory, PsiClass mClass) {
@@ -207,9 +213,6 @@ public class InnerClassEntity extends FieldEntity {
             }
             PsiClass subClass = mFactory.createClassFromText(classContent, null).getInnerClasses()[0];
 
-            createExtraMethod(mFactory, subClass);
-
-
             for (FieldEntity fieldEntity : getFields()) {
                 if (fieldEntity instanceof InnerClassEntity) {
                     ((InnerClassEntity) fieldEntity).generateSupperFiled(mFactory, subClass);
@@ -220,9 +223,10 @@ public class InnerClassEntity extends FieldEntity {
                     fieldEntity.generateFiled(mFactory, subClass, this);
                 }
             }
-            if (Config.getInstant().isFieldPrivateMode()) {
-                createGetAndSetMethod(mFactory, getFields(), subClass);
-            }
+
+            configGetterAndSetter(mFactory, subClass);
+            createExtraMethod(mFactory, subClass);
+
             parentClass.add(subClass);
 
             if (Config.getInstant().getAnnotationStr().equals(Strings.jackAnnotation)) {

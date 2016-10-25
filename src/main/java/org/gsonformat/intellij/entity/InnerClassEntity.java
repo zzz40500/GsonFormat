@@ -158,11 +158,12 @@ public class InnerClassEntity extends FieldEntity {
                     PsiAnnotation annotationFromText = mFactory.createAnnotationFromText("@com.bluelinelabs.logansquare.annotation.JsonObject", mClass);
                     modifierList.addBefore(annotationFromText, firstChild);
                 }
+            } else if (Config.getInstant().getAnnotationStr().equals(Strings.autoValueAnnotation)) {
+                hanleAutoValueAnnotation(mFactory, mClass);
             }
         } catch (Throwable e) {
         }
 
-        createExtraMethod(mFactory, mClass);
 
         for (FieldEntity fieldEntity : getFields()) {
             if (fieldEntity instanceof InnerClassEntity) {
@@ -173,10 +174,31 @@ public class InnerClassEntity extends FieldEntity {
             }
         }
 
-        if (Config.getInstant().isFieldPrivateMode()) {
-            createGetAndSetMethod(mFactory, getFields(), mClass);
+        configGetterAndSetter(mFactory, mClass);
+
+        createExtraMethod(mFactory, mClass);
+    }
+
+    private void hanleAutoValueAnnotation(PsiElementFactory mFactory, PsiClass mClass) {
+        PsiModifierList modifierList = mClass.getModifierList();
+        PsiElement firstChild = modifierList.getFirstChild();
+        Pattern pattern = Pattern.compile("@.*?AutoValue");
+        if (firstChild != null && !pattern.matcher(firstChild.getText()).find()) {
+            PsiAnnotation annotationFromText = mFactory.createAnnotationFromText("@com.google.auto.value.AutoValue", mClass);
+            modifierList.addBefore(annotationFromText, firstChild);
         }
 
+        if (!modifierList.hasModifierProperty(PsiModifier.ABSTRACT)) {
+            modifierList.setModifierProperty(PsiModifier.ABSTRACT, true);
+        }
+    }
+
+    private void configGetterAndSetter(PsiElementFactory mFactory, PsiClass mClass) {
+        if (!Config.getInstant().getAnnotationStr().equals(Strings.autoValueAnnotation)) {
+            if (Config.getInstant().isFieldPrivateMode()) {
+                createGetAndSetMethod(mFactory, getFields(), mClass);
+            }
+        }
     }
 
     private void createExtraMethod(PsiElementFactory mFactory, PsiClass mClass) {
@@ -202,27 +224,22 @@ public class InnerClassEntity extends FieldEntity {
         if (isGenerate()) {
             String classContent =
                     "public static class " + className + "{}";
-            if (Config.getInstant().getAnnotationStr().equals(Strings.autoValueAnnotation)) {
-                classContent = "public abstract static class " + className + "{}";
-            }
             PsiClass subClass = mFactory.createClassFromText(classContent, null).getInnerClasses()[0];
-
-            createExtraMethod(mFactory, subClass);
-
 
             for (FieldEntity fieldEntity : getFields()) {
                 if (fieldEntity instanceof InnerClassEntity) {
                     ((InnerClassEntity) fieldEntity).generateSupperFiled(mFactory, subClass);
                     ((InnerClassEntity) fieldEntity).setFieldTypeSuffix(getClassFieldType());
                     ((InnerClassEntity) fieldEntity).generateClass(mFactory, subClass);
+                    fieldEntity.generateFiled(mFactory, subClass, this);
                 } else {
-
                     fieldEntity.generateFiled(mFactory, subClass, this);
                 }
             }
-            if (Config.getInstant().isFieldPrivateMode()) {
-                createGetAndSetMethod(mFactory, getFields(), subClass);
-            }
+
+            configGetterAndSetter(mFactory, subClass);
+            createExtraMethod(mFactory, subClass);
+
             parentClass.add(subClass);
 
             if (Config.getInstant().getAnnotationStr().equals(Strings.jackAnnotation)) {
@@ -246,6 +263,11 @@ public class InnerClassEntity extends FieldEntity {
                             mFactory.createAnnotationFromText("@com.bluelinelabs.logansquare.annotation.JsonObject", subClass);
                     PsiElement firstChild = modifierList.getFirstChild();
                     modifierList.addBefore(annotationFromText, firstChild);
+                }
+            } else if (Config.getInstant().getAnnotationStr().equals(Strings.autoValueAnnotation)) {
+                subClass = parentClass.findInnerClassByName(className, false);
+                if (subClass != null) {
+                    hanleAutoValueAnnotation(mFactory, subClass);
                 }
             }
         }

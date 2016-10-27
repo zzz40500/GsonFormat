@@ -17,9 +17,9 @@
 
 ##版本说明
 
-版本1.2.2 (中文)   
+版本1.2.2
 > 
-1. 支持 field 类型的修改.
+* 支持 field 类型的修改.
 * 支持快捷键打开 GsonFormat ,默认为 option+s(mac), alt+s(win)
 * 支持 field 名称的修改.
 * 支持添加 field 前缀.

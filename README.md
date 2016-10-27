@@ -21,11 +21,14 @@ Please do aware **This Plugin is only for Android Studio and IntelliJ IDEA**.
 Restart IDE.
 
 ## Usage
-1. Use menu
+### Use IDE menu
+
 ![Generate.png](http://upload-images.jianshu.io/upload_images/166866-2c5168c72b7155ba.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
  
-* Use hotkey
-Default option + s (mac), alt + s (win)
+### Use hotkey
+
+Default **Option + s**(Mac), **Alt + s** (win)
+
 You can change the hotkey via: 
 ![修改快捷键.png](http://upload-images.jianshu.io/upload_images/166866-f9e20ca0ad7b9ae4.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
@@ -35,7 +38,7 @@ You can change the hotkey via:
   
 ## Version Info
 
-v1.2.2  (English)   
+v1.2.2
 > 
 * Supports field type changes.
 * Supports shortcut to open GsonFormat, default option + s (mac), alt + s (win)

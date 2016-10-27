@@ -231,7 +231,6 @@ public class InnerClassEntity extends FieldEntity {
                     ((InnerClassEntity) fieldEntity).generateSupperFiled(mFactory, subClass);
                     ((InnerClassEntity) fieldEntity).setFieldTypeSuffix(getClassFieldType());
                     ((InnerClassEntity) fieldEntity).generateClass(mFactory, subClass);
-                    fieldEntity.generateFiled(mFactory, subClass, this);
                 } else {
                     fieldEntity.generateFiled(mFactory, subClass, this);
                 }

@@ -17,19 +17,9 @@
 
 ##版本说明
 
-v1.2.2  (English)   
+版本1.2.2
 > 
-1. Supports field type changes.
-* Supports shortcut to open GsonFormat, default option + s (mac), alt + s (win)
-* Support for field name changes.
-* Support to add the prefix field.
-* Support for multiple conversion libraries (Gson, Jackjson, FastJson, LoganSquare).
-* Support for private and public modes.
-* Supports filtering of superclass into existing fields.
-
-版本1.2.2 (中文)   
-> 
-1. 支持 field 类型的修改.
+* 支持 field 类型的修改.
 * 支持快捷键打开 GsonFormat ,默认为 option+s(mac), alt+s(win)
 * 支持 field 名称的修改.
 * 支持添加 field 前缀.

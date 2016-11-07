@@ -13,7 +13,6 @@ apply plugin: 'java'
 //     compile project(':ThirdPart:checktreetable')
 //     compile project(':ThirdPart:json')
 // }
-println("${project.rootDir.absolutePath}")
 sourceSets {
     main {
         java {

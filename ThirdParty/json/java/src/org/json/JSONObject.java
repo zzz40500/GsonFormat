@@ -73,9 +73,9 @@ import java.util.Map.Entry;
  * <ul>
  * <li>An extra <code>,</code>&nbsp;<small>(comma)</small> may appear just
  * before the closing brace.</li>
- * <li>Constant may be quoted with <code>'</code>&nbsp;<small>(single
+ * <li>Strings may be quoted with <code>'</code>&nbsp;<small>(single
  * quote)</small>.</li>
- * <li>Constant do not need to be quoted at all if they do not begin with a
+ * <li>Strings do not need to be quoted at all if they do not begin with a
  * quote or single quote, and if they do not contain leading or trailing
  * spaces, and if they do not contain any of these characters:
  * <code>{ } [ ] / \ : , #</code> and if they do not look like numbers and

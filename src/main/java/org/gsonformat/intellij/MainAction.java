@@ -7,9 +7,9 @@ import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiClass;
-import com.intellij.psi.PsiElementFactory;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.util.PsiUtilBase;
+import org.gsonformat.intellij.ui.JsonDialog;
 
 /**
  * User: dim
@@ -17,9 +17,6 @@ import com.intellij.psi.util.PsiUtilBase;
  * Time: 下午1:44
  */
 public class MainAction extends BaseGenerateAction {
-    protected PsiClass mClass;
-    private PsiElementFactory mFactory;
-    private Project mProject;
 
     @SuppressWarnings("unused")
     public MainAction() {
@@ -38,22 +35,18 @@ public class MainAction extends BaseGenerateAction {
 
     @Override
     public boolean isValidForFile(Project project, Editor editor, PsiFile file) {
-
         return super.isValidForFile(project, editor, file);
     }
 
-
     public void actionPerformed(AnActionEvent event) {
-
-        mProject = event.getData(PlatformDataKeys.PROJECT);
+        Project project = event.getData(PlatformDataKeys.PROJECT);
         Editor editor = event.getData(PlatformDataKeys.EDITOR);
-        PsiFile mFile = PsiUtilBase.getPsiFileInEditor(editor, mProject);
-        mClass = getTargetClass(editor, mFile);
-        JsonUtilsDialog jsonD = new JsonUtilsDialog(mClass, mFactory, mFile, mProject);
-        jsonD.setClass(mClass);
-        jsonD.setFactory(mFactory);
+        PsiFile mFile = PsiUtilBase.getPsiFileInEditor(editor, project);
+        PsiClass psiClass = getTargetClass(editor, mFile);
+        JsonDialog jsonD = new JsonDialog(psiClass, mFile, project);
+        jsonD.setClass(psiClass);
         jsonD.setFile(mFile);
-        jsonD.setProject(mProject);
+        jsonD.setProject(project);
         jsonD.setSize(600, 400);
         jsonD.setLocationRelativeTo(null);
         jsonD.setVisible(true);

@@ -7,54 +7,40 @@ import com.intellij.ide.util.PropertiesComponent;
  */
 public class Config {
 
-    private boolean fieldPrivateMode = true;
-    private boolean generateComments =true;
-    private boolean useSerializedName = false;
+    private static Config config;
 
-    private boolean objectFromData=false;
-    private boolean objectFromData1=false;
-    private boolean arrayFromData=false;
-    private boolean arrayFromData1=false;
+    private boolean fieldPrivateMode = true;
+    private boolean generateComments = true;
+    private boolean useSerializedName = false;
+    private boolean objectFromData = false;
+    private boolean objectFromData1 = false;
+    private boolean arrayFromData = false;
+    private boolean arrayFromData1 = false;
+    private boolean reuseEntity = false;
+    private boolean virgoMode = true; //处女座模式
+    private boolean useFieldNamePrefix = false;
+    private boolean splitGenerate = false;
+
 
     private String objectFromDataStr;
     private String objectFromDataStr1;
     private String arrayFromDataStr;
     private String arrayFromData1Str;
-
-    /**
-     * 注解语句
-     */
-    private  String annotationStr;
-
-    /**
-     * 字段前缀
-     */
-    private String filedNamePreFixStr;
-
-
-    /**
-     * 处女座模
-     */
-    private boolean virgoMode=true;
-
-    /**
-     * 创建实体类的包名.
-     */
-    private String entityPackName;
+    private String annotationStr; //注解语句
+    private String filedNamePreFixStr; //字段前缀
+    private String entityPackName;//创建实体类的包名.
+    private String suffixStr;
 
     /**
      * 错误次数,前两次提醒哪里查看错误日志.
      */
     private int errorCount;
 
-    private  boolean useFiledNamePrefix=false;
-
-    private String suffixStr;
-    private boolean reuseEntity =false;
 
     private Config() {
 
     }
+
     public void save() {
 
         PropertiesComponent.getInstance().setValue("fieldPrivateMode", "" + isFieldPrivateMode());
@@ -73,12 +59,13 @@ public class Config {
         PropertiesComponent.getInstance().setValue("annotationStr", annotationStr + "");
         PropertiesComponent.getInstance().setValue("errorCount", errorCount + "");
         PropertiesComponent.getInstance().setValue("entityPackName", entityPackName + "");
-        PropertiesComponent.getInstance().setValue("useFiledNamePrefix", useFiledNamePrefix + "");
+        PropertiesComponent.getInstance().setValue("useFieldNamePrefix", useFieldNamePrefix + "");
         PropertiesComponent.getInstance().setValue("generateComments", generateComments + "");
+        PropertiesComponent.getInstance().setValue("splitGenerate", splitGenerate + "");
     }
 
-    private static Config config;
     public static Config getInstant() {
+
         if (config == null) {
             config = new Config();
             config.setFieldPrivateMode(PropertiesComponent.getInstance().getBoolean("fieldPrivateMode", true));
@@ -89,28 +76,29 @@ public class Config {
             config.setArrayFromData1(PropertiesComponent.getInstance().getBoolean("arrayFromData1", false));
             config.setSuffixStr(PropertiesComponent.getInstance().getValue("suffixStr", "Bean"));
             config.setReuseEntity(PropertiesComponent.getInstance().getBoolean("reuseEntity", false));
-            config.setObjectFromDataStr(PropertiesComponent.getInstance().getValue("objectFromDataStr", Strings.objectFromObject));
-            config.setObjectFromDataStr1(PropertiesComponent.getInstance().getValue("objectFromDataStr1", Strings.objectFromObject1));
-            config.setArrayFromDataStr(PropertiesComponent.getInstance().getValue("arrayFromDataStr", Strings.arrayFromData));
-            config.setArrayFromData1Str(PropertiesComponent.getInstance().getValue("arrayFromData1Str", Strings.arrayFromData1));
-            config.setAnnotationStr(PropertiesComponent.getInstance().getValue("annotationStr", Strings.gsonAnnotation));
+            config.setObjectFromDataStr(PropertiesComponent.getInstance().getValue("objectFromDataStr", Constant.objectFromObject));
+            config.setObjectFromDataStr1(PropertiesComponent.getInstance().getValue("objectFromDataStr1", Constant.objectFromObject1));
+            config.setArrayFromDataStr(PropertiesComponent.getInstance().getValue("arrayFromDataStr", Constant.arrayFromData));
+            config.setArrayFromData1Str(PropertiesComponent.getInstance().getValue("arrayFromData1Str", Constant.arrayFromData1));
+            config.setAnnotationStr(PropertiesComponent.getInstance().getValue("annotationStr", Constant.gsonAnnotation));
             config.setEntityPackName(PropertiesComponent.getInstance().getValue("entityPackName"));
             config.setFiledNamePreFixStr(PropertiesComponent.getInstance().getValue("filedNamePreFixStr"));
             config.setErrorCount(PropertiesComponent.getInstance().getOrInitInt("errorCount", 0));
             config.setVirgoMode(PropertiesComponent.getInstance().getBoolean("virgoMode", true));
-            config.setUseFiledNamePrefix(PropertiesComponent.getInstance().getBoolean("useFiledNamePrefix", false));
+            config.setUseFieldNamePrefix(PropertiesComponent.getInstance().getBoolean("useFieldNamePrefix", false));
             config.setGenerateComments(PropertiesComponent.getInstance().getBoolean("generateComments", true));
+            config.setSplitGenerate(PropertiesComponent.getInstance().getBoolean("splitGenerate", true));
 
         }
         return config;
     }
 
-    public boolean isUseFiledNamePrefix() {
-        return useFiledNamePrefix;
+    public boolean isUseFieldNamePrefix() {
+        return useFieldNamePrefix;
     }
 
-    public void setUseFiledNamePrefix(boolean useFiledNamePrefix) {
-        this.useFiledNamePrefix = useFiledNamePrefix;
+    public void setUseFieldNamePrefix(boolean useFieldNamePrefix) {
+        this.useFieldNamePrefix = useFieldNamePrefix;
     }
 
     public boolean isObjectFromData() {
@@ -128,23 +116,22 @@ public class Config {
     public String getEntityPackName() {
         return entityPackName;
     }
-    public String geFullNameAnnotation(){
 
-        if(annotationStr.equals(Strings.gsonAnnotation)){
-            return Strings.gsonFullNameAnnotation;
-        }
-        if(annotationStr.equals(Strings.jackAnnotation)){
-            return Strings.jackFullNameAnnotation;
-        }
-        if(annotationStr.equals(Strings.fastAnnotation)){
-            return Strings.fastFullNameAnnotation;
-        }
-        if(annotationStr.equals(Strings.loganSquareAnnotation)){
-            return Strings.loganSquareFullNameAnnotation;
-        }
+    public String geFullNameAnnotation() {
 
-
-        return annotationStr.replaceAll("\\(", "(").replaceAll("\\)",")").replaceAll("\\s\\*","");
+        if (annotationStr.equals(Constant.gsonAnnotation)) {
+            return Constant.gsonFullNameAnnotation;
+        }
+        if (annotationStr.equals(Constant.jackAnnotation)) {
+            return Constant.jackFullNameAnnotation;
+        }
+        if (annotationStr.equals(Constant.fastAnnotation)) {
+            return Constant.fastFullNameAnnotation;
+        }
+        if (annotationStr.equals(Constant.loganSquareAnnotation)) {
+            return Constant.loganSquareFullNameAnnotation;
+        }
+        return annotationStr.replaceAll("\\(", "(").replaceAll("\\)", ")").replaceAll("\\s\\*", "");
     }
 
 
@@ -233,24 +220,17 @@ public class Config {
         return objectFromDataStr;
     }
 
-
-
     public String getObjectFromDataStr1() {
         return objectFromDataStr1;
     }
-
 
     public String getArrayFromDataStr() {
         return arrayFromDataStr;
     }
 
-
-
     public String getArrayFromData1Str() {
         return arrayFromData1Str;
     }
-
-
 
     public String getSuffixStr() {
         return suffixStr;
@@ -294,6 +274,7 @@ public class Config {
         this.objectFromDataStr1 = objectFromDataStr1;
         PropertiesComponent.getInstance().setValue("objectFromDataStr1", objectFromDataStr1 + "");
     }
+
     public void saveArrayFromDataStr(String arrayFromDataStr) {
         this.arrayFromDataStr = arrayFromDataStr;
         PropertiesComponent.getInstance().setValue("arrayFromDataStr", arrayFromDataStr + "");
@@ -304,14 +285,30 @@ public class Config {
         PropertiesComponent.getInstance().setValue("arrayFromData1Str", arrayFromData1Str + "");
     }
 
-
     public boolean isToastError() {
-
-       if( Config.getInstant().getErrorCount()<3){
-           Config.getInstant().setErrorCount(Config.getInstant().getErrorCount() + 1);
-           Config.getInstant().save();
-           return true;
-       }
+        if (Config.getInstant().getErrorCount() < 3) {
+            Config.getInstant().setErrorCount(Config.getInstant().getErrorCount() + 1);
+            Config.getInstant().save();
+            return true;
+        }
         return false;
     }
+
+    public boolean isSplitGenerate() {
+        return splitGenerate;
+    }
+
+    public void setSplitGenerate(boolean splitGenerate) {
+        this.splitGenerate = splitGenerate;
+    }
+
+
+    public void saveCurrentPackPath(String entityPackName) {
+        if (entityPackName == null) {
+            return;
+        }
+        setEntityPackName(entityPackName);
+        save();
+    }
+
 }

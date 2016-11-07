@@ -9,7 +9,20 @@ plugins {
 
 apply plugin: 'org.jetbrains.intellij'
 apply plugin: 'java'
+// dependencies {
+//     compile project(':ThirdPart:checktreetable')
+//     compile project(':ThirdPart:json')
+// }
+println("${project.rootDir.absolutePath}")
+sourceSets {
+    main {
+        java {
+            srcDir "${project.rootDir.absolutePath}/ThirdParty/json/java/src"
+            srcDir "${project.rootDir.absolutePath}/ThirdParty/treetable/java/src"
+        }
 
+    }
+}
 intellij {
     version 'IC-2016.2.5'
     pluginName 'GsonFormat'
@@ -24,3 +37,4 @@ intellij {
 //     Uncomment to test against Android Studio
 //     intellij.alternativeIdePath = '/Applications/Android Studio.app'
 }
+

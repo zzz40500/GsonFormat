@@ -1,28 +1,30 @@
 package org.gsonformat.intellij;
 
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.ui.MessageType;
 import com.intellij.psi.*;
+import com.intellij.psi.impl.source.PsiClassReferenceType;
 import org.apache.http.util.TextUtils;
+import org.gsonformat.intellij.common.StringUtils;
+import org.gsonformat.intellij.common.Utils;
 import org.gsonformat.intellij.config.Config;
+import org.gsonformat.intellij.entity.DataType;
 import org.gsonformat.intellij.entity.FieldEntity;
-import org.gsonformat.intellij.entity.InnerClassEntity;
-import org.gsonformat.intellij.utils.CheckUtil;
-import org.gsonformat.intellij.utils.PsiClassUtil;
-import org.gsonformat.intellij.utils.Toast;
+import org.gsonformat.intellij.entity.ClassEntity;
+import org.gsonformat.intellij.common.CheckUtil;
+import org.gsonformat.intellij.common.PsiClassUtil;
+import org.gsonformat.intellij.entity.IterableFieldEntity;
+import org.gsonformat.intellij.ui.FieldsDialog;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import javax.swing.*;
+import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 
 /**
  * Created by dim on 2015/8/21.
@@ -30,46 +32,41 @@ import java.util.regex.Pattern;
  */
 public class ConvertBridge {
 
-    protected PsiClass mGeneratClass;
-    protected PsiClass currentClass;
-    private PsiElementFactory mFactory;
+    private PsiClass targetClass;
+    private PsiClass currentClass;
+    private PsiElementFactory factory;
     private Project project;
-
-    private PsiFile mFile;
+    private PsiFile file;
     private String jsonStr;
-    private JsonUtilsDialog mJsonUtilsDialog;
-    private JLabel errorInfoLb;
-
-    private List<String> mFilterFields;
-
-    private List<InnerClassEntity> mFilterClass;
+    private HashMap<String, FieldEntity> declareFields;
+    private HashMap<String, ClassEntity> declareClass;
     private String generateClassName;
-    private InnerClassEntity mGenerateEntity = new InnerClassEntity();
-
+    private ClassEntity generateClassEntity = new ClassEntity();
     private StringBuilder fullFilterRegex = null;
     private StringBuilder briefFilterRegex = null;
     private String filterRegex = null;
+    private Operator operator;
+    private String packageName;
 
+    public ConvertBridge(Operator operator,
+                         String jsonStr, PsiFile file, Project project,
+                         PsiClass targetClass,
+                         PsiClass currentClass, String generateClassName) {
 
-    public ConvertBridge(JsonUtilsDialog mJsonUtilsDialog, JLabel errorInfoLb,
-                         String jsonStr, PsiFile mFile, Project project,
-                         PsiClass generateClass,
-                         PsiClass currentClass, String generateClassName, PsiFile... files) {
-
-        mFactory = JavaPsiFacade.getElementFactory(project);
-        this.mFile = mFile;
-        this.errorInfoLb = errorInfoLb;
+        factory = JavaPsiFacade.getElementFactory(project);
+        this.file = file;
         this.generateClassName = generateClassName;
-        this.mJsonUtilsDialog = mJsonUtilsDialog;
+        this.operator = operator;
         this.jsonStr = jsonStr;
         this.project = project;
-        this.mGeneratClass = generateClass;
+        this.targetClass = targetClass;
         this.currentClass = currentClass;
-        mFilterFields = new ArrayList<String>();
-        mFilterClass = new ArrayList<InnerClassEntity>();
-
+        declareFields = new HashMap<>();
+        declareClass = new HashMap<>();
+        packageName = StringUtils.getPackage(generateClassName);
         fullFilterRegex = new StringBuilder();
         briefFilterRegex = new StringBuilder();
+        CheckUtil.getInstant().cleanDeclareData();
         String[] arg = Config.getInstant().getAnnotationStr().replace("{filed}", "(\\w+)").split("\\.");
 
         for (int i = 0; i < arg.length; i++) {
@@ -81,7 +78,6 @@ public class ConvertBridge {
                 if (matcher.find()) {
                     filterRegex = matcher.group();
                 }
-
             } else {
                 fullFilterRegex.append(s).append("\\s*\\.\\s*");
             }
@@ -90,105 +86,116 @@ public class ConvertBridge {
 
     }
 
-
     public void run() {
-
         JSONObject json = null;
-        mJsonUtilsDialog.mErrorInfo = null;
+        operator.cleanErrorInfo();
         try {
             json = new JSONObject(jsonStr);
         } catch (Exception e) {
-            String jsonTS = filterComment(jsonStr);
-
+            String jsonTS = removeComment(jsonStr);
             jsonTS = jsonTS.replaceAll("^[\\s\\S]*?\\{", "{");
             try {
                 json = new JSONObject(jsonTS);
             } catch (Exception e2) {
-                e2.printStackTrace();
-                errorInfoLb.setText("data err !!");
-                Writer writer = new StringWriter();
-                PrintWriter printWriter = new PrintWriter(writer);
-                e2.printStackTrace(printWriter);
-                printWriter.close();
-                mJsonUtilsDialog.mErrorInfo = writer.toString();
-                if (Config.getInstant().isToastError()) {
-                    Toast.make(project, errorInfoLb, MessageType.ERROR, "click to see details");
-                }
+                handleDataError(e2);
             }
         }
         if (json != null) {
-
             try {
-
-                mFilterFields = initFilterFieldStr(mGeneratClass);
-                if (Config.getInstant().isReuseEntity()) {
-                    initFilterClass();
+                ClassEntity classEntity = collectClassAttribute(targetClass, Config.getInstant().isReuseEntity());
+                if (classEntity != null) {
+                    for (FieldEntity item : classEntity.getFields()) {
+                        declareFields.put(item.getKey(), item);
+                        CheckUtil.getInstant().addDeclareFieldName(item.getKey());
+                    }
                 }
+                if (Config.getInstant().isSplitGenerate()) {
+                    collectPackAllClassName();
+                }
+                operator.setVisible(false);
                 parseJson(json);
             } catch (Exception e2) {
-                e2.printStackTrace();
-                Writer writer = new StringWriter();
-                PrintWriter printWriter = new PrintWriter(writer);
-                e2.printStackTrace(printWriter);
-                printWriter.close();
-                mJsonUtilsDialog.mErrorInfo = writer.toString();
-                errorInfoLb.setText("parse err !!");
-                if (Config.getInstant().isToastError()) {
-                    Toast.make(project, errorInfoLb, MessageType.ERROR, "click to see details");
-                }
+                handleDataError(e2);
+                operator.setVisible(true);
+            }
+        }
+        declareFields = null;
+        declareClass = null;
+    }
 
+    private void collectPackAllClassName() {
+        File packageFile = PsiClassUtil.getPackageFile(file, packageName);
+        if (packageFile != null) {
+            File[] files = packageFile.listFiles();
+            if (files != null) {
+                for (File file1 : files) {
+                    if (packageName == null) {
+                        CheckUtil.getInstant().addDeclareClassName(file1.getName());
+                    } else {
+                        CheckUtil.getInstant().addDeclareClassName(packageName + "." + file1.getName());
+                    }
+                }
             }
         }
 
+    }
 
-        mFilterFields = null;
-        mFilterClass = null;
+    private void handleDataError(Exception e2) {
+        e2.printStackTrace();
+        Writer writer = new StringWriter();
+        PrintWriter printWriter = new PrintWriter(writer);
+        e2.printStackTrace(printWriter);
+        printWriter.close();
+        operator.showError(Error.DATA_ERROR);
+        operator.setErrorInfo(writer.toString());
     }
 
 
-    private void initFilterClass() {
-
-
-        if (mGeneratClass == null) {
-            return;
+    private ClassEntity collectClassAttribute(PsiClass psiClass, boolean collectInnerClass) {
+        if (psiClass == null) {
+            return null;
         }
-
-        PsiClass[] psiClasses = this.mGeneratClass.getAllInnerClasses();
-        for (PsiClass psiClass : psiClasses) {
-
-            InnerClassEntity item = new InnerClassEntity();
-            item.setClassName(psiClass.getName());
-            item.setAutoCreateClassName(psiClass.getName());
-            item.setFields(initFilterField(psiClass));
-            item.setPsiClass(psiClass);
-            item.setPackName(mGeneratClass.getName());
-            item.setType(".%s");
-            mFilterClass.add(item);
-
-            recursionInnerClass(item);
+        ClassEntity innerClass = new ClassEntity();
+        innerClass.setLock(true);
+        declareClass.put(psiClass.getQualifiedName(), innerClass);
+        CheckUtil.getInstant().addDeclareClassName(psiClass.getQualifiedName());
+        innerClass.setClassName(psiClass.getName());
+        innerClass.addAllFields(collectDeclareFields(psiClass));
+        innerClass.setPsiClass(psiClass);
+        innerClass.setPackName(getPackName(psiClass));
+        if (collectInnerClass) {
+            recursionInnerClass(innerClass);
         }
+        return innerClass;
     }
 
-    /**
-     * 遍历所有的内部类.
-     *
-     * @param innerClassEntity
-     */
-    private void recursionInnerClass(InnerClassEntity innerClassEntity) {
-
-        PsiClass[] innerClassArray = innerClassEntity.getPsiClass().getInnerClasses();
-
+    private void recursionInnerClass(ClassEntity classEntity) {
+        PsiClass[] innerClassArray = classEntity.getPsiClass().getAllInnerClasses();
         for (PsiClass psiClass : innerClassArray) {
-            InnerClassEntity item = new InnerClassEntity();
+            ClassEntity item = new ClassEntity();
+            item.setLock(true);
+            declareClass.put(psiClass.getQualifiedName(), item);
+            CheckUtil.getInstant().addDeclareClassName(psiClass.getQualifiedName());
             item.setClassName(psiClass.getName());
-            item.setAutoCreateClassName(psiClass.getName());
-            item.setFields(initFilterField(psiClass));
+            item.addAllFields(collectDeclareFields(psiClass));
             item.setPsiClass(psiClass);
-            item.setPackName(innerClassEntity.getPackName() + "." + innerClassEntity.getClassName());
-            item.setType("%s");
-            mFilterClass.add(item);
+            item.setPackName(getPackName(psiClass));
             recursionInnerClass(item);
         }
+    }
+
+    public String getPackName(PsiClass psiClass) {
+        String packName = null;
+        if (psiClass.getQualifiedName() != null) {
+            int i = psiClass.getQualifiedName().lastIndexOf(".");
+            if (i >= 0) {
+                packName = psiClass.getQualifiedName().substring(0, i);
+            } else {
+                packName = psiClass.getQualifiedName();
+            }
+        }
+        return packName;
+
     }
 
     /**
@@ -197,318 +204,323 @@ public class ConvertBridge {
      * @param str
      * @return
      */
-    public String filterComment(String str) {
-
+    public String removeComment(String str) {
         String temp = str.replaceAll("/\\*" +
                 "[\\S\\s]*?" +
                 "\\*/", "");
         return temp.replaceAll("//[\\S\\s]*?\n", "");
     }
 
-    /**
-     * 收集类的所有属性.
-     */
-    public List<String> initFilterFieldStr(PsiClass mClass) {
+    private List<FieldEntity> collectDeclareFields(PsiClass mClass) {
 
-        ArrayList<String> filterFieldList = new ArrayList<String>();
+        ArrayList<FieldEntity> filterFieldList = new ArrayList<>();
         if (mClass != null) {
             PsiField[] psiFields = mClass.getAllFields();
             for (PsiField psiField : psiFields) {
-                String psiFieldText = filterComment(psiField.getText());
+                String fileName = null;
+
+                String psiFieldText = removeComment(psiField.getText());
                 if (filterRegex != null && psiFieldText.contains(filterRegex)) {
                     boolean isSerializedName = false;
                     psiFieldText = psiFieldText.trim();
-
                     Pattern pattern = Pattern.compile(fullFilterRegex.toString());
                     Matcher matcher = pattern.matcher(psiFieldText);
                     if (matcher.find()) {
-                        filterFieldList.add(matcher.group(1));
+                        fileName = matcher.group(1);
                         isSerializedName = true;
                     }
                     pattern = Pattern.compile(briefFilterRegex.toString());
                     matcher = pattern.matcher(psiFieldText);
                     if (matcher.find()) {
-                        filterFieldList.add(matcher.group(1));
+                        fileName = matcher.group(1);
                         isSerializedName = true;
                     }
                     if (!isSerializedName) {
-                        filterFieldList.add(psiField.getName());
+                        fileName = psiField.getName();
                     }
                 } else {
-                    filterFieldList.add(psiField.getName());
+                    fileName = psiField.getName();
                 }
+                FieldEntity fieldEntity = evalFieldEntity(null, psiField.getType());
+                fieldEntity.setKey(fileName);
+                fieldEntity.setFieldName(fileName);
+                filterFieldList.add(fieldEntity);
             }
         }
 
         return filterFieldList;
-
-
     }
 
+    private FieldEntity evalFieldEntity(FieldEntity fieldEntity, PsiType type) {
 
-    /**
-     * 收集类的属性
-     */
-    public List<FieldEntity> initFilterField(PsiClass mClass) {
-
-        PsiField[] psiFields = mClass.getAllFields();
-        ArrayList<FieldEntity> filterFields = new ArrayList<FieldEntity>();
-
-        for (PsiField psiField : psiFields) {
-
-            String psiFieldText = filterComment(psiField.getText());
-            String key = null;
-            if (filterRegex != null && psiFieldText.contains(filterRegex)) {
-
-                boolean isSerializedName = false;
-                psiFieldText = psiFieldText.trim();
-                Pattern pattern = Pattern.compile(fullFilterRegex.toString());
-                Matcher matcher = pattern.matcher(psiFieldText);
-                if (matcher.find()) {
-                    key = matcher.group(1);
-                    isSerializedName = true;
-                }
-
-                pattern = Pattern.compile(briefFilterRegex.toString());
-                matcher = pattern.matcher(psiFieldText);
-                if (matcher.find()) {
-                    key = matcher.group(1);
-                    isSerializedName = true;
-                }
-                if (!isSerializedName) {
-                    key = psiField.getName();
-                }
-            } else {
-                key = psiField.getName();
-
+        if (type instanceof PsiPrimitiveType) {
+            if (fieldEntity == null) {
+                fieldEntity = new FieldEntity();
             }
-            if (key != null) {
-                FieldEntity fieldEntity = new FieldEntity();
-                fieldEntity.setKey(key);
-                filterFields.add(fieldEntity);
+            fieldEntity.setType(type.getPresentableText());
+            return fieldEntity;
+        } else if (type instanceof PsiArrayType) {
+            if (fieldEntity == null) {
+                fieldEntity = new IterableFieldEntity();
+            }
+            IterableFieldEntity iterableFieldEntity = (IterableFieldEntity) fieldEntity;
+            iterableFieldEntity.setDeep(iterableFieldEntity.getDeep() + 1);
+            return evalFieldEntity(fieldEntity, ((PsiArrayType) type).getComponentType());
+        } else if (type instanceof PsiClassReferenceType) {
+            PsiClass psi = ((PsiClassReferenceType) type).resolveGenerics().getElement();
+
+            if (isCollection(psi)) {
+                if (fieldEntity == null) {
+                    fieldEntity = new IterableFieldEntity();
+                }
+                IterableFieldEntity iterableFieldEntity = (IterableFieldEntity) fieldEntity;
+                iterableFieldEntity.setDeep(iterableFieldEntity.getDeep() + 1);
+                PsiType[] parameters = ((PsiClassReferenceType) type).getParameters();
+                if (parameters.length > 0) {
+                    PsiType parameter = parameters[0];
+                    if (parameter instanceof PsiWildcardType) {
+                        if (((PsiWildcardType) parameter).isExtends()) {
+                            final PsiType extendsBound = ((PsiWildcardType) parameter).getExtendsBound();
+
+                            evalFieldEntity(fieldEntity, extendsBound);
+                        }
+                        if (((PsiWildcardType) parameter).isSuper()) {
+                            final PsiType superBound = ((PsiWildcardType) parameter).getSuperBound();
+                            evalFieldEntity(fieldEntity, superBound);
+                        }
+                    } else if (parameter instanceof PsiClassReferenceType) {
+
+                        PsiClass element = ((PsiClassReferenceType) parameter).resolveGenerics().getElement();
+                        handleClassReferenceType(fieldEntity, element);
+                    }
+                }
+                return fieldEntity;
+            } else {
+
+                if (fieldEntity == null) {
+                    fieldEntity = new FieldEntity();
+                }
+                handleClassReferenceType(fieldEntity, psi);
+                return fieldEntity;
             }
 
         }
-        return filterFields;
+        if (fieldEntity == null) {
+            fieldEntity = new IterableFieldEntity();
+        }
+        return fieldEntity;
     }
 
+    private void handleClassReferenceType(FieldEntity fieldEntity, PsiClass psi) {
+        if (psi == null || psi.getQualifiedName() == null) {
+            return;
+        }
+        switch (psi.getQualifiedName()) {
+            case "java.lang.String":
+                fieldEntity.setType("String");
+                break;
+            case "java.lang.Boolean":
+                fieldEntity.setType("Boolean");
+                break;
+            case "java.lang.Integer":
+                fieldEntity.setType("Integer");
+                break;
+            case "java.lang.Double":
+                fieldEntity.setType("Double");
+                break;
+            case "java.lang.Long":
+                fieldEntity.setType("Long");
+                break;
+            default:
+                ClassEntity classEntity = declareClass.get(psi.getQualifiedName());
+                if (classEntity == null) {
+                    classEntity = collectClassAttribute(psi, true);
+                }
+                fieldEntity.setTargetClass(classEntity);
+                break;
+        }
+    }
 
-    public void parseJson(JSONObject json) {
+    private boolean isCollection(PsiClass element) {
 
-        Set<String> set = json.keySet();
+        if ("java.util.Collection".equals(element.getQualifiedName())) {
+            return true;
+        }
+        for (PsiClass psiClass : element.getInterfaces()) {
+            if (isCollection(psiClass)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void parseJson(JSONObject json) {
+        List<String> generateFiled = collectGenerateFiled(json);
+        if (Config.getInstant().isVirgoMode()) {
+            handleVirgoMode(json, generateFiled);
+        } else {
+            handleNormal(json, generateFiled);
+        }
+    }
+
+    private void handleVirgoMode(JSONObject json, List<String> fieldList) {
+        generateClassEntity.setClassName("");
+        generateClassEntity.setPsiClass(targetClass);
+        generateClassEntity.addAllFields(createFields(json, fieldList, generateClassEntity));
+        FieldsDialog fieldsDialog = new FieldsDialog(operator, generateClassEntity, factory,
+                targetClass, currentClass, file, project, generateClassName);
+        fieldsDialog.setSize(800, 500);
+        fieldsDialog.setLocationRelativeTo(null);
+        fieldsDialog.setVisible(true);
+    }
+
+    private void handleNormal(JSONObject json, List<String> generateFiled) {
+        if (targetClass == null) {
+            try {
+                targetClass = PsiClassUtil.getPsiClass(file, project, generateClassName);
+            } catch (Throwable throwable) {
+                handlePathError(throwable);
+            }
+        }
+        if (targetClass != null) {
+            generateClassEntity.setPsiClass(targetClass);
+            try {
+                generateClassEntity.addAllFields(createFields(json, generateFiled, generateClassEntity));
+                operator.setVisible(false);
+                WriterUtil writerUtil = new WriterUtil(file, project, targetClass);
+                writerUtil.execute(generateClassEntity);
+                Config.getInstant().saveCurrentPackPath(packageName);
+                operator.dispose();
+            } catch (Exception e) {
+                throw e;
+            }
+        }
+    }
+
+    private List<String> collectGenerateFiled(JSONObject json) {
+        Set<String> keySet = json.keySet();
         List<String> fieldList = new ArrayList<String>();
-        for (String key : set) {
-            if (!mFilterFields.contains(key)) {
+        for (String key : keySet) {
+            if (!existDeclareField(key, json)) {
                 fieldList.add(key);
             }
         }
-        if (Config.getInstant().isVirgoMode()) {
-            mGenerateEntity.setClassName("");
-            mGenerateEntity.setAutoCreateClassName("");
-            mGenerateEntity.setPsiClass(mGeneratClass);
-            mGenerateEntity.setFields(createFields(json, fieldList, mGenerateEntity));
-            FieldsDialog fieldsDialog = new FieldsDialog(mJsonUtilsDialog, mGenerateEntity, mFactory,
-                    mGeneratClass, currentClass, mFile, project, generateClassName);
-            fieldsDialog.setSize(800, 500);
-            fieldsDialog.setLocationRelativeTo(null);
-            fieldsDialog.setVisible(true);
-            mJsonUtilsDialog.setVisible(false);
-        } else {
-            if (mGeneratClass == null) {
-                try {
-                    mGeneratClass = PsiClassUtil.getPsiClass(mFile, project, generateClassName);
-                } catch (Throwable throwable) {
-                    throwable.printStackTrace();
-                    mJsonUtilsDialog.errorLB.setText("data err !!");
-                    Writer writer = new StringWriter();
-                    PrintWriter printWriter = new PrintWriter(writer);
-                    throwable.printStackTrace(printWriter);
-                    printWriter.close();
-                    mJsonUtilsDialog.mErrorInfo = writer.toString();
-                    mJsonUtilsDialog.setVisible(true);
-                    Toast.make(project, mJsonUtilsDialog.generateClassP, MessageType.ERROR, "the path is not allowed");
-                }
-
-            }
-            if (mGeneratClass != null) {
-                mGenerateEntity.setPsiClass(mGeneratClass);
-                String[] arg = generateClassName.split("\\.");
-                if (arg.length > 1) {
-                    Config.getInstant().setEntityPackName(generateClassName.substring(0, generateClassName.length() - arg[arg.length - 1].length()));
-                    Config.getInstant().save();
-                }
-                Config.getInstant().setEntityPackName(generateClassName);
-                try {
-                    mGenerateEntity.setFields(createFields(json, fieldList, mGenerateEntity));
-                    WriterUtil writerUtil = new WriterUtil(null, null, mFile, project, mGeneratClass);
-                    writerUtil.mInnerClassEntity = mGenerateEntity;
-                    writerUtil.execute();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    mJsonUtilsDialog.errorLB.setText("parse json err !!!");
-                    Writer writer = new StringWriter();
-                    PrintWriter printWriter = new PrintWriter(writer);
-                    e.printStackTrace(printWriter);
-                    printWriter.close();
-                    mJsonUtilsDialog.mErrorInfo = writer.toString();
-                    mJsonUtilsDialog.setVisible(true);
-                    Toast.make(project, errorInfoLb, MessageType.ERROR, "click to see details");
-                    return;
-                }
-            }
-            //消失
-            mJsonUtilsDialog.dispose();
-
-
-        }
-
-
+        return fieldList;
     }
 
+    private boolean existDeclareField(String key, JSONObject json) {
+        FieldEntity fieldEntity = declareFields.get(key);
+        if (fieldEntity == null) {
+            return false;
+        }
+        return fieldEntity.isSameType(json.get(key));
+    }
 
-    private List<FieldEntity> createFields(JSONObject json, List<String> list, InnerClassEntity parentClass) {
+    private void handlePathError(Throwable throwable) {
+        throwable.printStackTrace();
+        Writer writer = new StringWriter();
+        PrintWriter printWriter = new PrintWriter(writer);
+        throwable.printStackTrace(printWriter);
+        printWriter.close();
+        operator.setErrorInfo(writer.toString());
+        operator.setVisible(true);
+        operator.showError(Error.PATH_ERROR);
+    }
+
+    private List<FieldEntity> createFields(JSONObject json, List<String> fieldList, ClassEntity parentClass) {
 
         List<FieldEntity> fieldEntityList = new ArrayList<FieldEntity>();
-        StringBuilder sb = new StringBuilder();
-        sb.append("/** \n");
-        for (int i = 0; i < list.size(); i++) {
-            String key = list.get(i);
-            sb.append("* ").append(key).append(" : ");
-            sb.append(json.get(key).toString().replaceAll("\r", "")
-                    .replaceAll("\t ", "").replaceAll("\f", ""));
-            sb.append("\n");
-        }
-        sb.append("*/ \n");
-
         List<String> listEntityList = new ArrayList<String>();
         boolean writeExtra = Config.getInstant().isGenerateComments();
 
-        for (int i = 0; i < list.size(); i++) {
-            String key = list.get(i);
-            Object type = json.get(key);
-            if (type instanceof JSONArray) {
+        for (int i = 0; i < fieldList.size(); i++) {
+            String key = fieldList.get(i);
+            Object value = json.get(key);
+            if (value instanceof JSONArray) {
                 listEntityList.add(key);
                 continue;
             }
-
-            FieldEntity fieldEntity = createFiled(parentClass, key, type);
-
+            FieldEntity fieldEntity = createField(parentClass, key, value);
             fieldEntityList.add(fieldEntity);
             if (writeExtra) {
                 writeExtra = false;
-
-                parentClass.setExtra(sb.toString());
+                parentClass.setExtra(Utils.createCommentString(json, fieldList));
             }
         }
 
         for (int i = 0; i < listEntityList.size(); i++) {
             String key = listEntityList.get(i);
             Object type = json.get(key);
-
-            FieldEntity fieldEntity = createFiled(parentClass, key, type);
+            FieldEntity fieldEntity = createField(parentClass, key, type);
             fieldEntityList.add(fieldEntity);
         }
 
         return fieldEntityList;
     }
 
-    private FieldEntity createFiled(InnerClassEntity parentClass, String key, Object type) {
 
-        String filedName = CheckUtil.getInstant().handleArg(key);
-        if (CheckUtil.getInstant().checkKeyWord(filedName)) {
-            filedName = filedName + "X";
-        }
-
+    private FieldEntity createField(ClassEntity parentClass, String key, Object type) {
+        //过滤 不符合规则的key
+        String fieldName = CheckUtil.getInstant().handleArg(key);
         if (Config.getInstant().isUseSerializedName()) {
-            if (Config.getInstant().isUseFiledNamePrefix() && !TextUtils.isEmpty(Config.getInstant().getFiledNamePreFixStr())) {
-                filedName = Config.getInstant().getFiledNamePreFixStr() + "_" + filedName;
-            }
-            filedName = captureStringLeaveUnderscore(filedName);
+            fieldName = StringUtils.captureStringLeaveUnderscore(convertSerializedName(fieldName));
         }
-
+        fieldName = handleDeclareFieldName(fieldName, "");
 
         FieldEntity fieldEntity = typeByValue(parentClass, key, type);
-        fieldEntity.setFieldName(filedName);
-        fieldEntity.setAutoCreateFiledName(filedName);
-
-
+        fieldEntity.setFieldName(fieldName);
         return fieldEntity;
-
     }
 
+    private String convertSerializedName(String fieldName) {
+        if (Config.getInstant().isUseFieldNamePrefix() &&
+                !TextUtils.isEmpty(Config.getInstant().getFiledNamePreFixStr())) {
+            fieldName = Config.getInstant().getFiledNamePreFixStr() + "_" + fieldName;
+        }
+        return fieldName;
+    }
 
-    private FieldEntity typeByValue(InnerClassEntity parentClass, String key, Object type) {
-
-        FieldEntity nodeBean = null;
-        String typeStr;
-
+    private FieldEntity typeByValue(ClassEntity parentClass, String key, Object type) {
+        FieldEntity result;
         if (type instanceof JSONObject) {
-
-            InnerClassEntity classEntity = checkInnerClass((JSONObject) type);
+            ClassEntity classEntity = existDeclareClass((JSONObject) type);
             if (classEntity == null) {
-                typeStr = createSubClassName(key, type, parentClass);
-                InnerClassEntity innerClassEntity = createJSonObjectClassSub(typeStr, (JSONObject) type, parentClass);
-                innerClassEntity.setKey(key);
-                innerClassEntity.setType("%s");
-                nodeBean = innerClassEntity;
-
+                FieldEntity fieldEntity = new FieldEntity();
+                ClassEntity innerClassEntity = createInnerClass(createSubClassName(key, type), (JSONObject) type, parentClass);
+                fieldEntity.setKey(key);
+                fieldEntity.setTargetClass(innerClassEntity);
+                result = fieldEntity;
             } else {
-
                 FieldEntity fieldEntity = new FieldEntity();
                 fieldEntity.setKey(key);
                 fieldEntity.setTargetClass(classEntity);
-                fieldEntity.setType("%s");
-                nodeBean = fieldEntity;
+                result = fieldEntity;
             }
         } else if (type instanceof JSONArray) {
-
-            FieldEntity fieldEntity = handJSONArray(parentClass, (JSONArray) type, key, listStr);
-            nodeBean = fieldEntity;
+            result = handleJSONArray(parentClass, (JSONArray) type, key, 1);
         } else {
-
             FieldEntity fieldEntity = new FieldEntity();
             fieldEntity.setKey(key);
-            if (type instanceof Boolean) {
-                typeStr = "boolean";
-
-            } else if (type instanceof Integer) {
-                typeStr = "int";
-            } else if (type instanceof Double) {
-                typeStr = "double";
-            } else if (type instanceof Long) {
-                typeStr = "long";
-            } else if (type instanceof String) {
-                typeStr = "String";
-
-            } else {
-                typeStr = "Object";
+            fieldEntity.setType(DataType.typeOfObject(type).getValue());
+            result = fieldEntity;
+            if (type != null) {
+                result.setValue(type.toString());
             }
-
-            fieldEntity.setType(typeStr);
-            nodeBean = fieldEntity;
-            if (type != null && !(nodeBean instanceof InnerClassEntity)) {
-                nodeBean.setValue(type.toString());
-            }
-
         }
-
-        nodeBean.setKey(key);
-
-        return nodeBean;
+        result.setKey(key);
+        return result;
     }
 
-    private InnerClassEntity checkInnerClass(JSONObject jsonObject) {
-
-        for (InnerClassEntity innerClassEntity : mFilterClass) {
+    private ClassEntity existDeclareClass(JSONObject jsonObject) {
+        for (ClassEntity classEntity : declareClass.values()) {
             Iterator<String> keys = jsonObject.keys();
-
             boolean had = false;
             while (keys.hasNext()) {
                 String key = keys.next();
+                Object value = jsonObject.get(key);
                 had = false;
-
-                for (FieldEntity fieldEntity : innerClassEntity.getFields()) {
-                    if (fieldEntity.getKey().equals(key)) {
+                for (FieldEntity fieldEntity : classEntity.getFields()) {
+                    if (fieldEntity.getKey().equals(key) && DataType.isSameDataType(DataType.typeOfString(fieldEntity.getType()), DataType.typeOfObject(value))) {
                         had = true;
                         break;
                     }
@@ -518,29 +530,79 @@ public class ConvertBridge {
                 }
             }
             if (had) {
-//
-                return innerClassEntity;
+                return classEntity;
             }
         }
         return null;
     }
 
-    private InnerClassEntity createJSonObjectClassSub(String className, JSONObject json, InnerClassEntity parentClass) {
+    /**
+     * @param className
+     * @param json
+     * @param parentClass
+     * @return
+     */
+    private ClassEntity createInnerClass(String className, JSONObject json, ClassEntity parentClass) {
 
-        InnerClassEntity subClassEntity = new InnerClassEntity();
+        if (Config.getInstant().isSplitGenerate()) {
+            String qualifiedName = packageName == null ? className : packageName + "." + className;
+            if (CheckUtil.getInstant().containsDeclareClassName(qualifiedName)) {
+                //存在同名。
+                PsiClass psiClass = PsiClassUtil.exist(file, qualifiedName);
+                if (psiClass != null) {
+                    ClassEntity classEntity = collectClassAttribute(psiClass, false);
+                    classEntity.setLock(true);
+                    if (classEntity.isSame(json)) {
+//                        if (Config.getInstant().isReuseEntity()) {
+                        declareClass.put(classEntity.getQualifiedName(), classEntity);
+//                        }
+                        return classEntity;
+                    }
+                }
+            }
+        }
+
+        ClassEntity subClassEntity = new ClassEntity();
+
         Set<String> set = json.keySet();
         List<String> list = new ArrayList<String>(set);
         List<FieldEntity> fields = createFields(json, list, subClassEntity);
-        subClassEntity.setFields(fields);
-        subClassEntity.setClassName(className);
-        subClassEntity.setAutoCreateClassName(className);
-        if (Config.getInstant().isReuseEntity()) {
-            mFilterClass.add(subClassEntity);
+        subClassEntity.addAllFields(fields);
+        if (Config.getInstant().isSplitGenerate()) {
+            subClassEntity.setPackName(packageName);
+        } else {
+            subClassEntity.setPackName(parentClass.getQualifiedName());
         }
+        subClassEntity.setClassName(className);
+        if (handleDeclareClassName(subClassEntity, "")) {
+            CheckUtil.getInstant().addDeclareClassName(subClassEntity.getQualifiedName());
+        }
+        if (Config.getInstant().isReuseEntity()) {
+            declareClass.put(subClassEntity.getQualifiedName(), subClassEntity);
+        }
+        parentClass.addInnerClass(subClassEntity);
+
         return subClassEntity;
     }
 
-    private String createSubClassName(String key, Object o, InnerClassEntity parentClass) {
+    private boolean handleDeclareClassName(ClassEntity classEntity, String appendName) {
+
+        classEntity.setClassName(classEntity.getClassName() + appendName);
+        if (CheckUtil.getInstant().containsDeclareClassName(classEntity.getQualifiedName())) {
+            return handleDeclareClassName(classEntity, "X");
+        }
+        return true;
+    }
+
+    private String handleDeclareFieldName(String fieldName, String appendName) {
+        fieldName += appendName;
+        if (CheckUtil.getInstant().containsDeclareFieldName(fieldName)) {
+            return handleDeclareFieldName(fieldName, "X");
+        }
+        return fieldName;
+    }
+
+    private String createSubClassName(String key, Object o) {
         String name = "";
         if (o instanceof JSONObject) {
             if (TextUtils.isEmpty(key)) {
@@ -549,7 +611,7 @@ public class ConvertBridge {
             String[] strings = key.split("_");
             StringBuilder stringBuilder = new StringBuilder();
             for (int i = 0; i < strings.length; i++) {
-                stringBuilder.append(captureName(strings[i]));
+                stringBuilder.append(StringUtils.captureName(strings[i]));
             }
 
             name = stringBuilder.toString() + Config.getInstant().getSuffixStr();
@@ -559,117 +621,72 @@ public class ConvertBridge {
 
     }
 
-    private FieldEntity handJSONArray(InnerClassEntity parentClass, JSONArray jsonArray, String key, String preListType) {
+    private FieldEntity handleJSONArray(ClassEntity parentClass, JSONArray jsonArray, String key, int deep) {
 
-        FieldEntity fieldEntity = null;
+        FieldEntity fieldEntity;
         if (jsonArray.length() > 0) {
-
             Object item = jsonArray.get(0);
-            fieldEntity = listTypeByValue(parentClass, key, item, preListType);
+            fieldEntity = listTypeByValue(parentClass, key, item, deep);
         } else {
-
-            fieldEntity = new FieldEntity();
+            fieldEntity = new IterableFieldEntity();
             fieldEntity.setKey(key);
-            fieldEntity.setType(String.format(preListType, "?"));
+            fieldEntity.setType("?");
+            ((IterableFieldEntity) fieldEntity).setDeep(deep);
         }
-
         return fieldEntity;
     }
 
-    public static final String listStr = "List<%s>";
-//    public static final String listStr = "java.util.List<%s>";
+    private FieldEntity listTypeByValue(ClassEntity parentClass, String key, Object type, int deep) {
 
-
-    private FieldEntity listTypeByValue(InnerClassEntity parentClass, String key, Object type, String s) {
-
-        FieldEntity noteBean = null;
-        String typeStr;
+        FieldEntity item = null;
         if (type instanceof JSONObject) {
-            InnerClassEntity classEntity = checkInnerClass((JSONObject) type);
+            ClassEntity classEntity = existDeclareClass((JSONObject) type);
             if (classEntity == null) {
-                typeStr = s;
-                InnerClassEntity innerClassEntity = createJSonObjectClassSub(typeStr, (JSONObject) type, parentClass);
-                innerClassEntity.setType(typeStr);
-                innerClassEntity.setKey(key);
-                innerClassEntity.setClassName(createSubClassName(key, type, parentClass));
-                innerClassEntity.setAutoCreateClassName(innerClassEntity.getClassName());
-                noteBean = innerClassEntity;
+                IterableFieldEntity iterableFieldEntity = new IterableFieldEntity();
+                ClassEntity innerClassEntity = createInnerClass(createSubClassName(key, type), (JSONObject) type, parentClass);
+                iterableFieldEntity.setKey(key);
+                iterableFieldEntity.setDeep(deep);
+                iterableFieldEntity.setTargetClass(innerClassEntity);
+                item = iterableFieldEntity;
             } else {
-
-                typeStr = classEntity.getClassFieldType();
-                typeStr = String.format(s, typeStr);
-                FieldEntity fieldEntity = new FieldEntity();
+                IterableFieldEntity fieldEntity = new IterableFieldEntity();
                 fieldEntity.setKey(key);
                 fieldEntity.setTargetClass(classEntity);
-                fieldEntity.setType(typeStr);
-                noteBean = fieldEntity;
+                fieldEntity.setType(classEntity.getQualifiedName());
+                fieldEntity.setDeep(deep);
+                item = fieldEntity;
             }
 
         } else if (type instanceof JSONArray) {
-            typeStr = String.format(s, listStr);
-            FieldEntity fieldEntity = handJSONArray(parentClass, (JSONArray) type, key, typeStr);
+            FieldEntity fieldEntity = handleJSONArray(parentClass, (JSONArray) type, key, ++deep);
             fieldEntity.setKey(key);
-            noteBean = fieldEntity;
+            item = fieldEntity;
         } else {
-            FieldEntity fieldEntity = new FieldEntity();
+            IterableFieldEntity fieldEntity = new IterableFieldEntity();
             fieldEntity.setKey(key);
-
-            if (type instanceof Boolean) {
-                typeStr = String.format(s, type.getClass().getSimpleName());
-
-            } else if (type instanceof Integer) {
-                typeStr = String.format(s, type.getClass().getSimpleName());
-
-            } else if (type instanceof Double) {
-                typeStr = String.format(s, type.getClass().getSimpleName());
-
-            } else if (type instanceof Long) {
-                typeStr = String.format(s, type.getClass().getSimpleName());
-            } else if (type instanceof String) {
-                typeStr = String.format(s, type.getClass().getSimpleName());
-
-            } else {
-                typeStr = String.format(s, "?");
-            }
-            fieldEntity.setType(typeStr);
-            noteBean = fieldEntity;
+            fieldEntity.setType(type.getClass().getSimpleName());
+            fieldEntity.setDeep(deep);
+            item = fieldEntity;
         }
-        return noteBean;
+        return item;
     }
 
 
-    public String captureName(String text) {
+    public interface Operator {
 
-        if (text.length() > 0) {
-            text = text.substring(0, 1).toUpperCase() + text.substring(1);
-        }
-        return text;
+        void showError(Error err);
+
+        void dispose();
+
+        void setVisible(boolean visible);
+
+        void setErrorInfo(String error);
+
+        void cleanErrorInfo();
     }
 
-    /**
-     * 转成驼峰
-     *
-     * @param str
-     * @return
-     */
-    public String captureStringLeaveUnderscore(String str) {
-
-        if (TextUtils.isEmpty(str)) {
-            return str;
-        }
-        String temp = str.replaceAll("^_+", "");
-
-        if (!TextUtils.isEmpty(temp)) {
-            str = temp;
-        }
-
-        String[] strings = str.split("_");
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(strings[0]);
-        for (int i = 1; i < strings.length; i++) {
-            stringBuilder.append(captureName(strings[i]));
-        }
-        return stringBuilder.toString();
+    public enum Error {
+        DATA_ERROR, PARSE_ERROR, PATH_ERROR;
     }
 }
 

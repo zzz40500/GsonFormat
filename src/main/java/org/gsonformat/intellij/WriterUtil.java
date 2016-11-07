@@ -1,15 +1,22 @@
 package org.gsonformat.intellij;
 
+import com.intellij.openapi.application.RunResult;
 import com.intellij.openapi.command.WriteCommandAction;
+import com.intellij.openapi.progress.ProgressIndicator;
+import com.intellij.openapi.progress.ProgressManager;
+import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.MessageType;
 import com.intellij.psi.JavaPsiFacade;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElementFactory;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.codeStyle.JavaCodeStyleManager;
-import org.gsonformat.intellij.entity.InnerClassEntity;
-
-import javax.swing.*;
+import org.gsonformat.intellij.common.CheckUtil;
+import org.gsonformat.intellij.entity.ClassEntity;
+import org.gsonformat.intellij.process.ClassProcess;
+import org.gsonformat.intellij.ui.Toast;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Created with IntelliJ IDEA.
@@ -19,31 +26,54 @@ import javax.swing.*;
  */
 public class WriterUtil extends WriteCommandAction.Simple {
 
-    protected PsiClass mClass;
-    private PsiElementFactory mFactory;
-    private Project mProject;
-    private PsiFile mFile;
+    private PsiClass cls;
+    private PsiElementFactory factory;
+    private Project project;
+    private PsiFile file;
+    private ClassEntity targetClass;
 
-    public InnerClassEntity mInnerClassEntity;
+    public WriterUtil(PsiFile file, Project project, PsiClass cls) {
+        super(project, file);
+        factory = JavaPsiFacade.getElementFactory(project);
+        this.file = file;
+        this.project = project;
+        this.cls = cls;
+    }
 
-    public WriterUtil(JsonUtilsDialog mJsonUtilsDialog, JLabel jLabel,
-                      PsiFile mFile, Project project, PsiClass mClass) {
-        super(project, null);
+    public void execute(ClassEntity targetClass) {
+        this.targetClass = targetClass;
+        ProgressManager.getInstance().run(new Task.Backgroundable(project, "GsonFormat") {
 
-        mFactory = JavaPsiFacade.getElementFactory(project);
-        this.mFile = mFile;
-        this.mProject = project;
-        this.mClass = mClass;
+            @Override
+            public void run(@NotNull ProgressIndicator progressIndicator) {
+                progressIndicator.setIndeterminate(true);
+                long currentTimeMillis = System.currentTimeMillis();
+                execute();
+                progressIndicator.setIndeterminate(false);
+                progressIndicator.setFraction(1.0);
+                System.out.println("GsonFormat[" + (System.currentTimeMillis() - currentTimeMillis) + "ms]");
+//                Toast.make(project, progressIndicator, MessageType.INFO, "click to see details");
+            }
+        });
+    }
 
+    @NotNull
+    @Override
+    @Deprecated()
+    public RunResult execute() {
+        return super.execute();
     }
 
     @Override
     protected void run() {
-
-        mInnerClassEntity.generateField(mProject, mFactory, mClass);
-        JavaCodeStyleManager styleManager = JavaCodeStyleManager.getInstance(mProject);
-        styleManager.optimizeImports(mFile);
-        styleManager.shortenClassReferences(mClass);
+        if (targetClass == null) {
+            return;
+        }
+        new ClassProcess(factory, cls).generate(targetClass);
+        JavaCodeStyleManager styleManager = JavaCodeStyleManager.getInstance(project);
+        styleManager.optimizeImports(file);
+        styleManager.shortenClassReferences(cls);
+        targetClass = null;
     }
 
 }

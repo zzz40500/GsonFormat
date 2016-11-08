@@ -8,7 +8,7 @@ import org.gsonformat.intellij.config.Constant;
  */
 public enum ConvertLibrary {
 
-    Gson, Jack, FastJson, LoganSquare, AutoValue, Other;
+    Gson, Jack, FastJson, LoganSquare, AutoValue, Other, Lombok;
 
     public static ConvertLibrary from() {
         return from(Config.getInstant().getAnnotationStr());
@@ -29,6 +29,9 @@ public enum ConvertLibrary {
         }
         if (Config.getInstant().getAnnotationStr().equals(Constant.jackAnnotation)) {
             return Jack;
+        }
+        if (Config.getInstant().getAnnotationStr().equals(Constant.lombokAnnotation)) {
+            return Lombok;
         }
         return Other;
 

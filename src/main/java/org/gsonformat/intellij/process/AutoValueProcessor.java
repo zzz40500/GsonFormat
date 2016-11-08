@@ -15,7 +15,8 @@ import java.util.regex.Pattern;
 class AutoValueProcessor extends Processor {
 
     @Override
-    public void onStarProcess(ClassEntity classEntity, PsiElementFactory factory, PsiClass cls) {
+    public void onStarProcess(ClassEntity classEntity, PsiElementFactory factory, PsiClass cls,IProcessor visitor) {
+        super.onStarProcess(classEntity, factory, cls, visitor);
         injectAutoAnnotation(factory, cls);
     }
 
@@ -46,9 +47,6 @@ class AutoValueProcessor extends Processor {
             if (fieldEntity.getTargetClass() != null) {
                 fieldEntity.getTargetClass().setGenerate(true);
             }
-            if (!filedName.equals(fieldEntity.getKey()) || Config.getInstant().isUseSerializedName()) {
-                fieldSb.append(Config.getInstant().geFullNameAnnotation().replaceAll("\\{filed\\}", fieldEntity.getKey()));
-            }
 
             fieldSb.append(String.format("public abstract %s %s() ; ", fieldEntity.getFullNameType(), filedName));
             cls.add(factory.createMethodFromText(fieldSb.toString(), cls));
@@ -66,11 +64,8 @@ class AutoValueProcessor extends Processor {
     }
 
     @Override
-    protected void onEndGenerateClass(PsiElementFactory factory, ClassEntity classEntity, PsiClass parentClass, PsiClass generateClass) {
-        super.onEndGenerateClass(factory, classEntity, parentClass, generateClass);
-        generateClass = parentClass.findInnerClassByName(classEntity.getClassName(), false);
-        if (generateClass != null) {
-            injectAutoAnnotation(factory, generateClass);
-        }
+    protected void onEndGenerateClass(PsiElementFactory factory, ClassEntity classEntity, PsiClass parentClass, PsiClass generateClass, IProcessor visitor) {
+        super.onEndGenerateClass(factory, classEntity, parentClass, generateClass, visitor);
+        injectAutoAnnotation(factory, generateClass);
     }
 }

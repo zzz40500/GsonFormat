@@ -40,6 +40,7 @@ public class SettingDialog extends JFrame {
     private JRadioButton loganSquareCB;
     private JRadioButton autoValueRadioButton;
     private JCheckBox splitGenerateMode;
+    private JRadioButton lombokRB;
     private String annotaionStr;
 
     public SettingDialog(Project project) {
@@ -139,6 +140,7 @@ public class SettingDialog extends JFrame {
                 object1Button.setEnabled(false);
                 arrayButton.setEnabled(false);
                 array1Button.setEnabled(false);
+
             }
         });
         loganSquareCB.addActionListener(new ActionListener() {
@@ -146,6 +148,27 @@ public class SettingDialog extends JFrame {
             public void actionPerformed(ActionEvent actionEvent) {
                 if (loganSquareCB.isSelected()) {
                     annotationFT.setText(Constant.loganSquareAnnotation);
+                }
+                annotationFT.setEnabled(otherRB.isSelected());
+                objectFromDataCB.setEnabled(false);
+                objectFromData1CB.setEnabled(false);
+                arrayFromDataCB.setEnabled(false);
+                arrayFromData1CB.setEnabled(false);
+                objectFromDataCB.setSelected(false);
+                objectFromData1CB.setSelected(false);
+                arrayFromDataCB.setSelected(false);
+                arrayFromData1CB.setSelected(false);
+                objectButton.setEnabled(false);
+                object1Button.setEnabled(false);
+                arrayButton.setEnabled(false);
+                array1Button.setEnabled(false);
+            }
+        });
+        lombokRB.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                if (loganSquareCB.isSelected()) {
+                    annotationFT.setText(Constant.lombokAnnotation);
                 }
                 annotationFT.setEnabled(otherRB.isSelected());
                 objectFromDataCB.setEnabled(false);

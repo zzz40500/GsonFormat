@@ -6,7 +6,7 @@ import com.intellij.psi.PsiElementFactory;
 import cn.vearn.checktreetable.FiledTreeTableModel;
 import com.intellij.psi.PsiFile;
 import org.gsonformat.intellij.ConvertBridge;
-import org.gsonformat.intellij.WriterUtil;
+import org.gsonformat.intellij.action.DataWriter;
 import org.gsonformat.intellij.common.StringUtils;
 import org.gsonformat.intellij.config.Config;
 import org.gsonformat.intellij.entity.FieldEntity;
@@ -136,8 +136,8 @@ public class FieldsDialog extends JFrame {
             }
             try {
                 setVisible(false);
-                WriterUtil writerUtil = new WriterUtil(file, project, psiClass);
-                writerUtil.execute(classEntity);
+                DataWriter dataWriter = new DataWriter(file, project, psiClass);
+                dataWriter.execute(classEntity);
                 Config.getInstant().saveCurrentPackPath(StringUtils.getPackage(generateClassStr));
                 operator.dispose();
                 dispose();

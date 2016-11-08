@@ -20,7 +20,7 @@ public class ClassProcess {
         processor = Processor.getProcessor(ConvertLibrary.from());
     }
 
-    public void generate(ClassEntity classEntity) {
-        processor.process(classEntity, factory, cls);
+    public void generate(ClassEntity classEntity, IProcessor visitor) {
+        processor.process(classEntity, factory, cls, visitor);
     }
 }

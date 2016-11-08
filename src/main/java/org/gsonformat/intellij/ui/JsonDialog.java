@@ -173,7 +173,7 @@ public class JsonDialog extends JFrame implements ConvertBridge.Operator {
     private void onOK() {
 
         this.setAlwaysOnTop(false);
-        String jsonSTR = editTP.getText();
+        String jsonSTR = editTP.getText().trim();
         if (TextUtils.isEmpty(jsonSTR)) {
             return;
         }
@@ -221,7 +221,7 @@ public class JsonDialog extends JFrame implements ConvertBridge.Operator {
     public void openSettingDialog() {
 
         SettingDialog settingDialog = new SettingDialog(project);
-        settingDialog.setSize(800, 700);
+        settingDialog.setSize(800, 720);
         settingDialog.setLocationRelativeTo(null);
         settingDialog.setResizable(false);
         settingDialog.setVisible(true);

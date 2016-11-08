@@ -1,4 +1,4 @@
-package org.gsonformat.intellij;
+package org.gsonformat.intellij.action;
 
 import com.intellij.openapi.application.RunResult;
 import com.intellij.openapi.command.WriteCommandAction;
@@ -15,8 +15,13 @@ import com.intellij.psi.codeStyle.JavaCodeStyleManager;
 import org.gsonformat.intellij.common.CheckUtil;
 import org.gsonformat.intellij.entity.ClassEntity;
 import org.gsonformat.intellij.process.ClassProcess;
+import org.gsonformat.intellij.process.IProcessor;
+import org.gsonformat.intellij.ui.NotificationCenter;
 import org.gsonformat.intellij.ui.Toast;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -24,15 +29,16 @@ import org.jetbrains.annotations.NotNull;
  * Date: 14-7-4
  * Time: 下午3:58
  */
-public class WriterUtil extends WriteCommandAction.Simple {
+public class DataWriter extends WriteCommandAction.Simple {
 
     private PsiClass cls;
     private PsiElementFactory factory;
     private Project project;
     private PsiFile file;
     private ClassEntity targetClass;
+    private List<String> generateClassList = new ArrayList<>();
 
-    public WriterUtil(PsiFile file, Project project, PsiClass cls) {
+    public DataWriter(PsiFile file, Project project, PsiClass cls) {
         super(project, file);
         factory = JavaPsiFacade.getElementFactory(project);
         this.file = file;
@@ -51,8 +57,15 @@ public class WriterUtil extends WriteCommandAction.Simple {
                 execute();
                 progressIndicator.setIndeterminate(false);
                 progressIndicator.setFraction(1.0);
-                System.out.println("GsonFormat[" + (System.currentTimeMillis() - currentTimeMillis) + "ms]");
-//                Toast.make(project, progressIndicator, MessageType.INFO, "click to see details");
+                StringBuffer sb = new StringBuffer();
+                sb.append("GsonFormat[ " + (System.currentTimeMillis() - currentTimeMillis) + " ms ]\n");
+//                sb.append("generate class : ( "+generateClassList.size()+" )\n");
+//                for (String item: generateClassList) {
+//                    sb.append("    at "+item+"\n");
+//                }
+//                sb.append("  \n");
+//                NotificationCenter.info(sb.toString());
+                Toast.make(project, MessageType.INFO, sb.toString());
             }
         });
     }
@@ -69,11 +82,29 @@ public class WriterUtil extends WriteCommandAction.Simple {
         if (targetClass == null) {
             return;
         }
-        new ClassProcess(factory, cls).generate(targetClass);
-        JavaCodeStyleManager styleManager = JavaCodeStyleManager.getInstance(project);
-        styleManager.optimizeImports(file);
-        styleManager.shortenClassReferences(cls);
-        targetClass = null;
+        generateClassList.clear();
+        new ClassProcess(factory, cls).generate(targetClass, new IProcessor() {
+            @Override
+            public void onStarProcess(ClassEntity classEntity, PsiElementFactory factory, PsiClass cls) {
+                generateClassList.add(cls.getQualifiedName());
+            }
+
+            @Override
+            public void onEndProcess(ClassEntity classEntity, PsiElementFactory factory, PsiClass cls) {
+
+            }
+
+            @Override
+            public void onStartGenerateClass(PsiElementFactory factory, ClassEntity classEntity, PsiClass parentClass) {
+
+            }
+
+            @Override
+            public void onEndGenerateClass(PsiElementFactory factory, ClassEntity classEntity, PsiClass parentClass, PsiClass generateClass) {
+                generateClassList.add(generateClass.getQualifiedName());
+
+            }
+        });
     }
 
 }

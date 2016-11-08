@@ -9,7 +9,7 @@ import org.json.JSONObject;
 public enum DataType {
 
     Data_Type_Boolean("boolean"), Data_Type_Int("int"), Data_Type_Double("double"),
-    Data_Type_long("long"), Data_Type_String("String"), Data_type_Object("object"), Data_Type_Array("array");
+    Data_Type_long("long"), Data_Type_String("String"), Data_type_Object("Object"), Data_Type_Array("array");
 
     String value;
 
@@ -23,6 +23,9 @@ public enum DataType {
     }
 
     public static DataType typeOfObject(Object value) {
+        if (value == null) {
+            return Data_type_Object;
+        }
         DataType type = null;
         if (value instanceof Boolean) {
             type = Data_Type_Boolean;
@@ -38,6 +41,8 @@ public enum DataType {
             type = Data_type_Object;
         } else if (value instanceof JSONArray) {
             type = Data_Type_Array;
+        } else {
+            type = Data_type_Object;
         }
         return type;
     }

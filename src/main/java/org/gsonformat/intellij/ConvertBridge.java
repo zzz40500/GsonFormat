@@ -4,6 +4,8 @@ import com.intellij.openapi.project.Project;
 import com.intellij.psi.*;
 import com.intellij.psi.impl.source.PsiClassReferenceType;
 import org.apache.http.util.TextUtils;
+import org.gsonformat.intellij.action.ClassProvider;
+import org.gsonformat.intellij.action.DataWriter;
 import org.gsonformat.intellij.common.StringUtils;
 import org.gsonformat.intellij.common.Utils;
 import org.gsonformat.intellij.config.Config;
@@ -90,12 +92,13 @@ public class ConvertBridge {
         JSONObject json = null;
         operator.cleanErrorInfo();
         try {
-            json = new JSONObject(jsonStr);
+
+            json = parseJSONObject(jsonStr);
         } catch (Exception e) {
             String jsonTS = removeComment(jsonStr);
-            jsonTS = jsonTS.replaceAll("^[\\s\\S]*?\\{", "{");
+            jsonTS = jsonTS.replaceAll("^.*?\\{", "{");
             try {
-                json = new JSONObject(jsonTS);
+                json = parseJSONObject(jsonTS);
             } catch (Exception e2) {
                 handleDataError(e2);
             }
@@ -121,6 +124,38 @@ public class ConvertBridge {
         }
         declareFields = null;
         declareClass = null;
+    }
+
+    private JSONObject parseJSONObject(String jsonStr) {
+        if (jsonStr.startsWith("{")) {
+            return new JSONObject(jsonStr);
+        } else if (jsonStr.startsWith("[")) {
+            JSONArray jsonArray = new JSONArray(jsonStr);
+
+            if (jsonArray.length() > 0 && jsonArray.get(0) instanceof JSONObject) {
+                return getJsonObject(jsonArray);
+            }
+        }
+        return null;
+
+    }
+
+    private JSONObject getJsonObject(JSONArray jsonArray) {
+        JSONObject resultJSON = jsonArray.getJSONObject(0);
+
+        for (int i = 1; i < jsonArray.length(); i++) {
+            Object value = jsonArray.get(i);
+            if (!(value instanceof JSONObject)) {
+                break;
+            }
+            JSONObject json = (JSONObject) value;
+            for (String key : json.keySet()) {
+                if (!resultJSON.keySet().contains(key)) {
+                    resultJSON.put(key, json.get(key));
+                }
+            }
+        }
+        return resultJSON;
     }
 
     private void collectPackAllClassName() {
@@ -377,7 +412,7 @@ public class ConvertBridge {
     private void handleNormal(JSONObject json, List<String> generateFiled) {
         if (targetClass == null) {
             try {
-                targetClass = PsiClassUtil.getPsiClass(file, project, generateClassName);
+                targetClass = (PsiClass) new ClassProvider(project, file).execute(generateClassName).getResultObject();
             } catch (Throwable throwable) {
                 handlePathError(throwable);
             }
@@ -387,8 +422,8 @@ public class ConvertBridge {
             try {
                 generateClassEntity.addAllFields(createFields(json, generateFiled, generateClassEntity));
                 operator.setVisible(false);
-                WriterUtil writerUtil = new WriterUtil(file, project, targetClass);
-                writerUtil.execute(generateClassEntity);
+                DataWriter dataWriter = new DataWriter(file, project, targetClass);
+                dataWriter.execute(generateClassEntity);
                 Config.getInstant().saveCurrentPackPath(packageName);
                 operator.dispose();
             } catch (Exception e) {
@@ -626,6 +661,9 @@ public class ConvertBridge {
         FieldEntity fieldEntity;
         if (jsonArray.length() > 0) {
             Object item = jsonArray.get(0);
+            if(item instanceof JSONObject){
+                item=getJsonObject(jsonArray);
+            }
             fieldEntity = listTypeByValue(parentClass, key, item, deep);
         } else {
             fieldEntity = new IterableFieldEntity();

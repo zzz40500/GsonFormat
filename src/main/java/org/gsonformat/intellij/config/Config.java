@@ -87,7 +87,7 @@ public class Config {
             config.setVirgoMode(PropertiesComponent.getInstance().getBoolean("virgoMode", true));
             config.setUseFieldNamePrefix(PropertiesComponent.getInstance().getBoolean("useFieldNamePrefix", false));
             config.setGenerateComments(PropertiesComponent.getInstance().getBoolean("generateComments", true));
-            config.setSplitGenerate(PropertiesComponent.getInstance().getBoolean("splitGenerate", true));
+            config.setSplitGenerate(PropertiesComponent.getInstance().getBoolean("splitGenerate", false));
 
         }
         return config;
@@ -307,7 +307,7 @@ public class Config {
         if (entityPackName == null) {
             return;
         }
-        setEntityPackName(entityPackName);
+        setEntityPackName(entityPackName+".");
         save();
     }
 

@@ -1,6 +1,7 @@
 package org.gsonformat.intellij.process;
 
 import com.intellij.psi.*;
+import com.intellij.psi.codeStyle.JavaCodeStyleManager;
 import org.apache.http.util.TextUtils;
 import org.gsonformat.intellij.common.PsiClassUtil;
 import org.gsonformat.intellij.config.Config;
@@ -26,6 +27,7 @@ public abstract class Processor {
         sProcessorMap.put(ConvertLibrary.AutoValue, new AutoValueProcessor());
         sProcessorMap.put(ConvertLibrary.LoganSquare, new LoganSquareProcessor());
         sProcessorMap.put(ConvertLibrary.Other, new OtherProcessor());
+        sProcessorMap.put(ConvertLibrary.Lombok, new LombokProcessor());
     }
 
     public static Processor getProcessor(ConvertLibrary convertLibrary) {
@@ -33,28 +35,43 @@ public abstract class Processor {
     }
 
 
-    public void process(ClassEntity classEntity, PsiElementFactory factory, PsiClass cls) {
-        onStarProcess(classEntity, factory, cls);
+    public void process(ClassEntity classEntity, PsiElementFactory factory, PsiClass cls, IProcessor visitor) {
+        onStarProcess(classEntity, factory, cls, visitor);
+
         for (FieldEntity fieldEntity : classEntity.getFields()) {
             generateField(factory, fieldEntity, cls, classEntity);
         }
         for (ClassEntity innerClass : classEntity.getInnerClasss()) {
-            generateClass(factory, innerClass, cls);
+            generateClass(factory, innerClass, cls, visitor);
         }
         generateGetterAndSetter(factory, cls, classEntity);
         generateConvertMethod(factory, cls, classEntity);
-        onEndProcess(classEntity, factory, cls);
+        onEndProcess(classEntity, factory, cls, visitor);
     }
 
-    public void onEndProcess(ClassEntity classEntity, PsiElementFactory factory, PsiClass cls) {
-
+    protected void onEndProcess(ClassEntity classEntity, PsiElementFactory factory, PsiClass cls, IProcessor visitor) {
+        if (visitor != null) {
+            visitor.onEndProcess(classEntity, factory, cls);
+        }
+        formatJavaFile(cls);
     }
 
-    public void onStarProcess(ClassEntity classEntity, PsiElementFactory factory, PsiClass cls) {
-
+    protected void formatJavaFile(PsiClass cls) {
+        if (cls == null) {
+            return;
+        }
+        JavaCodeStyleManager styleManager = JavaCodeStyleManager.getInstance(cls.getProject());
+        styleManager.optimizeImports(cls.getContainingFile());
+        styleManager.shortenClassReferences(cls);
     }
 
-    public void generateConvertMethod(PsiElementFactory factory, PsiClass cls, ClassEntity classEntity) {
+    protected void onStarProcess(ClassEntity classEntity, PsiElementFactory factory, PsiClass cls, IProcessor visitor) {
+        if (visitor != null) {
+            visitor.onStarProcess(classEntity, factory, cls);
+        }
+    }
+
+    protected void generateConvertMethod(PsiElementFactory factory, PsiClass cls, ClassEntity classEntity) {
         if (Config.getInstant().isObjectFromData()) {
             createMethod(factory, Config.getInstant().getObjectFromDataStr().replace("$ClassName$", cls.getName()).trim(), cls);
         }
@@ -69,7 +86,7 @@ public abstract class Processor {
         }
     }
 
-    public void generateGetterAndSetter(PsiElementFactory factory, PsiClass cls, ClassEntity classEntity) {
+    protected void generateGetterAndSetter(PsiElementFactory factory, PsiClass cls, ClassEntity classEntity) {
 
         if (Config.getInstant().isFieldPrivateMode()) {
             for (FieldEntity field : classEntity.getFields()) {
@@ -133,11 +150,12 @@ public abstract class Processor {
         }
     }
 
-    public void generateClass(PsiElementFactory factory, ClassEntity classEntity, PsiClass parentClass) {
+    protected void generateClass(PsiElementFactory factory, ClassEntity classEntity, PsiClass parentClass, IProcessor visitor) {
 
-        onStartGenerateClass(factory, classEntity, parentClass);
+        onStartGenerateClass(factory, classEntity, parentClass, visitor);
         PsiClass generateClass = null;
         if (classEntity.isGenerate()) {
+            //// TODO: 16/11/9  待重构 
             if (Config.getInstant().isSplitGenerate()) {
                 try {
                     generateClass = PsiClassUtil.getPsiClass(
@@ -158,7 +176,7 @@ public abstract class Processor {
 
                 for (ClassEntity innerClass : classEntity.getInnerClasss()) {
 
-                    generateClass(factory, innerClass, generateClass);
+                    generateClass(factory, innerClass, generateClass, visitor);
                 }
                 generateGetterAndSetter(factory, generateClass, classEntity);
                 generateConvertMethod(factory, generateClass, classEntity);
@@ -168,19 +186,26 @@ public abstract class Processor {
             }
 
         }
-        onEndGenerateClass(factory, classEntity, parentClass, generateClass);
+        onEndGenerateClass(factory, classEntity, parentClass, generateClass, visitor);
+        if (Config.getInstant().isSplitGenerate()) {
+            formatJavaFile(generateClass);
+        }
 
     }
 
-    protected void onStartGenerateClass(PsiElementFactory factory, ClassEntity classEntity, PsiClass parentClass) {
-
+    protected void onStartGenerateClass(PsiElementFactory factory, ClassEntity classEntity, PsiClass parentClass, IProcessor visitor) {
+        if (visitor != null) {
+            visitor.onStartGenerateClass(factory, classEntity, parentClass);
+        }
     }
 
-    protected void onEndGenerateClass(PsiElementFactory factory, ClassEntity classEntity, PsiClass parentClass, PsiClass generateClass) {
-
+    protected void onEndGenerateClass(PsiElementFactory factory, ClassEntity classEntity, PsiClass parentClass, PsiClass generateClass, IProcessor visitor) {
+        if (visitor != null) {
+            visitor.onEndGenerateClass(factory, classEntity, parentClass, generateClass);
+        }
     }
 
-    public void generateField(PsiElementFactory factory, FieldEntity fieldEntity, PsiClass cls, ClassEntity classEntity) {
+    protected void generateField(PsiElementFactory factory, FieldEntity fieldEntity, PsiClass cls, ClassEntity classEntity) {
 
         if (fieldEntity.isGenerate()) {
 

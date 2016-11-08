@@ -10,17 +10,8 @@ import org.gsonformat.intellij.entity.ClassEntity;
 class FastJsonProcessor extends Processor {
 
     @Override
-    public void onStarProcess(ClassEntity classEntity, PsiElementFactory factory, PsiClass cls) {
-        super.onEndProcess(classEntity, factory, cls);
-//        PsiModifierList modifierList = cls.getModifierList();
-//        PsiElement firstChild = modifierList.getFirstChild();
-//        Pattern pattern = Pattern.compile("@.*?JsonIgnoreProperties");
-//
-//        if (!pattern.matcher(firstChild.getText()).find()) {
-//            PsiAnnotation annotationFromText =
-//                    factory.createAnnotationFromText("@com.fasterxml.jackson.annotation.JsonIgnoreProperties(ignoreUnknown = true)", cls);
-//            modifierList.addBefore(annotationFromText, firstChild);
-//        }
+    public void onStarProcess(ClassEntity classEntity, PsiElementFactory factory, PsiClass cls,IProcessor visitor) {
+        super.onEndProcess(classEntity, factory, cls, visitor);
     }
 
 }

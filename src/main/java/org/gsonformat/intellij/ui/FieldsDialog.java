@@ -1,5 +1,6 @@
 package org.gsonformat.intellij.ui;
 
+import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElementFactory;
@@ -113,46 +114,53 @@ public class FieldsDialog extends JFrame {
     private void onOK() {
 
         this.setAlwaysOnTop(false);
-        if (psiClass == null) {
-            try {
-                psiClass = PsiClassUtil.getPsiClass(file, project, generateClassStr);
-            } catch (Throwable throwable) {
-                throwable.printStackTrace();
-                operator.showError(ConvertBridge.Error.DATA_ERROR);
-                Writer writer = new StringWriter();
-                PrintWriter printWriter = new PrintWriter(writer);
-                throwable.printStackTrace(printWriter);
-                printWriter.close();
-                operator.setErrorInfo(writer.toString());
-                operator.setVisible(true);
-                operator.showError(ConvertBridge.Error.PATH_ERROR);
+        WriteCommandAction.runWriteCommandAction(project, new Runnable() {
+
+            @Override
+            public void run() {
+                if (psiClass == null) {
+                    try {
+                        psiClass = PsiClassUtil.getPsiClass(file, project, generateClassStr);
+                    } catch (Throwable throwable) {
+                        throwable.printStackTrace();
+                        operator.showError(ConvertBridge.Error.DATA_ERROR);
+                        Writer writer = new StringWriter();
+                        PrintWriter printWriter = new PrintWriter(writer);
+                        throwable.printStackTrace(printWriter);
+                        printWriter.close();
+                        operator.setErrorInfo(writer.toString());
+                        operator.setVisible(true);
+                        operator.showError(ConvertBridge.Error.PATH_ERROR);
+                    }
+                }
+
+                if (psiClass != null) {
+                    String[] arg = generateClassStr.split("\\.");
+                    if (arg.length > 1) {
+                        Config.getInstant().setEntityPackName(generateClassStr.substring(0, generateClassStr.length() - arg[arg.length - 1].length()));
+                        Config.getInstant().save();
+                    }
+                    try {
+                        setVisible(false);
+                        DataWriter dataWriter = new DataWriter(file, project, psiClass);
+                        dataWriter.execute(classEntity);
+                        Config.getInstant().saveCurrentPackPath(StringUtils.getPackage(generateClassStr));
+                        operator.dispose();
+                        dispose();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        operator.showError(ConvertBridge.Error.PARSE_ERROR);
+                        Writer writer = new StringWriter();
+                        PrintWriter printWriter = new PrintWriter(writer);
+                        e.printStackTrace(printWriter);
+                        printWriter.close();
+                        operator.setErrorInfo(writer.toString());
+                        operator.setVisible(true);
+                        dispose();
+                    }
+                }
             }
-        }
-        if (psiClass != null) {
-            String[] arg = generateClassStr.split("\\.");
-            if (arg.length > 1) {
-                Config.getInstant().setEntityPackName(generateClassStr.substring(0, generateClassStr.length() - arg[arg.length - 1].length()));
-                Config.getInstant().save();
-            }
-            try {
-                setVisible(false);
-                DataWriter dataWriter = new DataWriter(file, project, psiClass);
-                dataWriter.execute(classEntity);
-                Config.getInstant().saveCurrentPackPath(StringUtils.getPackage(generateClassStr));
-                operator.dispose();
-                dispose();
-            } catch (Exception e) {
-                e.printStackTrace();
-                operator.showError(ConvertBridge.Error.PARSE_ERROR);
-                Writer writer = new StringWriter();
-                PrintWriter printWriter = new PrintWriter(writer);
-                e.printStackTrace(printWriter);
-                printWriter.close();
-                operator.setErrorInfo(writer.toString());
-                operator.setVisible(true);
-                dispose();
-            }
-        }
+        });
     }
 
     private void onCancel() {

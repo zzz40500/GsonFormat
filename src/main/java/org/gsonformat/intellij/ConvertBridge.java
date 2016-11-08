@@ -1,10 +1,10 @@
 package org.gsonformat.intellij;
 
+import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.*;
 import com.intellij.psi.impl.source.PsiClassReferenceType;
 import org.apache.http.util.TextUtils;
-import org.gsonformat.intellij.action.ClassProvider;
 import org.gsonformat.intellij.action.DataWriter;
 import org.gsonformat.intellij.common.StringUtils;
 import org.gsonformat.intellij.common.Utils;
@@ -410,26 +410,31 @@ public class ConvertBridge {
     }
 
     private void handleNormal(JSONObject json, List<String> generateFiled) {
-        if (targetClass == null) {
-            try {
-                targetClass = (PsiClass) new ClassProvider(project, file).execute(generateClassName).getResultObject();
-            } catch (Throwable throwable) {
-                handlePathError(throwable);
+        WriteCommandAction.runWriteCommandAction(project, new Runnable() {
+            @Override
+            public void run() {
+                if (targetClass == null) {
+                    try {
+                        targetClass = PsiClassUtil.getPsiClass(file, project, generateClassName);
+                    } catch (Throwable throwable) {
+                        handlePathError(throwable);
+                    }
+                }
+                if (targetClass != null) {
+                    generateClassEntity.setPsiClass(targetClass);
+                    try {
+                        generateClassEntity.addAllFields(createFields(json, generateFiled, generateClassEntity));
+                        operator.setVisible(false);
+                        DataWriter dataWriter = new DataWriter(file, project, targetClass);
+                        dataWriter.execute(generateClassEntity);
+                        Config.getInstant().saveCurrentPackPath(packageName);
+                        operator.dispose();
+                    } catch (Exception e) {
+                        throw e;
+                    }
+                }
             }
-        }
-        if (targetClass != null) {
-            generateClassEntity.setPsiClass(targetClass);
-            try {
-                generateClassEntity.addAllFields(createFields(json, generateFiled, generateClassEntity));
-                operator.setVisible(false);
-                DataWriter dataWriter = new DataWriter(file, project, targetClass);
-                dataWriter.execute(generateClassEntity);
-                Config.getInstant().saveCurrentPackPath(packageName);
-                operator.dispose();
-            } catch (Exception e) {
-                throw e;
-            }
-        }
+        });
     }
 
     private List<String> collectGenerateFiled(JSONObject json) {
@@ -661,8 +666,8 @@ public class ConvertBridge {
         FieldEntity fieldEntity;
         if (jsonArray.length() > 0) {
             Object item = jsonArray.get(0);
-            if(item instanceof JSONObject){
-                item=getJsonObject(jsonArray);
+            if (item instanceof JSONObject) {
+                item = getJsonObject(jsonArray);
             }
             fieldEntity = listTypeByValue(parentClass, key, item, deep);
         } else {

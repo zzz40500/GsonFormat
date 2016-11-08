@@ -1,6 +1,7 @@
 package org.gsonformat.intellij.common;
 
 import com.intellij.ide.util.DirectoryUtil;
+import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.*;
@@ -128,8 +129,8 @@ public class PsiClassUtil {
                     }
                 }
             }
-            psiClass = JavaDirectoryService.getInstance().createClass(psiDirectory, className);
 
+            psiClass = JavaDirectoryService.getInstance().createClass(psiDirectory, className);
             FileEditorManager manager = FileEditorManager.getInstance(project);
             manager.openFile(psiClass.getContainingFile().getVirtualFile(), true, true);
         }

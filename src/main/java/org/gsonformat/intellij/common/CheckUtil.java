@@ -65,6 +65,7 @@ public class CheckUtil {
         keyWordList.add("throw");
         keyWordList.add("throws");
         keyWordList.add("transient");
+        keyWordList.add("try");
         keyWordList.add("abstract");
         keyWordList.add("void");
         keyWordList.add("volatile");

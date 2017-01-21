@@ -34,6 +34,5 @@ public enum ConvertLibrary {
             return Lombok;
         }
         return Other;
-
     }
 }

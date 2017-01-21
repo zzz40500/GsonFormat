@@ -3,8 +3,11 @@ package org.gsonformat.intellij.process;
 import com.intellij.psi.*;
 import com.intellij.psi.codeStyle.JavaCodeStyleManager;
 import org.apache.http.util.TextUtils;
+import org.gsonformat.intellij.common.FieldHelper;
 import org.gsonformat.intellij.common.PsiClassUtil;
+import org.gsonformat.intellij.common.Try;
 import org.gsonformat.intellij.config.Config;
+import org.gsonformat.intellij.config.Constant;
 import org.gsonformat.intellij.entity.ConvertLibrary;
 import org.gsonformat.intellij.entity.FieldEntity;
 import org.gsonformat.intellij.entity.ClassEntity;
@@ -30,12 +33,25 @@ public abstract class Processor {
         sProcessorMap.put(ConvertLibrary.Lombok, new LombokProcessor());
     }
 
-    public static Processor getProcessor(ConvertLibrary convertLibrary) {
+    static Processor getProcessor(ConvertLibrary convertLibrary) {
         return sProcessorMap.get(convertLibrary);
     }
 
 
+    public void logPsiElement(PsiElement element) {
+        System.out.println(element.getClass().toString());
+        System.out.println(element.toString());
+
+    }
+
     public void process(ClassEntity classEntity, PsiElementFactory factory, PsiClass cls, IProcessor visitor) {
+
+        if (cls.getChildren() != null) {
+            for (PsiElement e : cls.getChildren()) {
+                logPsiElement(e);
+            }
+        }
+
         onStarProcess(classEntity, factory, cls, visitor);
 
         for (FieldEntity fieldEntity : classEntity.getFields()) {
@@ -53,10 +69,10 @@ public abstract class Processor {
         if (visitor != null) {
             visitor.onEndProcess(classEntity, factory, cls);
         }
-        formatJavaFile(cls);
+        formatJavCode(cls);
     }
 
-    protected void formatJavaFile(PsiClass cls) {
+    protected void formatJavCode(PsiClass cls) {
         if (cls == null) {
             return;
         }
@@ -72,6 +88,9 @@ public abstract class Processor {
     }
 
     protected void generateConvertMethod(PsiElementFactory factory, PsiClass cls, ClassEntity classEntity) {
+        if (cls == null || cls.getName() == null) {
+            return;
+        }
         if (Config.getInstant().isObjectFromData()) {
             createMethod(factory, Config.getInstant().getObjectFromDataStr().replace("$ClassName$", cls.getName()).trim(), cls);
         }
@@ -95,8 +114,23 @@ public abstract class Processor {
         }
     }
 
-    protected void createMethod(PsiElementFactory mFactory, String method, PsiClass cla) {
-        cla.add(mFactory.createMethodFromText(method, cla));
+    protected void createMethod(PsiElementFactory factory, String method, PsiClass cls) {
+        Try.run(new Try.TryListener() {
+            @Override
+            public void run() {
+                cls.add(factory.createMethodFromText(method, cls));
+            }
+
+            @Override
+            public void runAgain() {
+
+            }
+
+            @Override
+            public void error() {
+
+            }
+        });
     }
 
     protected void createGetAndSetMethod(PsiElementFactory factory, PsiClass cls, FieldEntity field) {
@@ -115,8 +149,7 @@ public abstract class Processor {
                         field.getGenerateFieldName()).concat(" ;} ");
                 cls.add(factory.createMethodFromText(method, cls));
             } else {
-                String method = "public ".concat(typeStr).concat(
-                        "   get").concat(
+                String method = "public ".concat(typeStr).concat("   get").concat(
                         captureName(fieldName)).concat(
                         "() {   return ").concat(
                         field.getGenerateFieldName()).concat(" ;} ");
@@ -146,7 +179,26 @@ public abstract class Processor {
             } else {
                 method = method.concat(field.getGenerateFieldName()).concat(" = ").concat(arg).concat(";} ");
             }
-            cls.add(factory.createMethodFromText(method, cls));
+
+            String finalMethod = method;
+            String finalFieldName = fieldName;
+            Try.run(new Try.TryListener() {
+                @Override
+                public void run() {
+                    cls.add(factory.createMethodFromText(finalMethod, cls));
+                }
+
+                @Override
+                public void runAgain() {
+                    cls.addBefore(factory.createCommentFromText("// FIXME generate failure  method  set and get " + captureName(finalFieldName), cls), cls.getChildren()[0]);
+
+                }
+
+                @Override
+                public void error() {
+
+                }
+            });
         }
     }
 
@@ -188,9 +240,8 @@ public abstract class Processor {
         }
         onEndGenerateClass(factory, classEntity, parentClass, generateClass, visitor);
         if (Config.getInstant().isSplitGenerate()) {
-            formatJavaFile(generateClass);
+            formatJavCode(generateClass);
         }
-
     }
 
     protected void onStartGenerateClass(PsiElementFactory factory, ClassEntity classEntity, PsiClass parentClass, IProcessor visitor) {
@@ -208,27 +259,49 @@ public abstract class Processor {
     protected void generateField(PsiElementFactory factory, FieldEntity fieldEntity, PsiClass cls, ClassEntity classEntity) {
 
         if (fieldEntity.isGenerate()) {
+            Try.run(new Try.TryListener() {
+                @Override
+                public void run() {
+                    cls.add(factory.createFieldFromText(generateFieldText(classEntity, fieldEntity, null), cls));
 
-            StringBuilder fieldSb = new StringBuilder();
-            String filedName = fieldEntity.getGenerateFieldName();
-            if (!TextUtils.isEmpty(classEntity.getExtra())) {
-                fieldSb.append(classEntity.getExtra()).append("\n");
-                classEntity.setExtra(null);
-            }
-            if (fieldEntity.getTargetClass() != null) {
-                fieldEntity.getTargetClass().setGenerate(true);
-            }
-            if (!filedName.equals(fieldEntity.getKey()) || Config.getInstant().isUseSerializedName()) {
-                fieldSb.append(Config.getInstant().geFullNameAnnotation().replaceAll("\\{filed\\}", fieldEntity.getKey()));
-            }
+                }
 
-            if (Config.getInstant().isFieldPrivateMode()) {
-                fieldSb.append("private  ").append(fieldEntity.getFullNameType()).append(" ").append(filedName).append(" ; ");
-            } else {
-                fieldSb.append("public  ").append(fieldEntity.getFullNameType()).append(" ").append(filedName).append(" ; ");
-            }
-            cls.add(factory.createFieldFromText(fieldSb.toString(), cls));
+                @Override
+                public void runAgain() {
+                    fieldEntity.setFieldName(FieldHelper.generateLuckyFieldName(fieldEntity.getFieldName()));
+                    cls.add(factory.createFieldFromText(generateFieldText(classEntity, fieldEntity, Constant.FIXME), cls));
+                }
+
+                @Override
+                public void error() {
+                    cls.addBefore(factory.createCommentFromText("// FIXME generate failure  field " + fieldEntity.getFieldName(), cls), cls.getChildren()[0]);
+                }
+            });
+
         }
 
+    }
+
+    private String generateFieldText(ClassEntity classEntity, FieldEntity fieldEntity, String fixme) {
+        fixme = fixme == null ? "" : fixme;
+        StringBuilder fieldSb = new StringBuilder();
+        String filedName = fieldEntity.getGenerateFieldName();
+        if (!TextUtils.isEmpty(classEntity.getExtra())) {
+            fieldSb.append(classEntity.getExtra()).append("\n");
+            classEntity.setExtra(null);
+        }
+        if (fieldEntity.getTargetClass() != null) {
+            fieldEntity.getTargetClass().setGenerate(true);
+        }
+        if (!filedName.equals(fieldEntity.getKey()) || Config.getInstant().isUseSerializedName()) {
+            fieldSb.append(Config.getInstant().geFullNameAnnotation().replaceAll("\\{filed\\}", fieldEntity.getKey()));
+        }
+
+        if (Config.getInstant().isFieldPrivateMode()) {
+            fieldSb.append("private  ").append(fieldEntity.getFullNameType()).append(" ").append(filedName).append(" ; ");
+        } else {
+            fieldSb.append("public  ").append(fieldEntity.getFullNameType()).append(" ").append(filedName).append(" ; ");
+        }
+        return fieldSb.append(fixme).toString();
     }
 }

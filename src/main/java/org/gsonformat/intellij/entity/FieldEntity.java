@@ -39,7 +39,6 @@ public class FieldEntity implements Selector, CellProvider {
     }
 
     public String getGenerateFieldName() {
-
         return CheckUtil.getInstant().handleArg(fieldName);
     }
 

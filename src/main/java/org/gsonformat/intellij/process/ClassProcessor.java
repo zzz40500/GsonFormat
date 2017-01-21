@@ -8,19 +8,19 @@ import org.gsonformat.intellij.entity.ClassEntity;
 /**
  * Created by dim on 16/11/7.
  */
-public class ClassProcess {
+public class ClassProcessor {
 
     private PsiElementFactory factory;
     private PsiClass cls;
     private Processor processor;
 
-    public ClassProcess(PsiElementFactory factory, PsiClass cls) {
+    public ClassProcessor(PsiElementFactory factory, PsiClass cls) {
         this.factory = factory;
         this.cls = cls;
         processor = Processor.getProcessor(ConvertLibrary.from());
     }
 
     public void generate(ClassEntity classEntity, IProcessor visitor) {
-        processor.process(classEntity, factory, cls, visitor);
+        if (processor != null) processor.process(classEntity, factory, cls, visitor);
     }
 }

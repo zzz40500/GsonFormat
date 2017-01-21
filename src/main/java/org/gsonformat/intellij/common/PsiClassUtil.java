@@ -148,4 +148,13 @@ public class PsiClassUtil {
         return javaPsiFacade.findClass(cls, searchScope);
     }
 
+//    public static  a(PsiElementFactory factory){
+//        PsiElement psiElement = cls.addAfter(factory.createCommentFromText("// todo dim " + fieldEntity.getFieldName(), cls), add);
+////                    CharTable charTableByTree = SharedImplUtil.findCharTableByTree(
+////                            (ASTNode) psiElement);
+////                    PsiWhiteSpace psiWhiteSpace = (PsiWhiteSpace) Factory.createSingleLeafElement(TokenType.WHITE_SPACE, "\n\n",
+////                                    charTableByTree, PsiManager.getInstance(cls.getProject()));
+////                    cls.addAfter(psiWhiteSpace, psiElement);
+//    }
+
 }

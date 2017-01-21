@@ -223,7 +223,7 @@ public class JsonDialog extends JFrame implements ConvertBridge.Operator {
         SettingDialog settingDialog = new SettingDialog(project);
         settingDialog.setSize(800, 720);
         settingDialog.setLocationRelativeTo(null);
-        settingDialog.setResizable(false);
+//        settingDialog.setResizable(false);
         settingDialog.setVisible(true);
     }
 

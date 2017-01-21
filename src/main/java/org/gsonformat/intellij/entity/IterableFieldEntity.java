@@ -85,7 +85,7 @@ public class IterableFieldEntity extends FieldEntity {
 
     @Override
     public void checkAndSetType(String text) {
-        if(targetClass.isLock()){
+        if (targetClass.isLock()) {
             return;
         }
         String regex = getBriefTypeReg().replaceAll("%s", "(\\\\w+)");
@@ -123,7 +123,6 @@ public class IterableFieldEntity extends FieldEntity {
 
 
     private Object deepObjectFromJson(int deep, int current, JSONArray array) {
-
         if (deep <= current) {
             return null;
         }

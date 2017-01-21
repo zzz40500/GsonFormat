@@ -2,6 +2,7 @@ package org.gsonformat.intellij;
 
 import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.MessageType;
 import com.intellij.psi.*;
 import com.intellij.psi.impl.source.PsiClassReferenceType;
 import org.apache.http.util.TextUtils;
@@ -16,6 +17,7 @@ import org.gsonformat.intellij.common.CheckUtil;
 import org.gsonformat.intellij.common.PsiClassUtil;
 import org.gsonformat.intellij.entity.IterableFieldEntity;
 import org.gsonformat.intellij.ui.FieldsDialog;
+import org.gsonformat.intellij.ui.Toast;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -209,6 +211,9 @@ public class ConvertBridge {
         for (PsiClass psiClass : innerClassArray) {
             ClassEntity item = new ClassEntity();
             item.setLock(true);
+            if (declareClass.containsKey(psiClass.getQualifiedName())) {
+                return;
+            }
             declareClass.put(psiClass.getQualifiedName(), item);
             CheckUtil.getInstant().addDeclareClassName(psiClass.getQualifiedName());
             item.setClassName(psiClass.getName());
@@ -653,9 +658,7 @@ public class ConvertBridge {
             for (int i = 0; i < strings.length; i++) {
                 stringBuilder.append(StringUtils.captureName(strings[i]));
             }
-
             name = stringBuilder.toString() + Config.getInstant().getSuffixStr();
-
         }
         return name;
 

@@ -1,5 +1,7 @@
 package org.gsonformat.intellij.common;
 
+import org.gsonformat.intellij.config.Constant;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -17,6 +19,7 @@ public class CheckUtil {
     private List<String> simpleTypeList = new ArrayList<String>();
     private Set<String> declareClassNameList = new HashSet();
     private Set<String> declareFieldNameList = new HashSet();
+    private static Pattern sPattern = Pattern.compile("^\\d+");
 
     private CheckUtil() {
         keyWordList.add("abstract");
@@ -102,7 +105,7 @@ public class CheckUtil {
     }
 
     public void addDeclareClassName(String name) {
-        declareClassNameList.add(name.replace(".java",""));
+        declareClassNameList.add(name.replace(".java", ""));
     }
 
     public void removeDeclareClassName(String name) {
@@ -131,10 +134,11 @@ public class CheckUtil {
     }
 
     public String handleArg(String arg) {
-        Pattern pattern = Pattern.compile("^\\d+");
-        Matcher matcher = pattern.matcher(arg);
+
+        arg = arg.replaceAll("-", "");
+        Matcher matcher = sPattern.matcher(arg);
         if (matcher.find()) {
-            return "value" + arg;
+            return Constant.DEFAULT_PREFIX + arg;
         } else {
             if (CheckUtil.getInstant().checkKeyWord(arg)) {
                 return arg + "X";

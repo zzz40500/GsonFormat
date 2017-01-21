@@ -5,6 +5,11 @@ package org.gsonformat.intellij.config;
  */
 public class Constant {
 
+
+    public static final String DEFAULT_PREFIX = "_$";
+    public static String FIXME="// FIXME check this code";
+
+
     public static final String privateStr = "   private String name;\n" +
             "\n" +
             "    public void setName(String name){\n" +
@@ -38,10 +43,10 @@ public class Constant {
     public static final String objectFromObject1 = "    public  static $ClassName$ objectFromData(String str, String key){\n" +
             "\n" +
             "        try {\n" +
-            "            org.org.json.JSONObject jsonObject=new org.org.json.JSONObject(str);\n" +
+            "            org.json.JSONObject jsonObject=new org.json.JSONObject(str);\n" +
             "\n" +
             "            return new com.google.gson.Gson().fromJson(jsonObject.getString(str),$ClassName$.class);\n" +
-            "        } catch (org.org.json.JSONException e) {\n" +
+            "        } catch (org.json.JSONException e) {\n" +
             "            e.printStackTrace();\n" +
             "        }\n" +
             "\n" +
@@ -58,12 +63,12 @@ public class Constant {
     public static final String arrayFromData1 = "    public  static java.util.List<$ClassName$> array$ClassName$FromData(String str,String key){\n" +
             "\n" +
             "        try {\n" +
-            "            org.org.json.JSONObject jsonObject=new org.org.json.JSONObject(str);\n" +
+            "            org.json.JSONObject jsonObject=new org.json.JSONObject(str);\n" +
             "            java.lang.reflect.Type listType=new com.google.gson.reflect.TypeToken<java.util.ArrayList<$ClassName$>>(){}.getType();\n" +
             "\n" +
             "            return new com.google.gson.Gson().fromJson(jsonObject.getString(str),listType);\n" +
             "\n" +
-            "        } catch (org.org.json.JSONException e) {\n" +
+            "        } catch (org.json.JSONException e) {\n" +
             "            e.printStackTrace();\n" +
             "        }\n" +
             "\n" +

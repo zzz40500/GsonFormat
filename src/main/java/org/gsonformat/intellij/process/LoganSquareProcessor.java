@@ -15,22 +15,24 @@ public class LoganSquareProcessor extends Processor {
         injectAnnotation(factory, cls);
     }
 
+    @Override
+    protected void onEndGenerateClass(PsiElementFactory factory, ClassEntity classEntity, PsiClass parentClass, PsiClass generateClass, IProcessor visitor) {
+        super.onEndGenerateClass(factory, classEntity, parentClass, generateClass, visitor);
+        injectAnnotation(factory, generateClass);
+    }
+
     private void injectAnnotation(PsiElementFactory factory, PsiClass generateClass) {
         if (factory == null || generateClass == null) {
             return;
         }
         PsiModifierList modifierList = generateClass.getModifierList();
-        PsiElement firstChild = modifierList.getFirstChild();
-        Pattern pattern = Pattern.compile("@.*?JsonObject");
-        if (firstChild != null && !pattern.matcher(firstChild.getText()).find()) {
-            PsiAnnotation annotationFromText = factory.createAnnotationFromText("@com.bluelinelabs.logansquare.annotation.JsonObject", generateClass);
-            modifierList.addBefore(annotationFromText, firstChild);
+        if (modifierList != null) {
+            PsiElement firstChild = modifierList.getFirstChild();
+            Pattern pattern = Pattern.compile("@.*?JsonObject");
+            if (firstChild != null && !pattern.matcher(firstChild.getText()).find()) {
+                PsiAnnotation annotationFromText = factory.createAnnotationFromText("@com.bluelinelabs.logansquare.annotation.JsonObject", generateClass);
+                modifierList.addBefore(annotationFromText, firstChild);
+            }
         }
-    }
-
-    @Override
-    protected void onEndGenerateClass(PsiElementFactory factory, ClassEntity classEntity, PsiClass parentClass, PsiClass generateClass, IProcessor visitor) {
-        super.onEndGenerateClass(factory, classEntity, parentClass, generateClass, visitor);
-        injectAnnotation(factory, generateClass);
     }
 }

@@ -13,5 +13,4 @@ class FastJsonProcessor extends Processor {
     public void onStarProcess(ClassEntity classEntity, PsiElementFactory factory, PsiClass cls,IProcessor visitor) {
         super.onEndProcess(classEntity, factory, cls, visitor);
     }
-
 }

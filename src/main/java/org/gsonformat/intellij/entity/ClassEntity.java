@@ -90,7 +90,7 @@ public class ClassEntity implements Selector, CellProvider {
     }
 
     public void setClassName(String className) {
-        this.className = className;
+        this.className =  CheckUtil.getInstant().handleArg(className);
     }
 
     public List<? extends FieldEntity> getFields() {

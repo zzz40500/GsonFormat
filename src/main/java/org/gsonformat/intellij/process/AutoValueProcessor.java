@@ -2,6 +2,8 @@ package org.gsonformat.intellij.process;
 
 import com.intellij.psi.*;
 import org.apache.http.util.TextUtils;
+import org.gsonformat.intellij.common.FieldHelper;
+import org.gsonformat.intellij.common.Try;
 import org.gsonformat.intellij.config.Config;
 import org.gsonformat.intellij.config.Constant;
 import org.gsonformat.intellij.entity.FieldEntity;
@@ -15,22 +17,23 @@ import java.util.regex.Pattern;
 class AutoValueProcessor extends Processor {
 
     @Override
-    public void onStarProcess(ClassEntity classEntity, PsiElementFactory factory, PsiClass cls,IProcessor visitor) {
+    public void onStarProcess(ClassEntity classEntity, PsiElementFactory factory, PsiClass cls, IProcessor visitor) {
         super.onStarProcess(classEntity, factory, cls, visitor);
         injectAutoAnnotation(factory, cls);
     }
 
     private void injectAutoAnnotation(PsiElementFactory factory, PsiClass cls) {
         PsiModifierList modifierList = cls.getModifierList();
-        PsiElement firstChild = modifierList.getFirstChild();
-        Pattern pattern = Pattern.compile("@.*?AutoValue");
-        if (firstChild != null && !pattern.matcher(firstChild.getText()).find()) {
-            PsiAnnotation annotationFromText = factory.createAnnotationFromText("@com.google.auto.value.AutoValue", cls);
-            modifierList.addBefore(annotationFromText, firstChild);
-        }
-
-        if (!modifierList.hasModifierProperty(PsiModifier.ABSTRACT)) {
-            modifierList.setModifierProperty(PsiModifier.ABSTRACT, true);
+        if (modifierList != null) {
+            PsiElement firstChild = modifierList.getFirstChild();
+            Pattern pattern = Pattern.compile("@.*?AutoValue");
+            if (firstChild != null && !pattern.matcher(firstChild.getText()).find()) {
+                PsiAnnotation annotationFromText = factory.createAnnotationFromText("@com.google.auto.value.AutoValue", cls);
+                modifierList.addBefore(annotationFromText, firstChild);
+            }
+            if (!modifierList.hasModifierProperty(PsiModifier.ABSTRACT)) {
+                modifierList.setModifierProperty(PsiModifier.ABSTRACT, true);
+            }
         }
     }
 
@@ -38,18 +41,25 @@ class AutoValueProcessor extends Processor {
     public void generateField(PsiElementFactory factory, FieldEntity fieldEntity, PsiClass cls, ClassEntity classEntity) {
 
         if (fieldEntity.isGenerate()) {
-            StringBuilder fieldSb = new StringBuilder();
-            String filedName = fieldEntity.getGenerateFieldName();
-            if (!TextUtils.isEmpty(classEntity.getExtra())) {
-                fieldSb.append(classEntity.getExtra()).append("\n");
-                classEntity.setExtra(null);
-            }
-            if (fieldEntity.getTargetClass() != null) {
-                fieldEntity.getTargetClass().setGenerate(true);
-            }
 
-            fieldSb.append(String.format("public abstract %s %s() ; ", fieldEntity.getFullNameType(), filedName));
-            cls.add(factory.createMethodFromText(fieldSb.toString(), cls));
+            Try.run(new Try.TryListener() {
+                @Override
+                public void run() {
+                    cls.add(factory.createMethodFromText(generateFieldText(classEntity, fieldEntity,null), cls));
+                }
+
+                @Override
+                public void runAgain() {
+                    fieldEntity.setFieldName(FieldHelper.generateLuckyFieldName(fieldEntity.getFieldName()));
+                    cls.add(factory.createMethodFromText(generateFieldText(classEntity, fieldEntity,Constant.FIXME), cls));
+                }
+
+                @Override
+                public void error() {
+                    cls.addBefore(factory.createCommentFromText("// FIXME generate failure  field " + fieldEntity.getFieldName(), cls), cls.getChildren()[0]);
+                }
+            });
+
         }
     }
 
@@ -67,5 +77,19 @@ class AutoValueProcessor extends Processor {
     protected void onEndGenerateClass(PsiElementFactory factory, ClassEntity classEntity, PsiClass parentClass, PsiClass generateClass, IProcessor visitor) {
         super.onEndGenerateClass(factory, classEntity, parentClass, generateClass, visitor);
         injectAutoAnnotation(factory, generateClass);
+    }
+
+    private String generateFieldText(ClassEntity classEntity, FieldEntity fieldEntity, String fixme) {
+        fixme = fixme == null ? "" : fixme;
+        StringBuilder fieldSb = new StringBuilder();
+        String fieldName = fieldEntity.getGenerateFieldName();
+        if (!TextUtils.isEmpty(classEntity.getExtra())) {
+            fieldSb.append(classEntity.getExtra()).append("\n");
+            classEntity.setExtra(null);
+        }
+        if (fieldEntity.getTargetClass() != null) {
+            fieldEntity.getTargetClass().setGenerate(true);
+        }
+        return fieldSb.toString() + String.format("public abstract %s %s() ; " + fixme, fieldEntity.getFullNameType(), fieldName);
     }
 }

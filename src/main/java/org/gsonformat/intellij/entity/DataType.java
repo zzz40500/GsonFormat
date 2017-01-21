@@ -10,13 +10,11 @@ public enum DataType {
 
     Data_Type_Boolean("boolean"), Data_Type_Int("int"), Data_Type_Double("double"),
     Data_Type_long("long"), Data_Type_String("String"), Data_type_Object("Object"), Data_Type_Array("array");
-
-    String value;
+    private String value;
 
     DataType(String value) {
         this.value = value;
     }
-
 
     public String getValue() {
         return value;
@@ -71,8 +69,6 @@ public enum DataType {
     }
 
     public static boolean isSameDataType(String text, String text2) {
-
-
         return isSameDataType(typeOfString(text), typeOfString(text2));
     }
 

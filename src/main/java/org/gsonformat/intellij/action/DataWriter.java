@@ -11,12 +11,9 @@ import com.intellij.psi.JavaPsiFacade;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElementFactory;
 import com.intellij.psi.PsiFile;
-import com.intellij.psi.codeStyle.JavaCodeStyleManager;
-import org.gsonformat.intellij.common.CheckUtil;
 import org.gsonformat.intellij.entity.ClassEntity;
-import org.gsonformat.intellij.process.ClassProcess;
+import org.gsonformat.intellij.process.ClassProcessor;
 import org.gsonformat.intellij.process.IProcessor;
-import org.gsonformat.intellij.ui.NotificationCenter;
 import org.gsonformat.intellij.ui.Toast;
 import org.jetbrains.annotations.NotNull;
 
@@ -58,7 +55,7 @@ public class DataWriter extends WriteCommandAction.Simple {
                 progressIndicator.setIndeterminate(false);
                 progressIndicator.setFraction(1.0);
                 StringBuffer sb = new StringBuffer();
-                sb.append("GsonFormat[ " + (System.currentTimeMillis() - currentTimeMillis) + " ms ]\n");
+                sb.append("GsonFormat [" + (System.currentTimeMillis() - currentTimeMillis) + " ms]\n");
 //                sb.append("generate class : ( "+generateClassList.size()+" )\n");
 //                for (String item: generateClassList) {
 //                    sb.append("    at "+item+"\n");
@@ -83,7 +80,7 @@ public class DataWriter extends WriteCommandAction.Simple {
             return;
         }
         generateClassList.clear();
-        new ClassProcess(factory, cls).generate(targetClass, new IProcessor() {
+        new ClassProcessor(factory, cls).generate(targetClass, new IProcessor() {
             @Override
             public void onStarProcess(ClassEntity classEntity, PsiElementFactory factory, PsiClass cls) {
                 generateClassList.add(cls.getQualifiedName());

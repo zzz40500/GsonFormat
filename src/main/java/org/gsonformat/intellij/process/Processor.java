@@ -33,25 +33,15 @@ public abstract class Processor {
         sProcessorMap.put(ConvertLibrary.Lombok, new LombokProcessor());
     }
 
+
     static Processor getProcessor(ConvertLibrary convertLibrary) {
         return sProcessorMap.get(convertLibrary);
     }
 
-
-    public void logPsiElement(PsiElement element) {
-        System.out.println(element.getClass().toString());
-        System.out.println(element.toString());
-
-    }
+    protected String mainPackage;
 
     public void process(ClassEntity classEntity, PsiElementFactory factory, PsiClass cls, IProcessor visitor) {
-
-        if (cls.getChildren() != null) {
-            for (PsiElement e : cls.getChildren()) {
-                logPsiElement(e);
-            }
-        }
-
+        mainPackage = PsiClassUtil.getPackage(cls);
         onStarProcess(classEntity, factory, cls, visitor);
 
         for (FieldEntity fieldEntity : classEntity.getFields()) {
@@ -222,21 +212,19 @@ public abstract class Processor {
             }
 
             if (generateClass != null) {
+
+                for (ClassEntity innerClass : classEntity.getInnerClasss()) {
+                    generateClass(factory, innerClass, generateClass, visitor);
+                }
+                if (!Config.getInstant().isSplitGenerate()) {
+                    generateClass = (PsiClass) parentClass.add(generateClass);
+                }
                 for (FieldEntity fieldEntity : classEntity.getFields()) {
                     generateField(factory, fieldEntity, generateClass, classEntity);
                 }
-
-                for (ClassEntity innerClass : classEntity.getInnerClasss()) {
-
-                    generateClass(factory, innerClass, generateClass, visitor);
-                }
                 generateGetterAndSetter(factory, generateClass, classEntity);
                 generateConvertMethod(factory, generateClass, classEntity);
-                if (!Config.getInstant().isSplitGenerate()) {
-                    parentClass.add(generateClass);
-                }
             }
-
         }
         onEndGenerateClass(factory, classEntity, parentClass, generateClass, visitor);
         if (Config.getInstant().isSplitGenerate()) {

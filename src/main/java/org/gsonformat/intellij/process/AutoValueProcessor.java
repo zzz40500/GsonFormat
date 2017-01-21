@@ -3,6 +3,7 @@ package org.gsonformat.intellij.process;
 import com.intellij.psi.*;
 import org.apache.http.util.TextUtils;
 import org.gsonformat.intellij.common.FieldHelper;
+import org.gsonformat.intellij.common.PsiClassUtil;
 import org.gsonformat.intellij.common.Try;
 import org.gsonformat.intellij.config.Config;
 import org.gsonformat.intellij.config.Constant;
@@ -22,21 +23,6 @@ class AutoValueProcessor extends Processor {
         injectAutoAnnotation(factory, cls);
     }
 
-    private void injectAutoAnnotation(PsiElementFactory factory, PsiClass cls) {
-        PsiModifierList modifierList = cls.getModifierList();
-        if (modifierList != null) {
-            PsiElement firstChild = modifierList.getFirstChild();
-            Pattern pattern = Pattern.compile("@.*?AutoValue");
-            if (firstChild != null && !pattern.matcher(firstChild.getText()).find()) {
-                PsiAnnotation annotationFromText = factory.createAnnotationFromText("@com.google.auto.value.AutoValue", cls);
-                modifierList.addBefore(annotationFromText, firstChild);
-            }
-            if (!modifierList.hasModifierProperty(PsiModifier.ABSTRACT)) {
-                modifierList.setModifierProperty(PsiModifier.ABSTRACT, true);
-            }
-        }
-    }
-
     @Override
     public void generateField(PsiElementFactory factory, FieldEntity fieldEntity, PsiClass cls, ClassEntity classEntity) {
 
@@ -45,13 +31,13 @@ class AutoValueProcessor extends Processor {
             Try.run(new Try.TryListener() {
                 @Override
                 public void run() {
-                    cls.add(factory.createMethodFromText(generateFieldText(classEntity, fieldEntity,null), cls));
+                    cls.add(factory.createMethodFromText(generateFieldText(classEntity, fieldEntity, null), cls));
                 }
 
                 @Override
                 public void runAgain() {
                     fieldEntity.setFieldName(FieldHelper.generateLuckyFieldName(fieldEntity.getFieldName()));
-                    cls.add(factory.createMethodFromText(generateFieldText(classEntity, fieldEntity,Constant.FIXME), cls));
+                    cls.add(factory.createMethodFromText(generateFieldText(classEntity, fieldEntity, Constant.FIXME), cls));
                 }
 
                 @Override
@@ -70,13 +56,36 @@ class AutoValueProcessor extends Processor {
     @Override
     public void generateConvertMethod(PsiElementFactory factory, PsiClass cls, ClassEntity classEntity) {
         super.generateConvertMethod(factory, cls, classEntity);
-        createMethod(factory, Constant.autoValueMethodTemplate.replace("$className$", cls.getName()).trim(), cls);
+        if (PsiClassUtil.isClassAvailableForProject(cls.getProject(), "com.ryanharter.auto.value.gson.AutoValueGsonAdapterFactoryProcessor")) {
+            String qualifiedName = cls.getQualifiedName();
+            String autoAdapter = qualifiedName.substring(mainPackage.length(), qualifiedName.length());
+            createMethod(factory, Constant.autoValueMethodTemplate.replace("$className$", classEntity.getClassName()).replace("$AdapterClassName$", getAutoAdpaterClass(autoAdapter)).trim(), cls);
+        }
+    }
+
+    public static String getAutoAdpaterClass(String className) {
+        return String.join("_", className.split("\\."));
     }
 
     @Override
     protected void onEndGenerateClass(PsiElementFactory factory, ClassEntity classEntity, PsiClass parentClass, PsiClass generateClass, IProcessor visitor) {
         super.onEndGenerateClass(factory, classEntity, parentClass, generateClass, visitor);
         injectAutoAnnotation(factory, generateClass);
+    }
+
+    private void injectAutoAnnotation(PsiElementFactory factory, PsiClass cls) {
+        PsiModifierList modifierList = cls.getModifierList();
+        if (modifierList != null) {
+            PsiElement firstChild = modifierList.getFirstChild();
+            Pattern pattern = Pattern.compile("@.*?AutoValue");
+            if (firstChild != null && !pattern.matcher(firstChild.getText()).find()) {
+                PsiAnnotation annotationFromText = factory.createAnnotationFromText("@com.google.auto.value.AutoValue", cls);
+                modifierList.addBefore(annotationFromText, firstChild);
+            }
+            if (!modifierList.hasModifierProperty(PsiModifier.ABSTRACT)) {
+                modifierList.setModifierProperty(PsiModifier.ABSTRACT, true);
+            }
+        }
     }
 
     private String generateFieldText(ClassEntity classEntity, FieldEntity fieldEntity, String fixme) {

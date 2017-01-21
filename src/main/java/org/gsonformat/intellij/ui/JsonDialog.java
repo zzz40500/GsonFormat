@@ -51,7 +51,6 @@ public class JsonDialog extends JFrame implements ConvertBridge.Operator {
 
         okButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-
                 if (generateClassTF.isFocusOwner()) {
                     editTP.requestFocus(true);
                 } else {
@@ -61,7 +60,6 @@ public class JsonDialog extends JFrame implements ConvertBridge.Operator {
         });
         formatBtn.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-
                 String json = editTP.getText();
                 json = json.trim();
                 if (json.startsWith("{")) {
@@ -81,7 +79,6 @@ public class JsonDialog extends JFrame implements ConvertBridge.Operator {
             public void keyReleased(KeyEvent keyEvent) {
                 super.keyReleased(keyEvent);
                 if (keyEvent.getKeyCode() == KeyEvent.VK_ENTER) {
-
                     onOK();
                 }
             }
@@ -192,7 +189,6 @@ public class JsonDialog extends JFrame implements ConvertBridge.Operator {
         new ConvertBridge(this, jsonSTR, file, project, generateClass,
                 cls, generateClassName).run();
     }
-
     private void onCancel() {
         dispose();
     }

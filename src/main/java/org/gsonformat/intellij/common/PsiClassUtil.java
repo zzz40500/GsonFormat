@@ -3,9 +3,12 @@ package org.gsonformat.intellij.common;
 import com.intellij.ide.util.DirectoryUtil;
 import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.fileEditor.FileEditorManager;
+import com.intellij.openapi.module.Module;
+import com.intellij.openapi.module.ModuleUtil;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.*;
 import com.intellij.psi.impl.source.PsiJavaFileImpl;
+import com.intellij.psi.search.EverythingGlobalScope;
 import com.intellij.psi.search.GlobalSearchScope;
 import org.apache.http.util.TextUtils;
 
@@ -71,7 +74,7 @@ public class PsiClassUtil {
             return null;
         }
 
-        if(packageName == null){
+        if (packageName == null) {
             return new File(psiDirectory.getVirtualFile().getCanonicalPath());
         }
         File file = new File(psiDirectory.getVirtualFile().getCanonicalPath().concat("/")
@@ -147,6 +150,22 @@ public class PsiClassUtil {
         JavaPsiFacade javaPsiFacade = JavaPsiFacade.getInstance(project);
         return javaPsiFacade.findClass(cls, searchScope);
     }
+
+
+    public static String getPackage(PsiClass cls) {
+        if (cls.getQualifiedName() == null) {
+            return null;
+        }
+        int i = cls.getQualifiedName().lastIndexOf(".");
+        return cls.getQualifiedName().substring(0, i);
+    }
+
+    public static boolean isClassAvailableForProject(Project project, String className) {
+        PsiClass classInModule = JavaPsiFacade.getInstance(project).findClass(className,
+                new EverythingGlobalScope(project));
+        return classInModule != null;
+    }
+
 
 //    public static  a(PsiElementFactory factory){
 //        PsiElement psiElement = cls.addAfter(factory.createCommentFromText("// todo dim " + fieldEntity.getFieldName(), cls), add);

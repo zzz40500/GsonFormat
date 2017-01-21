@@ -50,7 +50,6 @@ public class FieldsDialog extends JFrame {
     public FieldsDialog(ConvertBridge.Operator operator, ClassEntity classEntity,
                         PsiElementFactory factory, PsiClass psiClass, PsiClass aClass, PsiFile file, Project project
             , String generateClassStr) {
-
         this.operator = operator;
         this.factory = factory;
         this.aClass = aClass;
@@ -58,11 +57,14 @@ public class FieldsDialog extends JFrame {
         this.project = project;
         this.psiClass = psiClass;
         this.generateClassStr = generateClassStr;
-        this.setAlwaysOnTop(true);
-
-        setTitle("Virgo Model");
         setContentPane(contentPane);
+        setTitle("Virgo Model");
         getRootPane().setDefaultButton(buttonOK);
+        this.setAlwaysOnTop(true);
+        initListener(classEntity, generateClassStr);
+    }
+
+    private void initListener(ClassEntity classEntity, String generateClassStr) {
         this.classEntity = classEntity;
         defaultMutableTreeTableNodeList = new ArrayList<DefaultMutableTreeTableNode>();
         JXTreeTable treetable = new JXTreeTable(new FiledTreeTableModel(createData(classEntity)));
@@ -82,7 +84,6 @@ public class FieldsDialog extends JFrame {
                 defaultListSelectionModel.clearSelection();
             }
         });
-
         defaultMutableTreeTableNodeList = null;
         treetable.setRowHeight(30);
         sp.setViewportView(treetable);
@@ -109,10 +110,14 @@ public class FieldsDialog extends JFrame {
             }
         }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
+        contentPane.registerKeyboardAction(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                onOK();
+            }
+        }, KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
     }
 
     private void onOK() {
-
         this.setAlwaysOnTop(false);
         WriteCommandAction.runWriteCommandAction(project, new Runnable() {
 
@@ -168,13 +173,7 @@ public class FieldsDialog extends JFrame {
         dispose();
     }
 
-    @Override
-    public void dispose() {
-        super.dispose();
-    }
-
     private DefaultMutableTreeTableNode createData(ClassEntity classEntity) {
-
         DefaultMutableTreeTableNode root = new DefaultMutableTreeTableNode(classEntity);
         createDataNode(root, classEntity);
         return root;

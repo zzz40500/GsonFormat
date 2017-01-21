@@ -79,7 +79,7 @@ public class Constant {
 
     public static final String autoValueMethodTemplate = "public static com.google.gson.TypeAdapter<$className$> typeAdapter(com.google.gson.Gson gson)" +
             " {\n" +
-            "    return new AutoValue_$className$.GsonTypeAdapter(gson);\n" +
+            "    return new AutoValue_$AdapterClassName$.GsonTypeAdapter(gson);\n" +
             "}";
 
     public static final String gsonAnnotation = "@com.google.gson.annotations.SerializedName\\s*\\(\\s*\"{filed}\"\\s*\\)";

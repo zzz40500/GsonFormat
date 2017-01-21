@@ -20,7 +20,6 @@ public class EditDialog extends JFrame {
 
     public EditDialog(Type type) {
         this.type = type;
-
         setContentPane(contentPane);
 //        setModal(true);
         this.setAlwaysOnTop(true);

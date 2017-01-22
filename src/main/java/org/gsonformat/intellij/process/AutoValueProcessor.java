@@ -56,11 +56,11 @@ class AutoValueProcessor extends Processor {
     @Override
     public void generateConvertMethod(PsiElementFactory factory, PsiClass cls, ClassEntity classEntity) {
         super.generateConvertMethod(factory, cls, classEntity);
-        if (PsiClassUtil.isClassAvailableForProject(cls.getProject(), "com.ryanharter.auto.value.gson.AutoValueGsonAdapterFactoryProcessor")) {
-            String qualifiedName = cls.getQualifiedName();
-            String autoAdapter = qualifiedName.substring(mainPackage.length(), qualifiedName.length());
-            createMethod(factory, Constant.autoValueMethodTemplate.replace("$className$", classEntity.getClassName()).replace("$AdapterClassName$", getAutoAdpaterClass(autoAdapter)).trim(), cls);
-        }
+//        if (PsiClassUtil.isClassAvailableForProject(cls.getProject(), "com.ryanharter.auto.value.gson.AutoValueGsonAdapterFactoryProcessor")) {
+//            String qualifiedName = cls.getQualifiedName();
+//            String autoAdapter = qualifiedName.substring(mainPackage.length()+1, qualifiedName.length());
+//            createMethod(factory, Constant.autoValueMethodTemplate.replace("$className$", classEntity.getClassName()).replace("$AdapterClassName$", getAutoAdpaterClass(autoAdapter)).trim(), cls);
+//        }
     }
 
     public static String getAutoAdpaterClass(String className) {
@@ -96,9 +96,12 @@ class AutoValueProcessor extends Processor {
             fieldSb.append(classEntity.getExtra()).append("\n");
             classEntity.setExtra(null);
         }
+        if (!fieldName.equals(fieldEntity.getKey()) || Config.getInstant().isUseSerializedName()) {
+            fieldSb.append(Constant.gsonFullNameAnnotation.replaceAll("\\{filed\\}", fieldEntity.getKey()));
+        }
         if (fieldEntity.getTargetClass() != null) {
             fieldEntity.getTargetClass().setGenerate(true);
         }
-        return fieldSb.toString() + String.format("public abstract %s %s() ; " + fixme, fieldEntity.getFullNameType(), fieldName);
+        return fieldSb.append(String.format("\npublic abstract %s %s() ; " + fixme, fieldEntity.getFullNameType(), fieldName)).toString();
     }
 }

@@ -167,7 +167,7 @@ public class SettingDialog extends JFrame {
         lombokRB.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                if (loganSquareCB.isSelected()) {
+                if (lombokRB.isSelected()) {
                     annotationFT.setText(Constant.lombokAnnotation);
                 }
                 annotationFT.setEnabled(otherRB.isSelected());

@@ -102,6 +102,6 @@ class AutoValueProcessor extends Processor {
         if (fieldEntity.getTargetClass() != null) {
             fieldEntity.getTargetClass().setGenerate(true);
         }
-        return fieldSb.append(String.format("\npublic abstract %s %s() ; " + fixme, fieldEntity.getFullNameType(), fieldName)).toString();
+        return fieldSb.append(String.format("public abstract %s %s(); " + fixme, fieldEntity.getFullNameType(), fieldName)).toString();
     }
 }

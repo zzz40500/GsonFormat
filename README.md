@@ -1,4 +1,4 @@
-GsonForamt
+GsonFormat
 ------
   [jetbrains](https://plugins.jetbrains.com/plugin/7654?pr=androidstudio)
   [![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-GsonFormat-brightgreen.svg?style=flat)](http://android-arsenal.com/details/1/1896)

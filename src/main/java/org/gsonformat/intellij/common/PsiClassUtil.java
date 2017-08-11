@@ -154,7 +154,11 @@ public class PsiClassUtil {
             return null;
         }
         int i = cls.getQualifiedName().lastIndexOf(".");
-        return cls.getQualifiedName().substring(0, i);
+        if (i > -1) {
+            return cls.getQualifiedName().substring(0, i);
+        } else {
+            return "";
+        }
     }
 
     public static boolean isClassAvailableForProject(Project project, String className) {

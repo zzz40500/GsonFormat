@@ -405,7 +405,7 @@
                   </grid>
                 </constraints>
                 <properties>
-                  <text value="use warpper class "/>
+                  <text value="use wrapper class "/>
                 </properties>
               </component>
             </children>

@@ -2,22 +2,21 @@ package org.gsonformat.intellij;
 
 import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.ui.MessageType;
 import com.intellij.psi.*;
 import com.intellij.psi.impl.source.PsiClassReferenceType;
+import com.intellij.psi.util.PsiTypesUtil;
 import org.apache.http.util.TextUtils;
 import org.gsonformat.intellij.action.DataWriter;
+import org.gsonformat.intellij.common.CheckUtil;
+import org.gsonformat.intellij.common.PsiClassUtil;
 import org.gsonformat.intellij.common.StringUtils;
 import org.gsonformat.intellij.common.Utils;
 import org.gsonformat.intellij.config.Config;
+import org.gsonformat.intellij.entity.ClassEntity;
 import org.gsonformat.intellij.entity.DataType;
 import org.gsonformat.intellij.entity.FieldEntity;
-import org.gsonformat.intellij.entity.ClassEntity;
-import org.gsonformat.intellij.common.CheckUtil;
-import org.gsonformat.intellij.common.PsiClassUtil;
 import org.gsonformat.intellij.entity.IterableFieldEntity;
 import org.gsonformat.intellij.ui.FieldsDialog;
-import org.gsonformat.intellij.ui.Toast;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -546,7 +545,13 @@ public class ConvertBridge {
         } else {
             FieldEntity fieldEntity = new FieldEntity();
             fieldEntity.setKey(key);
-            fieldEntity.setType(DataType.typeOfObject(type).getValue());
+            String vType;
+            if (Config.getInstant().isUseWrapperClass()) {
+                vType = PsiTypesUtil.boxIfPossible(DataType.getWrapperTypeSimpleName(DataType.typeOfObject(type)));
+            } else {
+                vType = DataType.typeOfObject(type).getValue();
+            }
+            fieldEntity.setType(vType);
             result = fieldEntity;
             if (type != null) {
                 result.setValue(type.toString());

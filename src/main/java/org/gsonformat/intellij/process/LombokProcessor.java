@@ -75,7 +75,7 @@ public class LombokProcessor extends Processor {
         injectAnnotation(factory, generateClass);
     }
 
-    private String generateLombokFieldText(ClassEntity classEntity, FieldEntity fieldEntity,String fixme) {
+    private String generateLombokFieldText(ClassEntity classEntity, FieldEntity fieldEntity, String fixme) {
         fixme = fixme == null ? "" : fixme;
 
         StringBuilder fieldSb = new StringBuilder();

@@ -36,6 +36,11 @@ public class Config {
      */
     private int errorCount;
 
+    /**
+     * 是否使用包装类来替代基本类型
+     */
+    private boolean useWrapperClass;
+
 
     private Config() {
 
@@ -62,6 +67,8 @@ public class Config {
         PropertiesComponent.getInstance().setValue("useFieldNamePrefix", useFieldNamePrefix + "");
         PropertiesComponent.getInstance().setValue("generateComments", generateComments + "");
         PropertiesComponent.getInstance().setValue("splitGenerate", splitGenerate + "");
+        PropertiesComponent.getInstance().setValue("useWrapperClass", useWrapperClass + "");
+
     }
 
     public static Config getInstant() {
@@ -88,6 +95,7 @@ public class Config {
             config.setUseFieldNamePrefix(PropertiesComponent.getInstance().getBoolean("useFieldNamePrefix", false));
             config.setGenerateComments(PropertiesComponent.getInstance().getBoolean("generateComments", true));
             config.setSplitGenerate(PropertiesComponent.getInstance().getBoolean("splitGenerate", false));
+            config.setUseWrapperClass(PropertiesComponent.getInstance().getBoolean("useWrapperClass", false));
 
         }
         return config;
@@ -311,4 +319,11 @@ public class Config {
         save();
     }
 
+    public boolean isUseWrapperClass() {
+        return useWrapperClass;
+    }
+
+    public void setUseWrapperClass(boolean useWrapperClass) {
+        this.useWrapperClass = useWrapperClass;
+    }
 }

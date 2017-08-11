@@ -1,8 +1,9 @@
 package org.gsonformat.intellij.process;
 
-import com.intellij.psi.*;
-import org.gsonformat.intellij.entity.ConvertLibrary;
+import com.intellij.psi.PsiClass;
+import com.intellij.psi.PsiElementFactory;
 import org.gsonformat.intellij.entity.ClassEntity;
+import org.gsonformat.intellij.entity.ConvertLibrary;
 
 
 /**

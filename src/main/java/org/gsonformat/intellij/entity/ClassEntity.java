@@ -1,6 +1,6 @@
 package org.gsonformat.intellij.entity;
 
-import com.intellij.psi.*;
+import com.intellij.psi.PsiClass;
 import org.apache.http.util.TextUtils;
 import org.gsonformat.intellij.common.CheckUtil;
 import org.jdesktop.swingx.ux.CellProvider;

@@ -79,4 +79,19 @@ public enum DataType {
         return dataType == dataType1;
     }
 
+    public static String getWrapperTypeSimpleName(DataType type) {
+        switch (type) {
+            case Data_Type_Boolean:
+                return "Boolean";
+            case Data_Type_Int:
+                return "Integer";
+            case Data_Type_Double:
+                return "Double";
+            case Data_Type_long:
+                return "Long";
+            default:
+                return type.getValue();
+        }
+    }
+
 }

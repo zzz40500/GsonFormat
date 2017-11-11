@@ -42,6 +42,7 @@ public class SettingDialog extends JFrame {
     private JCheckBox splitGenerateMode;
     private JRadioButton lombokRB;
     private String annotaionStr;
+    private JCheckBox useWrapperClassCB;
 
     public SettingDialog(Project project) {
         setContentPane(contentPane);
@@ -93,6 +94,7 @@ public class SettingDialog extends JFrame {
         array1Button.setEnabled(arrayFromData1CB.isSelected());
         suffixEdit.setText(Config.getInstant().getSuffixStr());
         splitGenerateMode.setSelected(Config.getInstant().isSplitGenerate());
+        useWrapperClassCB.setSelected(Config.getInstant().isUseWrapperClass());
         objectFromDataCB.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
@@ -340,6 +342,7 @@ public class SettingDialog extends JFrame {
         Config.getInstant().setAnnotationStr(annotationFT.getText());
         Config.getInstant().setUseFieldNamePrefix(filedPrefixCB.isSelected());
         Config.getInstant().setSplitGenerate(splitGenerateMode.isSelected());
+        Config.getInstant().setUseWrapperClass(useWrapperClassCB.isSelected());
         Config.getInstant().save();
 
         dispose();

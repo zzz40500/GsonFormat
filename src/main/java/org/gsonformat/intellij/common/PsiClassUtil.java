@@ -1,10 +1,7 @@
 package org.gsonformat.intellij.common;
 
 import com.intellij.ide.util.DirectoryUtil;
-import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.fileEditor.FileEditorManager;
-import com.intellij.openapi.module.Module;
-import com.intellij.openapi.module.ModuleUtil;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.*;
 import com.intellij.psi.impl.source.PsiJavaFileImpl;
@@ -157,7 +154,11 @@ public class PsiClassUtil {
             return null;
         }
         int i = cls.getQualifiedName().lastIndexOf(".");
-        return cls.getQualifiedName().substring(0, i);
+        if (i > -1) {
+            return cls.getQualifiedName().substring(0, i);
+        } else {
+            return "";
+        }
     }
 
     public static boolean isClassAvailableForProject(Project project, String className) {

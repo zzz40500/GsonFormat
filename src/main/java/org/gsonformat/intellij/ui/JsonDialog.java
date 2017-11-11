@@ -7,8 +7,8 @@ import com.intellij.psi.PsiFile;
 import com.intellij.psi.impl.source.PsiJavaFileImpl;
 import org.apache.http.util.TextUtils;
 import org.gsonformat.intellij.ConvertBridge;
-import org.gsonformat.intellij.config.Config;
 import org.gsonformat.intellij.common.PsiClassUtil;
+import org.gsonformat.intellij.config.Config;
 import org.json.JSONArray;
 import org.json.JSONObject;
 

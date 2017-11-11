@@ -1,6 +1,7 @@
 package org.gsonformat.intellij.process;
 
-import com.intellij.psi.*;
+import com.intellij.psi.PsiClass;
+import com.intellij.psi.PsiElementFactory;
 import com.intellij.psi.codeStyle.JavaCodeStyleManager;
 import org.apache.http.util.TextUtils;
 import org.gsonformat.intellij.common.FieldHelper;
@@ -8,9 +9,9 @@ import org.gsonformat.intellij.common.PsiClassUtil;
 import org.gsonformat.intellij.common.Try;
 import org.gsonformat.intellij.config.Config;
 import org.gsonformat.intellij.config.Constant;
+import org.gsonformat.intellij.entity.ClassEntity;
 import org.gsonformat.intellij.entity.ConvertLibrary;
 import org.gsonformat.intellij.entity.FieldEntity;
-import org.gsonformat.intellij.entity.ClassEntity;
 
 import java.util.HashMap;
 
